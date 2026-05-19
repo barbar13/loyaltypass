@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    -webkit-tap-highlight-color: transparent;
+    box-sizing: border-box;
+  }
+
+  html, body, #root {
+    height: 100%;
+    height: 100dvh;
+  }
+
+  body {
+    background-color: #0f0f14;
+    color: white;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    overscroll-behavior: none;
+  }
+}
+
+/* Strip html5-qrcode default UI — we keep only the video feed */
+#qr-viewport > img,
+#qr-viewport > div[style*="border"],
+#qr-viewport button,
+#qr-viewport select {
+  display: none !important;
+}
+
+#qr-viewport video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover;
+  border-radius: 1rem;
+}
+
+#qr-viewport {
+  border: none !important;
+  padding: 0 !important;
+}

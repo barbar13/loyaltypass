@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LoyaltyPass — Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { height: 100%; background: #0a0a0f; color: #e5e7eb; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: #374151; border-radius: 3px; }
+    .stat-card { background: linear-gradient(135deg, #13131a 0%, #0f0f16 100%); border: 1px solid rgba(255,255,255,0.06); }
+    .table-row:hover td { background: rgba(255,255,255,0.025); }
+    .badge-free { background:#1f2937; color:#9ca3af; }
+    .badge-pro  { background:#1e1b4b; color:#a5b4fc; }
+    .badge-enterprise { background:#1c1a12; color:#fcd34d; }
+    input[type=password]:focus { outline: none; box-shadow: 0 0 0 2px #6366f1; }
+    @keyframes fade-up { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes pulse-dot { 0%,100% { opacity:1; } 50% { opacity:.4; } }
+    .animate-fade-up { animation: fade-up .35s cubic-bezier(.16,1,.3,1) both; }
+    .delay-1 { animation-delay:.05s; } .delay-2 { animation-delay:.1s; } .delay-3 { animation-delay:.15s; }
+    .live-dot { animation: pulse-dot 2s ease-in-out infinite; }
+  </style>
+</head>
+<body>
+
+<!-- ── LOGIN ─────────────────────────────────────────────────────────────── -->
+<div id="s-login" style="min-height:100vh" class="flex items-center justify-center px-4">
+  <div class="w-full max-w-sm animate-fade-up">
+    <!-- Logo -->
+    <div class="text-center mb-8">
+      <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-indigo-600/20 border border-indigo-500/30 mb-4">
+        <svg class="w-7 h-7 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z"/>
+        </svg>
+      </div>
+      <h1 class="text-white text-xl font-bold">LoyaltyPass Admin</h1>
+      <p class="text-gray-500 text-sm mt-1">Accès réservé au propriétaire de la plateforme</p>
+    </div>
+
+    <!-- Form -->
+    <div class="bg-gray-900/60 border border-white/5 rounded-2xl p-6">
+      <label class="block text-sm font-medium text-gray-400 mb-2">Mot de passe admin</label>
+      <input id="pwd-input" type="password" placeholder="••••••••" autocomplete="current-password"
+             class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-600 text-sm mb-3 transition-shadow"
+             onkeydown="if(event.key==='Enter') login()">
+      <div id="login-error" class="hidden text-red-400 text-xs mb-3 flex items-center gap-1.5">
+        <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"/>
+        </svg>
+        <span id="login-error-msg"></span>
+      </div>
+      <button onclick="login()" id="login-btn"
+              class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:scale-[.98] text-white text-sm font-semibold transition-all">
+        Se connecter
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── DASHBOARD ──────────────────────────────────────────────────────────── -->
+<div id="s-dashboard" style="display:none; min-height:100vh">
+
+  <!-- Header -->
+  <header class="sticky top-0 z-10 bg-[#0a0a0f]/90 backdrop-blur border-b border-white/5 px-6 py-4">
+    <div class="max-w-6xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-600/20 border border-indigo-500/30">
+          <svg class="w-4 h-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z"/>
+          </svg>
+        </div>
+        <div>
+          <span class="text-white font-semibold text-sm">LoyaltyPass</span>
+          <span class="text-gray-600 text-sm"> / Admin</span>
+        </div>
+        <div class="flex items-center gap-1.5 ml-2">
+          <span class="live-dot w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span>
+          <span class="text-gray-500 text-xs">En ligne</span>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <button onclick="loadData()" id="refresh-btn"
+                class="flex items-center gap-1.5 text-gray-400 hover:text-white text-xs px-3 py-1.5 rounded-lg hover:bg-white/5 transition-all">
+          <svg id="refresh-icon" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"/>
+          </svg>
+          Actualiser
+        </button>
+        <button onclick="logout()"
+                class="flex items-center gap-1.5 text-gray-400 hover:text-white text-xs px-3 py-1.5 rounded-lg hover:bg-white/5 transition-all">
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75"/>
+          </svg>
+          Déconnexion
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-6 py-8">
+
+    <!-- Stat cards -->
+    <div id="stats-grid" class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8"></div>
+
+    <!-- Merchants table -->
+    <div class="bg-gray-900/40 border border-white/5 rounded-2xl overflow-hidden">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-white/5">
+        <div>
+          <h2 class="text-white font-semibold text-sm">Marchands</h2>
+          <p id="table-subtitle" class="text-gray-500 text-xs mt-0.5"></p>
+        </div>
+        <input id="search-input" type="text" placeholder="Rechercher…"
+               oninput="filterTable(this.value)"
+               class="bg-gray-800 border border-gray-700 rounded-xl px-3 py-1.5 text-gray-300 placeholder-gray-600 text-xs w-44 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition">
+      </div>
+
+      <!-- Loading skeleton -->
+      <div id="table-loading" class="px-6 py-12 text-center">
+        <div class="flex items-center justify-center gap-2 text-gray-500 text-sm">
+          <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+          </svg>
+          Chargement…
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div id="table-wrap" style="display:none" class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-white/5">
+              <th class="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-6 py-3">Marchand</th>
+              <th class="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-4 py-3">Plan</th>
+              <th class="text-right text-xs font-medium text-gray-500 uppercase tracking-wider px-4 py-3">Clients</th>
+              <th class="text-right text-xs font-medium text-gray-500 uppercase tracking-wider px-4 py-3">Points distribués</th>
+              <th class="text-right text-xs font-medium text-gray-500 uppercase tracking-wider px-4 py-3">Dernière activité</th>
+              <th class="text-right text-xs font-medium text-gray-500 uppercase tracking-wider px-6 py-3">Inscription</th>
+            </tr>
+          </thead>
+          <tbody id="merchants-tbody"></tbody>
+        </table>
+      </div>
+
+      <!-- Empty state -->
+      <div id="table-empty" style="display:none" class="px-6 py-16 text-center">
+        <div class="w-12 h-12 rounded-2xl bg-gray-800 flex items-center justify-center mx-auto mb-3">
+          <svg class="w-6 h-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016c.896 0 1.7-.393 2.25-1.015a3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72M6.75 18h3.75a.75.75 0 0 0 .75-.75V13.5a.75.75 0 0 0-.75-.75H6.75a.75.75 0 0 0-.75.75v3.75c0 .414.336.75.75.75Z"/>
+          </svg>
+        </div>
+        <p id="empty-msg" class="text-gray-500 text-sm">Aucun marchand inscrit pour l'instant.</p>
+      </div>
+    </div>
+
+    <p class="text-gray-700 text-xs text-center mt-6">
+      LoyaltyPass Admin · <span id="last-updated"></span>
+    </p>
+  </main>
+</div>
+
+<script>
+  const STORAGE_KEY = 'lp_admin_pwd';
+  let allMerchants  = [];
+
+  // ── Auth ──────────────────────────────────────────────────────────────────
+  async function login() {
+    const pwd = document.getElementById('pwd-input').value;
+    if (!pwd) return;
+    const btn = document.getElementById('login-btn');
+    btn.disabled  = true;
+    btn.textContent = 'Connexion…';
+    const ok = await tryFetch(pwd);
+    if (ok) {
+      localStorage.setItem(STORAGE_KEY, pwd);
+    } else {
+      btn.disabled    = false;
+      btn.textContent = 'Se connecter';
+    }
+  }
+
+  function logout() {
+    localStorage.removeItem(STORAGE_KEY);
+    document.getElementById('s-dashboard').style.display = 'none';
+    document.getElementById('s-login').style.display     = 'flex';
+    document.getElementById('pwd-input').value           = '';
+  }
+
+  // ── Data fetching ─────────────────────────────────────────────────────────
+  async function tryFetch(pwd) {
+    try {
+      const res  = await fetch('/api/admin/merchants', {
+        headers: { Authorization: `Bearer ${pwd}` },
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        showLoginError(data.error || 'Erreur');
+        return false;
+      }
+      renderDashboard(data);
+      return true;
+    } catch {
+      showLoginError('Impossible de contacter le serveur.');
+      return false;
+    }
+  }
+
+  async function loadData() {
+    const pwd = localStorage.getItem(STORAGE_KEY);
+    if (!pwd) return;
+    const icon = document.getElementById('refresh-icon');
+    icon.classList.add('animate-spin');
+    await tryFetch(pwd);
+    icon.classList.remove('animate-spin');
+  }
+
+  function showLoginError(msg) {
+    const el  = document.getElementById('login-error');
+    document.getElementById('login-error-msg').textContent = msg;
+    el.classList.remove('hidden');
+    el.style.display = 'flex';
+  }
+
+  // ── Render ────────────────────────────────────────────────────────────────
+  function renderDashboard({ merchants, totals }) {
+    allMerchants = merchants;
+    document.getElementById('s-login').style.display     = 'none';
+    document.getElementById('s-dashboard').style.display = 'block';
+    document.getElementById('table-loading').style.display = 'none';
+    renderStats(totals);
+    renderTable(merchants);
+    document.getElementById('last-updated').textContent =
+      'Mis à jour à ' + new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function renderStats({ merchants, customers, points }) {
+    const stats = [
+      {
+        label: 'Marchands inscrits',
+        value: merchants,
+        icon: `<path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016c.896 0 1.7-.393 2.25-1.015a3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72M6.75 18h3.75a.75.75 0 0 0 .75-.75V13.5a.75.75 0 0 0-.75-.75H6.75a.75.75 0 0 0-.75.75v3.75c0 .414.336.75.75.75Z"/>`,
+        color: 'text-indigo-400', bg: 'bg-indigo-500/10 border-indigo-500/20',
+      },
+      {
+        label: 'Clients fidélisés',
+        value: customers,
+        icon: `<path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"/>`,
+        color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20',
+      },
+      {
+        label: 'Points distribués',
+        value: points.toLocaleString('fr-FR'),
+        icon: `<path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"/>`,
+        color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/20',
+      },
+    ];
+
+    document.getElementById('stats-grid').innerHTML = stats.map((s, i) => `
+      <div class="stat-card rounded-2xl p-5 animate-fade-up delay-${i + 1}">
+        <div class="flex items-start justify-between mb-4">
+          <p class="text-gray-400 text-xs font-medium uppercase tracking-wider">${s.label}</p>
+          <div class="w-8 h-8 rounded-xl ${s.bg} border flex items-center justify-center shrink-0">
+            <svg class="w-4 h-4 ${s.color}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">${s.icon}</svg>
+          </div>
+        </div>
+        <p class="text-3xl font-black text-white">${s.value}</p>
+      </div>
+    `).join('');
+  }
+
+  function renderTable(merchants) {
+    const tbody = document.getElementById('merchants-tbody');
+    document.getElementById('table-subtitle').textContent =
+      `${merchants.length} marchand${merchants.length > 1 ? 's' : ''}`;
+
+    if (merchants.length === 0) {
+      document.getElementById('table-wrap').style.display  = 'none';
+      document.getElementById('table-empty').style.display = 'block';
+      document.getElementById('empty-msg').textContent = 'Aucun marchand inscrit pour l\'instant.';
+      return;
+    }
+
+    document.getElementById('table-empty').style.display = 'none';
+    document.getElementById('table-wrap').style.display  = 'block';
+
+    tbody.innerHTML = merchants.map(m => {
+      const color    = m.color || '#6366f1';
+      const initial  = (m.name || '?').charAt(0).toUpperCase();
+      const plan     = m.plan || 'free';
+      const badgeCls = plan === 'enterprise' ? 'badge-enterprise' : plan === 'pro' ? 'badge-pro' : 'badge-free';
+      const joined   = fmtDate(m.created_at);
+      const lastAct  = m.last_activity ? fmtRelative(m.last_activity) : '—';
+
+      return `<tr class="table-row border-b border-white/[0.04] last:border-0">
+        <td class="px-6 py-4">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm font-bold shrink-0"
+                 style="background:${color}">
+              ${initial}
+            </div>
+            <div class="min-w-0">
+              <p class="text-white font-medium text-sm truncate">${esc(m.name)}</p>
+              <p class="text-gray-500 text-xs truncate">${esc(m.email)}</p>
+            </div>
+          </div>
+        </td>
+        <td class="px-4 py-4">
+          <span class="${badgeCls} text-[11px] font-semibold px-2.5 py-1 rounded-lg uppercase tracking-wide">${plan}</span>
+        </td>
+        <td class="px-4 py-4 text-right">
+          <span class="text-white font-semibold">${m.customer_count}</span>
+        </td>
+        <td class="px-4 py-4 text-right">
+          <span class="text-white font-semibold">${m.total_points.toLocaleString('fr-FR')}</span>
+        </td>
+        <td class="px-4 py-4 text-right text-gray-400 text-xs">${lastAct}</td>
+        <td class="px-6 py-4 text-right text-gray-500 text-xs">${joined}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  function filterTable(query) {
+    const q = query.trim().toLowerCase();
+    const filtered = q
+      ? allMerchants.filter(m =>
+          m.name.toLowerCase().includes(q) || m.email.toLowerCase().includes(q)
+        )
+      : allMerchants;
+    renderTable(filtered);
+    if (filtered.length === 0 && q) {
+      document.getElementById('empty-msg').textContent = `Aucun résultat pour « ${query} »`;
+    }
+  }
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+  function esc(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function fmtDate(iso) {
+    if (!iso) return '—';
+    const d = new Date(iso);
+    return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  function fmtRelative(iso) {
+    if (!iso) return '—';
+    const diff = Date.now() - new Date(iso).getTime();
+    const mins  = Math.floor(diff / 60000);
+    const hours = Math.floor(mins / 60);
+    const days  = Math.floor(hours / 24);
+    if (mins  <  2) return 'À l\'instant';
+    if (mins  < 60) return `Il y a ${mins} min`;
+    if (hours < 24) return `Il y a ${hours}h`;
+    if (days  <  7) return `Il y a ${days}j`;
+    return fmtDate(iso);
+  }
+
+  // ── Boot ──────────────────────────────────────────────────────────────────
+  (async () => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      const ok = await tryFetch(saved);
+      if (!ok) localStorage.removeItem(STORAGE_KEY);
+    }
+  })();
+</script>
+</body>
+</html>

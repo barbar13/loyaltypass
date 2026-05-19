@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+scanner/node_modules/
+
+# Environment — never commit secrets
+.env
+
+# Database — ephemeral on Railway; use DATABASE_PATH + a volume for persistence
+loyaltypass.db
+loyaltypass.db-shm
+loyaltypass.db-wal
+
+# Scanner build output — Railway rebuilds this on every deploy
+scanner/dist/
+
+# Logs
+*.log
+server.log
+server-err.log
+
+# OS
+.DS_Store
+Thumbs.db

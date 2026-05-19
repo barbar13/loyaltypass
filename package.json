@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
-    "build": "npm ci --prefix scanner && npm run build --prefix scanner"
+    "build": "npm install --include=dev --prefix scanner && npm run build --prefix scanner"
   },
   "engines": {
     "node": ">=22.5.0"

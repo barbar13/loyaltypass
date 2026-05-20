@@ -33,6 +33,7 @@ const SCANNER_DIST = path.join(__dirname, '../scanner/dist');
 
 app.get('/enroll/:merchantId', (_req, res) => res.sendFile(path.join(PUBLIC, 'enroll.html')));
 app.get('/card/:qrCode',       (_req, res) => res.sendFile(path.join(PUBLIC, 'card.html')));
+app.get('/my-card',            (_req, res) => res.sendFile(path.join(PUBLIC, 'my-card.html')));
 app.get('/admin',              (_req, res) => res.sendFile(path.join(PUBLIC, 'admin.html')));
 app.get('/register',           (_req, res) => res.sendFile(path.join(PUBLIC, 'register.html')));
 

@@ -123,8 +123,14 @@
     <p class="text-gray-600 text-xs mt-1">Elle fonctionne dans tous les commerces partenaires</p>
   </div>
 
+  <!-- Primary CTA -->
+  <a id="my-card-btn" href="#"
+     class="w-full max-w-sm py-4 rounded-2xl font-semibold text-white text-base text-center block active:scale-[0.98] transition-all shadow-2xl animate-fade-up delay-2">
+    Accéder à ma carte →
+  </a>
+
   <!-- Rewards at this merchant -->
-  <div id="rewards-section" class="w-full max-w-sm hidden animate-fade-up delay-2">
+  <div id="rewards-section" class="w-full max-w-sm hidden animate-fade-up delay-3">
     <div class="bg-gray-900 border border-white/5 rounded-3xl p-5">
       <p class="text-gray-500 text-xs font-semibold uppercase tracking-widest mb-3">Récompenses disponibles</p>
       <div id="rewards-list" class="space-y-2"></div>
@@ -132,15 +138,11 @@
   </div>
 
   <!-- Big QR (their universal card) -->
-  <div class="w-full max-w-sm animate-fade-up delay-3">
+  <div class="w-full max-w-sm animate-fade-up delay-4">
     <div class="bg-gray-900 border border-white/5 rounded-3xl p-6 text-center">
-      <p class="text-gray-500 text-xs font-semibold uppercase tracking-widest mb-1">Votre carte de fidélité</p>
-      <p class="text-gray-600 text-xs mb-5">Montrez ce QR à chaque visite pour cumuler vos points</p>
-      <div id="qr-big" class="flex justify-center mb-4"></div>
-      <a id="see-card-link" href="#"
-         class="inline-block mt-2 text-indigo-400 hover:text-indigo-300 text-sm font-medium transition underline underline-offset-2">
-        Voir tous mes points →
-      </a>
+      <p class="text-gray-500 text-xs font-semibold uppercase tracking-widest mb-1">Votre code fidélité</p>
+      <p class="text-gray-600 text-xs mb-5">Présentez ce QR à la caisse pour cumuler vos points</p>
+      <div id="qr-big" class="flex justify-center"></div>
     </div>
   </div>
 
@@ -252,7 +254,11 @@
   }
 
   function renderSuccess({ customer, membership, merchant, rewards }, firstName) {
-    const color = merchant.color || '#6366f1';
+    const color   = merchant.color || '#6366f1';
+    const cardUrl = `/card/${encodeURIComponent(customer.qr_code)}`;
+
+    // Persist card URL so /my-card can redirect directly next time
+    try { localStorage.setItem('loyaltypass_card_url', cardUrl); } catch (_) {}
 
     // Card widget
     $('loyalty-card').style.background = `linear-gradient(140deg, ${color} 0%, ${adjustBrightness(color, -30)} 100%)`;
@@ -262,6 +268,12 @@
     $('card-customer-name').textContent = firstName;
 
     $('welcome-title').textContent = `Bienvenue, ${firstName} !`;
+
+    // Primary CTA button
+    const btn = $('my-card-btn');
+    btn.href             = cardUrl;
+    btn.style.background = color;
+    btn.style.boxShadow  = `0 16px 40px ${color}40`;
 
     // Rewards
     if (rewards && rewards.length > 0) {
@@ -278,9 +290,6 @@
     const qrUrl = `/api/qr/${encodeURIComponent(customer.qr_code)}`;
     $('qr-big').innerHTML  = `<img src="${qrUrl}?size=200" width="200" height="200" alt="QR code fidélité" style="display:block;border-radius:8px">`;
     $('qr-mini').innerHTML = `<img src="${qrUrl}?size=48"  width="48"  height="48"  alt="" style="display:block">`;
-
-    // Link to universal card
-    $('see-card-link').href = `/card/${encodeURIComponent(customer.qr_code)}`;
 
     show('s-success');
   }

@@ -56,6 +56,42 @@
 <div id="s-card" style="display:none" class="min-h-dvh flex flex-col px-5 pt-safe pb-safe">
   <div class="max-w-sm mx-auto w-full">
 
+    <!-- Add to Home Screen banner (dismissible) -->
+    <div id="aths-banner" style="display:none" class="mt-4 mb-1 rounded-2xl border border-indigo-500/20 bg-indigo-500/8 px-4 py-4 animate-fade-up">
+      <div class="flex items-start gap-3">
+        <div class="w-9 h-9 rounded-xl bg-indigo-500/15 flex items-center justify-center shrink-0 mt-0.5">
+          <svg class="w-5 h-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/>
+          </svg>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-white font-semibold text-sm">Accédez à votre carte en un tap</p>
+          <!-- iOS instructions -->
+          <p id="aths-ios" style="display:none" class="text-gray-400 text-xs mt-1 leading-relaxed">
+            iPhone : appuyez sur
+            <svg class="inline w-3.5 h-3.5 text-indigo-400 mb-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
+            puis <strong class="text-white">"Sur l'écran d'accueil"</strong>
+          </p>
+          <!-- Android instructions -->
+          <p id="aths-android" style="display:none" class="text-gray-400 text-xs mt-1 leading-relaxed">
+            Android : menu
+            <svg class="inline w-3.5 h-3.5 text-gray-400 mb-0.5" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+            puis <strong class="text-white">"Ajouter à l'écran d'accueil"</strong>
+          </p>
+          <!-- Generic / Desktop -->
+          <p id="aths-other" style="display:none" class="text-gray-400 text-xs mt-1 leading-relaxed">
+            Ajoutez cette page à vos favoris pour y revenir facilement.
+          </p>
+        </div>
+        <button id="aths-close" onclick="dismissBanner()"
+          class="text-gray-600 hover:text-gray-400 active:scale-90 transition p-1 -mt-1 -mr-1 shrink-0" aria-label="Fermer">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
     <!-- Header -->
     <div class="text-center py-8 animate-fade-up">
       <div class="w-14 h-14 rounded-2xl bg-indigo-600/20 border border-indigo-500/25 flex items-center justify-center mx-auto mb-4">
@@ -205,10 +241,36 @@
       }
 
       show('s-card');
+      showBanner();
     } catch (e) {
       $('error-msg').textContent = e.message;
       show('s-error');
     }
+  }
+
+  function showBanner() {
+    // Don't show if already running as installed PWA
+    const isStandalone = window.navigator.standalone === true ||
+      window.matchMedia('(display-mode: standalone)').matches;
+    if (isStandalone) return;
+
+    // Don't show if already dismissed for this card
+    try {
+      if (localStorage.getItem('lp_aths_' + qrCode)) return;
+    } catch (_) {}
+
+    const isIos     = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    const isAndroid = /android/i.test(navigator.userAgent);
+
+    $('aths-ios').style.display     = isIos     ? 'block' : 'none';
+    $('aths-android').style.display = isAndroid ? 'block' : 'none';
+    $('aths-other').style.display   = (!isIos && !isAndroid) ? 'block' : 'none';
+    $('aths-banner').style.display  = 'block';
+  }
+
+  function dismissBanner() {
+    try { localStorage.setItem('lp_aths_' + qrCode, '1'); } catch (_) {}
+    $('aths-banner').style.display = 'none';
   }
 
   init();

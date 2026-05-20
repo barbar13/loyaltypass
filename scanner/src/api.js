@@ -86,3 +86,9 @@ export function deleteReward(id, token) {
     headers: { Authorization: `Bearer ${token}` },
   });
 }
+
+export function getAnalytics(token) {
+  return request('/merchants/analytics', {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}

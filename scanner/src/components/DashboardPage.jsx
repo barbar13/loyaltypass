@@ -1,6 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { Chart, registerables } from 'chart.js';
 import ScanModal  from './ScanModal.jsx';
-import { addReward, deleteReward, redeemReward, updateProfile, getScans, createCheckout } from '../api.js';
+import { addReward, deleteReward, redeemReward, updateProfile, getScans, createCheckout, getAnalytics } from '../api.js';
+
+Chart.register(...registerables);
 
 // ── Tab icons ─────────────────────────────────────────────────────────────────
 
@@ -23,6 +26,11 @@ const IconGift = () => (
 const IconHistory = () => (
   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+  </svg>
+);
+const IconChart = () => (
+  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
   </svg>
 );
 const IconSettings = () => (
@@ -131,7 +139,7 @@ function OnboardingChecklist({ merchant, stats, rewards }) {
     <div className="mx-5 mt-4 mb-1 bg-gray-900 border border-white/5 rounded-2xl p-4">
       <div className="flex items-center justify-between mb-3">
         <div>
-          <p className="text-white font-bold text-sm">Premiers pas avec Fidevo</p>
+          <p className="text-white font-bold text-sm">Premiers pas avec Fidelyzio</p>
           <p className="text-gray-600 text-xs">{doneCount}/{steps.length} étapes complétées</p>
         </div>
         {allDone && (
@@ -729,6 +737,338 @@ function SettingsTab({ merchant, token, onRefresh }) {
   );
 }
 
+// ── Analytics tab ─────────────────────────────────────────────────────────────
+
+const CHART_OPTS = {
+  responsive: true, maintainAspectRatio: false,
+  plugins: {
+    legend: { display: false },
+    tooltip: {
+      backgroundColor: '#1c1c28', titleColor: '#9ca3af', bodyColor: '#f9fafb',
+      borderColor: '#2d2d3a', borderWidth: 1, padding: 10, displayColors: false,
+    },
+  },
+  scales: {
+    x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#6b7280', font: { size: 10 }, maxRotation: 0 }, border: { display: false } },
+    y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#6b7280', font: { size: 10 }, precision: 0 }, border: { display: false }, beginAtZero: true },
+  },
+};
+
+function CanvasChart({ type, data, options, height = 160 }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    if (!ref.current) return;
+    const c = new Chart(ref.current, { type, data, options });
+    return () => c.destroy();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  return <div style={{ height }}><canvas ref={ref} /></div>;
+}
+
+function ACard({ title, subtitle, children }) {
+  return (
+    <div className="bg-gray-900 border border-white/5 rounded-2xl p-4">
+      <div className="flex items-baseline justify-between mb-4">
+        <p className="text-white text-sm font-semibold">{title}</p>
+        {subtitle && <span className="text-gray-600 text-xs">{subtitle}</span>}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function KpiRow({ items }) {
+  return (
+    <div className={`grid gap-3 grid-cols-${items.length}`}>
+      {items.map(({ label, value, sub, up }) => (
+        <div key={label} className="bg-gray-900 border border-white/5 rounded-2xl p-3.5 text-center">
+          <p className="text-2xl font-black text-white leading-none">{value}</p>
+          {sub !== undefined && (
+            <p className={`text-xs font-semibold mt-0.5 ${up === true ? 'text-emerald-400' : up === false ? 'text-red-400' : 'text-gray-600'}`}>
+              {sub}
+            </p>
+          )}
+          <p className="text-gray-600 text-[10px] uppercase tracking-wider mt-1 leading-tight">{label}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function SectionLabel({ children }) {
+  return <p className="text-gray-500 text-xs font-semibold uppercase tracking-widest mt-5 mb-3">{children}</p>;
+}
+
+function TrendChip({ value }) {
+  if (value === null || value === undefined) return null;
+  const up = value >= 0;
+  return (
+    <span className={`inline-flex items-center gap-0.5 text-xs font-semibold px-2 py-0.5 rounded-full ${up ? 'bg-emerald-500/15 text-emerald-400' : 'bg-red-500/15 text-red-400'}`}>
+      {up ? '▲' : '▼'} {Math.abs(value)}%
+    </span>
+  );
+}
+
+function AnalyticsTab({ token, color }) {
+  const [data,    setData]    = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [err,     setErr]     = useState('');
+
+  async function load() {
+    setLoading(true); setErr('');
+    try { setData(await getAnalytics(token)); }
+    catch (e) { setErr(e.message); }
+    finally { setLoading(false); }
+  }
+  useEffect(() => { load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (loading) return (
+    <div className="flex justify-center py-20">
+      <div className="w-7 h-7 rounded-full border-2 border-white/10 border-t-white/60 animate-spin" />
+    </div>
+  );
+  if (err) return (
+    <div className="px-5 py-12 text-center">
+      <p className="text-red-400 text-sm mb-4">{err}</p>
+      <button onClick={load} className="px-4 py-2 bg-gray-800 rounded-xl text-white text-sm hover:bg-gray-700 transition">Réessayer</button>
+    </div>
+  );
+  if (!data) return null;
+
+  const brand = color || '#6366f1';
+  const DOW   = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+
+  const weekTrend = data.new_customers_last_week > 0
+    ? Math.round(((data.new_customers_this_week - data.new_customers_last_week) / data.new_customers_last_week) * 100)
+    : data.new_customers_this_week > 0 ? 100 : 0;
+  const monthScanTrend = data.last_month_scans > 0
+    ? Math.round(((data.this_month_scans - data.last_month_scans) / data.last_month_scans) * 100)
+    : null;
+
+  const totalCustomers = data.active_customers + data.inactive_customers;
+  const activePct = totalCustomers > 0 ? Math.round((data.active_customers / totalCustomers) * 100) : 0;
+
+  return (
+    <div className="px-5 pt-2 pb-6 space-y-1">
+
+      {/* Refresh */}
+      <div className="flex justify-end pt-2 pb-1">
+        <button onClick={load} className="flex items-center gap-1.5 text-gray-500 hover:text-white text-xs px-3 py-1.5 rounded-xl hover:bg-white/5 transition-all active:scale-95">
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+          </svg>
+          Actualiser
+        </button>
+      </div>
+
+      {/* ── Weekly summary ─────────────────────────────────────────────────── */}
+      <SectionLabel>Cette semaine</SectionLabel>
+      <KpiRow items={[
+        { label: 'Nouveaux clients', value: data.weekly_new_customers, sub: `${weekTrend >= 0 ? '+' : ''}${weekTrend}% vs S-1`, up: weekTrend >= 0 },
+        { label: 'Scans', value: data.weekly_scans },
+        { label: 'Récompenses', value: data.weekly_redemptions },
+      ]} />
+
+      {/* ── Customer analysis ──────────────────────────────────────────────── */}
+      <SectionLabel>Analyse clients</SectionLabel>
+
+      {/* Active vs inactive */}
+      <div className="bg-gray-900 border border-white/5 rounded-2xl p-4">
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-white text-sm font-semibold">Clients actifs vs inactifs</p>
+          <span className="text-gray-500 text-xs">30 derniers jours</span>
+        </div>
+        <div className="flex gap-4 mb-3">
+          <div>
+            <p className="text-2xl font-black text-emerald-400 leading-none">{data.active_customers}</p>
+            <p className="text-gray-600 text-[10px] uppercase tracking-wide mt-0.5">Actifs</p>
+          </div>
+          <div>
+            <p className="text-2xl font-black text-gray-500 leading-none">{data.inactive_customers}</p>
+            <p className="text-gray-600 text-[10px] uppercase tracking-wide mt-0.5">Inactifs</p>
+          </div>
+          <div className="ml-auto text-right">
+            <p className="text-xl font-black text-white leading-none">{activePct}%</p>
+            <p className="text-gray-600 text-[10px] uppercase tracking-wide mt-0.5">Actifs</p>
+          </div>
+        </div>
+        <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
+          <div className="h-full rounded-full bg-emerald-500 transition-all" style={{ width: `${activePct}%` }} />
+        </div>
+      </div>
+
+      {/* KPIs */}
+      <KpiRow items={[
+        { label: 'Fréquence moy.', value: `${data.avg_visit_frequency}`, sub: 'visites / mois' },
+        { label: 'Nouveaux S-1', value: data.new_customers_this_week, sub: <TrendChip value={weekTrend} /> },
+        { label: 'Taux rétention', value: `${data.retention_rate}%` },
+      ]} />
+
+      {/* Top 10 customers */}
+      <ACard title="Top 10 clients" subtitle="par points cumulés">
+        {data.top_customers.length === 0
+          ? <p className="text-gray-600 text-sm text-center py-4">Aucun client encore.</p>
+          : <div className="space-y-2.5">
+              {data.top_customers.map((c, i) => {
+                const maxPts = data.top_customers[0].points || 1;
+                const pct    = Math.round((c.points / maxPts) * 100);
+                return (
+                  <div key={i} className="flex items-center gap-2.5">
+                    <span className="text-gray-600 text-xs w-4 text-right shrink-0 font-semibold">{i + 1}</span>
+                    <div className="w-7 h-7 rounded-lg bg-gray-800 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                      {c.first_name.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-white text-xs font-medium truncate mr-2">{c.first_name}</span>
+                        <span className="text-gray-500 text-[10px] shrink-0">{c.points} pts · {c.visit_count} visites</span>
+                      </div>
+                      <div className="h-1.5 bg-gray-800 rounded-full overflow-hidden">
+                        <div className="h-full rounded-full" style={{ width: `${pct}%`, background: brand }} />
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+        }
+      </ACard>
+
+      {/* Lost customers */}
+      {data.lost_customers.length > 0 && (
+        <ACard title="Clients à relancer" subtitle="+30j sans visite">
+          <div className="space-y-2">
+            {data.lost_customers.slice(0, 8).map((c, i) => (
+              <div key={i} className="flex items-center gap-3 bg-gray-800/50 rounded-xl px-3 py-2.5">
+                <div className="w-7 h-7 rounded-lg bg-gray-700 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                  {c.first_name.charAt(0).toUpperCase()}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-white text-sm font-medium">{c.first_name}</p>
+                  <p className="text-gray-600 text-xs">{c.last_visit ? fmtRelative(c.last_visit) : 'Jamais'} · {c.points} pts</p>
+                </div>
+                <button className="px-2.5 py-1 rounded-lg bg-indigo-600/20 text-indigo-400 text-xs font-semibold border border-indigo-500/20 opacity-60 cursor-not-allowed" disabled>
+                  Relancer
+                </button>
+              </div>
+            ))}
+          </div>
+          {data.lost_customers.length > 8 && (
+            <p className="text-gray-600 text-xs text-center mt-3">+{data.lost_customers.length - 8} autres clients inactifs</p>
+          )}
+        </ACard>
+      )}
+
+      {/* ── Time analysis ──────────────────────────────────────────────────── */}
+      <SectionLabel>Activité dans le temps</SectionLabel>
+
+      {/* Scans per day */}
+      <ACard title="Scans par jour" subtitle="30 derniers jours">
+        <CanvasChart key="scan-day" type="line" height={150}
+          data={{
+            labels: data.scans_per_day.map(d => d.day.slice(5)),
+            datasets: [{ data: data.scans_per_day.map(d => d.count), borderColor: brand, backgroundColor: brand + '18', fill: true, tension: 0.4, pointRadius: 0, pointHoverRadius: 4, borderWidth: 2 }],
+          }}
+          options={{ ...CHART_OPTS, scales: { ...CHART_OPTS.scales, x: { ...CHART_OPTS.scales.x, ticks: { ...CHART_OPTS.scales.x.ticks, maxTicksLimit: 7 } } } }}
+        />
+      </ACard>
+
+      {/* Scans by weekday */}
+      <ACard title="Scans par jour de semaine" subtitle="30 derniers jours">
+        <CanvasChart key="scan-dow" type="bar" height={140}
+          data={{
+            labels: DOW,
+            datasets: [{ data: data.scans_by_weekday, backgroundColor: brand + 'aa', hoverBackgroundColor: brand, borderRadius: 4, borderSkipped: false }],
+          }}
+          options={CHART_OPTS}
+        />
+      </ACard>
+
+      {/* Scans by hour */}
+      <ACard title="Scans par heure" subtitle="30 derniers jours">
+        <CanvasChart key="scan-hour" type="bar" height={130}
+          data={{
+            labels: Array.from({ length: 24 }, (_, i) => i + 'h'),
+            datasets: [{ data: data.scans_by_hour, backgroundColor: '#22c55e99', hoverBackgroundColor: '#22c55e', borderRadius: 3, borderSkipped: false }],
+          }}
+          options={{ ...CHART_OPTS, scales: { ...CHART_OPTS.scales, x: { ...CHART_OPTS.scales.x, ticks: { ...CHART_OPTS.scales.x.ticks, maxTicksLimit: 8 } } } }}
+        />
+      </ACard>
+
+      {/* Monthly comparison */}
+      <div className="bg-gray-900 border border-white/5 rounded-2xl p-4">
+        <p className="text-white text-sm font-semibold mb-3">Comparaison mensuelle</p>
+        <div className="grid grid-cols-2 gap-3">
+          {[
+            { label: 'Scans ce mois', value: data.this_month_scans, prev: data.last_month_scans, trend: monthScanTrend },
+            { label: 'Nouveaux clients', value: data.this_month_customers, prev: data.last_month_customers,
+              trend: data.last_month_customers > 0 ? Math.round(((data.this_month_customers - data.last_month_customers) / data.last_month_customers) * 100) : null },
+          ].map(item => (
+            <div key={item.label} className="bg-gray-800/60 rounded-xl p-3">
+              <p className="text-gray-500 text-[10px] uppercase tracking-wide mb-1">{item.label}</p>
+              <p className="text-white text-2xl font-black leading-none">{item.value}</p>
+              <div className="flex items-center gap-1.5 mt-1">
+                <TrendChip value={item.trend} />
+                <span className="text-gray-600 text-[10px]">vs mois dernier ({item.prev})</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Rewards analysis ───────────────────────────────────────────────── */}
+      <SectionLabel>Récompenses</SectionLabel>
+
+      <div className="bg-gray-900 border border-white/5 rounded-2xl p-4 space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-gray-500 text-[10px] uppercase tracking-wide">Taux de rachat</p>
+            <p className="text-white text-3xl font-black">{data.redemption_rate}%</p>
+            <p className="text-gray-600 text-xs mt-0.5">des clients ont racheté une récompense</p>
+          </div>
+          <div className="text-right">
+            <p className="text-gray-500 text-[10px] uppercase tracking-wide">Rachats</p>
+            <p className="text-white text-2xl font-black">{data.total_redeemed}</p>
+            <p className="text-gray-600 text-xs mt-0.5">{data.total_points_distributed.toLocaleString('fr-FR')} pts distribués</p>
+          </div>
+        </div>
+        {data.most_popular_reward && (
+          <div className="bg-amber-500/8 border border-amber-500/18 rounded-xl px-3 py-2.5">
+            <p className="text-amber-300/60 text-[10px] uppercase tracking-wide mb-0.5">Récompense la plus populaire</p>
+            <p className="text-amber-300 text-sm font-semibold">{data.most_popular_reward}</p>
+          </div>
+        )}
+        {data.avg_points_before_first_redemption > 0 && (
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-gray-500">Pts moyens avant 1er rachat</span>
+            <span className="text-white font-bold">{data.avg_points_before_first_redemption} pts</span>
+          </div>
+        )}
+      </div>
+
+      {/* ── Business indicators ─────────────────────────────────────────────── */}
+      <SectionLabel>Indicateurs business</SectionLabel>
+
+      <KpiRow items={[
+        { label: 'Score fidélité moy.', value: data.avg_loyalty_score, sub: 'pts / visite' },
+        { label: 'Taux rétention', value: `${data.retention_rate}%`, sub: 'clients revenus' },
+      ]} />
+
+      {/* Customer growth chart */}
+      <ACard title="Croissance clients" subtitle="12 dernières semaines">
+        <CanvasChart key="cust-growth" type="line" height={140}
+          data={{
+            labels: data.cumulative_customers.map(c => c.label),
+            datasets: [{ data: data.cumulative_customers.map(c => c.count), borderColor: '#22c55e', backgroundColor: '#22c55e18', fill: true, tension: 0.4, pointRadius: 0, pointHoverRadius: 4, borderWidth: 2 }],
+          }}
+          options={{ ...CHART_OPTS, scales: { ...CHART_OPTS.scales, x: { ...CHART_OPTS.scales.x, ticks: { ...CHART_OPTS.scales.x.ticks, maxTicksLimit: 6 } } } }}
+        />
+      </ACard>
+
+      <div style={{ height: '0.5rem' }} />
+    </div>
+  );
+}
+
 // ── Main DashboardPage ────────────────────────────────────────────────────────
 
 export default function DashboardPage({ auth, dashData, dashLoading, onLogout, onRefresh }) {
@@ -747,11 +1087,12 @@ export default function DashboardPage({ auth, dashData, dashLoading, onLogout, o
   }
 
   const TABS = [
-    { id: 'home',     label: 'Accueil',  Icon: IconHome     },
-    { id: 'clients',  label: 'Clients',  Icon: IconUsers    },
-    { id: 'rewards',  label: 'Primes',   Icon: IconGift     },
-    { id: 'history',  label: 'Scans',    Icon: IconHistory  },
-    { id: 'settings', label: 'Compte',   Icon: IconSettings },
+    { id: 'home',      label: 'Accueil', Icon: IconHome     },
+    { id: 'clients',   label: 'Clients', Icon: IconUsers    },
+    { id: 'rewards',   label: 'Primes',  Icon: IconGift     },
+    { id: 'analytics', label: 'Stats',   Icon: IconChart    },
+    { id: 'history',   label: 'Scans',   Icon: IconHistory  },
+    { id: 'settings',  label: 'Compte',  Icon: IconSettings },
   ];
 
   return (
@@ -798,13 +1139,14 @@ export default function DashboardPage({ auth, dashData, dashLoading, onLogout, o
         {tab === 'home' && merchant.subscription_status !== 'suspended' && (
           <OnboardingChecklist merchant={merchant} stats={stats} rewards={rewards} />
         )}
-        {tab === 'home'     && <HomeTab merchant={merchant} stats={stats} onScanClick={() => setShowScan(true)} />}
-        {tab === 'clients'  && (
+        {tab === 'home'      && <HomeTab merchant={merchant} stats={stats} onScanClick={() => setShowScan(true)} />}
+        {tab === 'clients'   && (
           <ClientsTab customers={customers} rewards={rewards} token={auth.token} onRewardsChange={onRefresh} />
         )}
-        {tab === 'rewards'  && <RewardsTab rewards={rewards} token={auth.token} onRewardsChange={onRefresh} />}
-        {tab === 'history'  && <HistoryTab token={auth.token} />}
-        {tab === 'settings' && <SettingsTab merchant={merchant} token={auth.token} onRefresh={onRefresh} />}
+        {tab === 'rewards'   && <RewardsTab rewards={rewards} token={auth.token} onRewardsChange={onRefresh} />}
+        {tab === 'analytics' && <AnalyticsTab token={auth.token} color={color} />}
+        {tab === 'history'   && <HistoryTab token={auth.token} />}
+        {tab === 'settings'  && <SettingsTab merchant={merchant} token={auth.token} onRefresh={onRefresh} />}
       </main>
 
       {/* Bottom tab bar */}

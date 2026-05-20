@@ -355,4 +355,164 @@ router.get('/scans', auth, async (req, res) => {
   }
 });
 
+// ─── Analytics ────────────────────────────────────────────────────────────────
+
+router.get('/analytics', auth, async (req, res) => {
+  const merchantId = req.merchant.id;
+  try {
+    const now  = Date.now();
+    const d30  = new Date(now - 30 * 86400000).toISOString();
+    const d7   = new Date(now - 7  * 86400000).toISOString();
+    const d14  = new Date(now - 14 * 86400000).toISOString();
+
+    const [memberships, allTxns] = await Promise.all([
+      db.all(`
+        SELECT mb.customer_id, mb.points, mb.joined_at,
+               c.first_name, c.phone,
+               MAX(CASE WHEN t.points > 0 THEN t.created_at END) AS last_visit,
+               COUNT(CASE WHEN t.points > 0 THEN 1 END)          AS visit_count
+        FROM memberships mb
+        JOIN customers c ON c.id = mb.customer_id
+        LEFT JOIN transactions t
+          ON t.merchant_id = mb.merchant_id AND t.customer_id = mb.customer_id
+        WHERE mb.merchant_id = $1
+        GROUP BY mb.customer_id, mb.points, mb.joined_at, c.first_name, c.phone
+      `, [merchantId]),
+      db.all(
+        'SELECT id, customer_id, points, note, created_at FROM transactions WHERE merchant_id = $1 ORDER BY created_at',
+        [merchantId]
+      ),
+    ]);
+
+    // ── Customer analysis ─────────────────────────────────────────────────
+    const positiveTxns   = allTxns.filter(t => t.points > 0);
+    const positiveTxns30 = positiveTxns.filter(t => t.created_at >= d30);
+    const redemptions    = allTxns.filter(t => t.points < 0);
+
+    const activeCustomers   = memberships.filter(m => m.last_visit && m.last_visit >= d30);
+    const inactiveCustomers = memberships.filter(m => !m.last_visit || m.last_visit < d30);
+    const avgVisitFreq = activeCustomers.length > 0
+      ? Math.round((positiveTxns30.length / activeCustomers.length) * 10) / 10
+      : 0;
+
+    const topCustomers = memberships
+      .map(m => ({ first_name: m.first_name, phone: m.phone, points: Number(m.points),
+                   visit_count: Number(m.visit_count), last_visit: m.last_visit }))
+      .sort((a, b) => b.points - a.points).slice(0, 10);
+
+    const lostCustomers = inactiveCustomers
+      .sort((a, b) => (a.last_visit || '') < (b.last_visit || '') ? -1 : 1).slice(0, 20)
+      .map(m => ({ first_name: m.first_name, phone: m.phone, points: Number(m.points), last_visit: m.last_visit }));
+
+    const newThisWeek = memberships.filter(m => m.joined_at >= d7).length;
+    const newLastWeek = memberships.filter(m => m.joined_at >= d14 && m.joined_at < d7).length;
+
+    // ── Time analysis ─────────────────────────────────────────────────────
+    const scansDayMap = {};
+    positiveTxns30.forEach(t => {
+      const d = t.created_at.slice(0, 10);
+      scansDayMap[d] = (scansDayMap[d] || 0) + 1;
+    });
+    const scansPerDay = [];
+    for (let i = 29; i >= 0; i--) {
+      const day = new Date(now - i * 86400000).toISOString().slice(0, 10);
+      scansPerDay.push({ day, count: scansDayMap[day] || 0 });
+    }
+
+    const scansByWeekday = Array(7).fill(0);
+    positiveTxns30.forEach(t => {
+      scansByWeekday[(new Date(t.created_at).getDay() + 6) % 7]++;
+    });
+
+    const scansByHour = Array(24).fill(0);
+    positiveTxns30.forEach(t => { scansByHour[new Date(t.created_at).getHours()]++; });
+
+    const nowDate        = new Date();
+    const thisMonthStart = new Date(nowDate.getFullYear(), nowDate.getMonth(), 1).toISOString();
+    const lastMonthStart = new Date(nowDate.getFullYear(), nowDate.getMonth() - 1, 1).toISOString();
+    const thisMonthScans      = positiveTxns.filter(t => t.created_at >= thisMonthStart).length;
+    const lastMonthScans      = positiveTxns.filter(t => t.created_at >= lastMonthStart && t.created_at < thisMonthStart).length;
+    const thisMonthCustomers  = memberships.filter(m => m.joined_at >= thisMonthStart).length;
+    const lastMonthCustomers  = memberships.filter(m => m.joined_at >= lastMonthStart && m.joined_at < thisMonthStart).length;
+
+    // ── Rewards analysis ──────────────────────────────────────────────────
+    const totalPointsDistrib   = positiveTxns.reduce((s, t) => s + t.points, 0);
+    const customersWhoRedeemed = new Set(redemptions.map(r => r.customer_id));
+    const redemptionRate       = memberships.length > 0
+      ? Math.round((customersWhoRedeemed.size / memberships.length) * 100) : 0;
+
+    const rewardCounts = {};
+    redemptions.forEach(t => {
+      const k = (t.note || '').replace(/^Récompense\s*:\s*/i, '').trim() || 'Inconnu';
+      rewardCounts[k] = (rewardCounts[k] || 0) + 1;
+    });
+    const mostPopularReward = Object.keys(rewardCounts).sort((a, b) => rewardCounts[b] - rewardCounts[a])[0] || null;
+
+    let avgPointsBeforeFirstRedemption = 0;
+    if (redemptions.length > 0) {
+      const firstRedeemDate = {};
+      redemptions.forEach(r => {
+        if (!firstRedeemDate[r.customer_id] || r.created_at < firstRedeemDate[r.customer_id])
+          firstRedeemDate[r.customer_id] = r.created_at;
+      });
+      const vals = Object.entries(firstRedeemDate).map(([cid, date]) =>
+        allTxns.filter(t => String(t.customer_id) === cid && t.points > 0 && t.created_at < date)
+               .reduce((s, t) => s + t.points, 0)
+      );
+      if (vals.length > 0)
+        avgPointsBeforeFirstRedemption = Math.round(vals.reduce((a, b) => a + b, 0) / vals.length);
+    }
+
+    // ── Business indicators ───────────────────────────────────────────────
+    const returnCustomers = memberships.filter(m => Number(m.visit_count) > 1).length;
+    const retentionRate   = memberships.length > 0
+      ? Math.round((returnCustomers / memberships.length) * 100) : 0;
+
+    const cumulativeCustomers = [];
+    for (let i = 11; i >= 0; i--) {
+      const wEnd  = new Date(now - i * 7 * 86400000);
+      const label = wEnd.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+      cumulativeCustomers.push({ label, count: memberships.filter(m => new Date(m.joined_at) <= wEnd).length });
+    }
+
+    const loyaltyScores = memberships.filter(m => Number(m.visit_count) > 0)
+      .map(m => Number(m.points) / Number(m.visit_count));
+    const avgLoyaltyScore = loyaltyScores.length > 0
+      ? Math.round(loyaltyScores.reduce((a, b) => a + b, 0) / loyaltyScores.length) : 0;
+
+    const weeklyScans       = positiveTxns.filter(t => t.created_at >= d7).length;
+    const weeklyRedemptions = redemptions.filter(t => t.created_at >= d7).length;
+
+    res.json({
+      active_customers:    activeCustomers.length,
+      inactive_customers:  inactiveCustomers.length,
+      avg_visit_frequency: avgVisitFreq,
+      top_customers:       topCustomers,
+      lost_customers:      lostCustomers,
+      new_customers_this_week: newThisWeek,
+      new_customers_last_week: newLastWeek,
+      scans_per_day:       scansPerDay,
+      scans_by_weekday:    scansByWeekday,
+      scans_by_hour:       scansByHour,
+      this_month_scans:    thisMonthScans,
+      last_month_scans:    lastMonthScans,
+      this_month_customers: thisMonthCustomers,
+      last_month_customers: lastMonthCustomers,
+      total_points_distributed:           totalPointsDistrib,
+      total_redeemed:                     redemptions.length,
+      redemption_rate:                    redemptionRate,
+      most_popular_reward:                mostPopularReward,
+      avg_points_before_first_redemption: avgPointsBeforeFirstRedemption,
+      retention_rate:       retentionRate,
+      cumulative_customers: cumulativeCustomers,
+      avg_loyalty_score:    avgLoyaltyScore,
+      weekly_new_customers: newThisWeek,
+      weekly_scans:         weeklyScans,
+      weekly_redemptions:   weeklyRedemptions,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;

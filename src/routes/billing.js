@@ -29,7 +29,7 @@ router.post('/create-checkout', auth, async (req, res) => {
       line_items: [{
         price_data: {
           currency: 'eur',
-          product_data: { name: 'Fidevo Pro — Abonnement mensuel' },
+          product_data: { name: 'Fidelyzio Pro — Abonnement mensuel' },
           unit_amount: PLAN_PRICE_EUR,
           recurring: { interval: 'month' },
         },

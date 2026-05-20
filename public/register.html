@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#0a0a0f">
-  <title>Fidevo — Créer un compte</title>
+  <title>Fidelyzio — Créer un compte</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -168,7 +168,7 @@
                class="mt-0.5 w-4 h-4 accent-indigo-500 cursor-pointer shrink-0">
         <label for="inp-rgpd" class="text-gray-500 text-xs leading-relaxed cursor-pointer">
           J'accepte la <a href="/privacy" target="_blank" class="text-indigo-400 underline underline-offset-1">politique de confidentialité</a>
-          et les <a href="/cgu" target="_blank" class="text-indigo-400 underline underline-offset-1">CGU</a> de Fidevo.
+          et les <a href="/cgu" target="_blank" class="text-indigo-400 underline underline-offset-1">CGU</a> de Fidelyzio.
         </label>
       </div>
 
@@ -252,7 +252,7 @@
 
     <p class="text-gray-700 text-xs text-center no-print animate-fade-up delay-3">
       Revenez sur cette page depuis
-      <a href="/register" class="underline hover:text-gray-500 transition">loyaltypass.app/register</a>
+      <a href="/register" class="underline hover:text-gray-500 transition">fidelyzio.com/register</a>
       pour créer un autre compte
     </p>
 
@@ -380,7 +380,7 @@
 
     // Store auth so scanner auto-logs in
     try {
-      localStorage.setItem('loyaltypass_auth', JSON.stringify({ merchant, token }));
+      localStorage.setItem('fidelyzio_auth', JSON.stringify({ merchant, token }));
     } catch {}
   }
 

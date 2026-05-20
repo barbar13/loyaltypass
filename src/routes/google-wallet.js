@@ -43,8 +43,8 @@ async function generateWalletPass(req, res) {
     );
     const topMerchant = memberships[0];
 
-    const objectId  = `${issuerId}.fidevo_${customer.id}`;
-    const classId   = `${issuerId}.fidevo_loyalty_v1`;
+    const objectId  = `${issuerId}.fidelyzio_${customer.id}`;
+    const classId   = `${issuerId}.fidelyzio_loyalty_v1`;
     const hexColor  = topMerchant?.color || '#6366f1';
 
     const passObject = {
@@ -52,7 +52,7 @@ async function generateWalletPass(req, res) {
       classId,
       state: 'ACTIVE',
       hexBackgroundColor: hexColor,
-      cardTitle: { defaultValue: { language: 'fr', value: 'Fidevo' } },
+      cardTitle: { defaultValue: { language: 'fr', value: 'Fidelyzio' } },
       subheader: { defaultValue: { language: 'fr', value: topMerchant?.merchant_name || 'Ma carte fidélité' } },
       header: { defaultValue: { language: 'fr', value: `${topMerchant?.points ?? 0} pts` } },
       textModulesData: [
@@ -60,13 +60,13 @@ async function generateWalletPass(req, res) {
         { id: 'points', header: 'Points',    body: String(topMerchant?.points ?? 0) },
       ],
       barcode: { type: 'QR_CODE', value: customer.qr_code, alternateText: '' },
-      logo: { sourceUri: { uri: `${process.env.BASE_URL || 'https://fidevo.app'}/logo.png` } },
+      logo: { sourceUri: { uri: `${process.env.BASE_URL || 'https://fidelyzio.com'}/logo.png` } },
     };
 
     const claims = {
       iss: credentials.client_email,
       aud: 'google',
-      origins: [process.env.BASE_URL || 'https://fidevo.app'],
+      origins: [process.env.BASE_URL || 'https://fidelyzio.com'],
       typ: 'savetowallet',
       payload: { genericObjects: [passObject] },
     };

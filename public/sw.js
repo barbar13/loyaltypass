@@ -1,4 +1,4 @@
-// Fidevo Service Worker — handles push notifications
+// Fidelyzio Service Worker — handles push notifications
 'use strict';
 
 self.addEventListener('install', () => self.skipWaiting());
@@ -6,7 +6,7 @@ self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
 
 self.addEventListener('push', event => {
   let data = {};
-  try { data = event.data?.json() ?? {}; } catch (_) { data = { title: 'Fidevo', body: event.data?.text() ?? '' }; }
+  try { data = event.data?.json() ?? {}; } catch (_) { data = { title: 'Fidelyzio', body: event.data?.text() ?? '' }; }
 
   const options = {
     body:    data.body  || '',
@@ -20,7 +20,7 @@ self.addEventListener('push', event => {
   };
 
   event.waitUntil(
-    self.registration.showNotification(data.title || 'Fidevo', options)
+    self.registration.showNotification(data.title || 'Fidelyzio', options)
   );
 });
 

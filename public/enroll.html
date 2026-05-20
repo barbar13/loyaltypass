@@ -6,7 +6,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#0f0f14">
-  <title>Fidevo – Inscription</title>
+  <title>Fidelyzio – Inscription</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -116,7 +116,7 @@
   <div id="loyalty-card" class="w-full max-w-sm rounded-3xl p-6 relative overflow-hidden card-shine shadow-2xl animate-scale-in">
     <div class="relative z-10">
       <div class="flex items-start justify-between mb-6">
-        <span class="text-white/50 text-[10px] font-semibold tracking-widest uppercase">Fidevo</span>
+        <span class="text-white/50 text-[10px] font-semibold tracking-widest uppercase">Fidelyzio</span>
         <span id="card-merchant-name" class="text-white text-sm font-semibold max-w-[55%] text-right truncate"></span>
       </div>
       <div class="text-center my-2">
@@ -296,7 +296,7 @@
     const cardUrl = `/card/${encodeURIComponent(customer.qr_code)}`;
 
     // Persist card URL so /my-card can redirect directly next time
-    try { localStorage.setItem('loyaltypass_card_url', cardUrl); } catch (_) {}
+    try { localStorage.setItem('fidelyzio_card_url', cardUrl); } catch (_) {}
 
     // Card widget
     $('loyalty-card').style.background = `linear-gradient(140deg, ${color} 0%, ${adjustBrightness(color, -30)} 100%)`;
@@ -370,7 +370,7 @@
     },
   };
 
-  let lang = (() => { try { return localStorage.getItem('fidevo_lang') || 'fr'; } catch { return 'fr'; } })();
+  let lang = (() => { try { return localStorage.getItem('fidelyzio_lang') || 'fr'; } catch { return 'fr'; } })();
 
   function applyLang() {
     document.querySelectorAll('[data-i18n]').forEach(el => {
@@ -385,7 +385,7 @@
 
   function setLang(l) {
     lang = l;
-    try { localStorage.setItem('fidevo_lang', l); } catch {}
+    try { localStorage.setItem('fidelyzio_lang', l); } catch {}
     applyLang();
   }
 

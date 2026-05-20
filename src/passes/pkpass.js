@@ -11,7 +11,7 @@ function buildPassJson({ card, customer, merchant }) {
   const displayName = customer.first_name || customer.phone || 'Client';
   return JSON.stringify({
     formatVersion: 1,
-    passTypeIdentifier: process.env.APPLE_PASS_TYPE_ID   || 'pass.com.loyaltypass.card',
+    passTypeIdentifier: process.env.APPLE_PASS_TYPE_ID   || 'pass.com.fidelyzio.card',
     teamIdentifier:     process.env.APPLE_TEAM_ID         || 'TEAM00000',
     serialNumber:       card.qr_code,
     organizationName:   merchant.name,

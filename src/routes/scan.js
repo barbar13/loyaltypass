@@ -135,7 +135,7 @@ router.post('/', auth, async (req, res) => {
     (async () => {
       try {
         const merchant = await db.one('SELECT name FROM merchants WHERE id = $1', [merchantId]);
-        const baseUrl  = process.env.BASE_URL || 'https://fidevo.app';
+        const baseUrl  = process.env.BASE_URL || 'https://fidelyzio.com';
         const cardUrl  = `${baseUrl}/card/${customer.qr_code}`;
 
         if (customer.email) {

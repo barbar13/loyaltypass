@@ -1,7 +1,7 @@
 {
-  "name": "fidevo-api",
+  "name": "fidelyzio-api",
   "version": "1.0.0",
-  "description": "API backend pour Fidevo - plateforme de cartes de fidélité digitales",
+  "description": "API backend pour Fidelyzio - plateforme de cartes de fidélité digitales",
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",

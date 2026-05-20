@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#0a0a0f">
-  <title>S'abonner — Fidevo Pro</title>
+  <title>S'abonner — Fidelyzio Pro</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; }
@@ -27,7 +27,7 @@
     <div class="text-center mb-8 au">
       <a href="/" class="text-gray-600 text-sm hover:text-gray-400 transition">← Retour au tableau de bord</a>
       <div class="mt-4 text-4xl">◆</div>
-      <h1 class="text-white text-2xl font-black mt-2">Fidevo Pro</h1>
+      <h1 class="text-white text-2xl font-black mt-2">Fidelyzio Pro</h1>
       <p class="text-gray-500 text-sm mt-1">Continuez à fidéliser vos clients</p>
     </div>
 
@@ -36,7 +36,7 @@
       <svg class="w-5 h-5 text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
         <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
       </svg>
-      <p class="text-emerald-300 text-sm font-semibold">Abonnement activé ! Bienvenue sur Fidevo Pro.</p>
+      <p class="text-emerald-300 text-sm font-semibold">Abonnement activé ! Bienvenue sur Fidelyzio Pro.</p>
     </div>
 
     <!-- Canceled banner -->
@@ -96,7 +96,7 @@
   }
 
   // Check if already subscribed
-  const auth = (() => { try { return JSON.parse(localStorage.getItem('loyaltypass_auth')); } catch { return null; } })();
+  const auth = (() => { try { return JSON.parse(localStorage.getItem('fidelyzio_auth')); } catch { return null; } })();
   if (auth?.merchant?.has_stripe) {
     document.getElementById('portal-wrap').classList.remove('hidden');
   }

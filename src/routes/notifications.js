@@ -8,7 +8,7 @@ const router = express.Router();
 function configureWebPush() {
   if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
     webpush.setVapidDetails(
-      'mailto:' + (process.env.EMAIL_USER || 'contact@fidevo.app'),
+      'mailto:' + (process.env.EMAIL_USER || 'contact@fidelyzio.com'),
       process.env.VAPID_PUBLIC_KEY,
       process.env.VAPID_PRIVATE_KEY
     );

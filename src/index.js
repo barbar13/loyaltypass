@@ -78,7 +78,7 @@ app.get('/api/qr/:text', async (req, res) => {
 });
 
 // ── API ───────────────────────────────────────────────────────────────────────
-app.get('/health', (_req, res) => res.json({ status: 'ok', service: 'Fidevo API' }));
+app.get('/health', (_req, res) => res.json({ status: 'ok', service: 'Fidelyzio API' }));
 app.use('/api/merchants',     merchantRoutes);
 app.use('/api/customers',     customerRoutes);
 app.use('/api/scan',          scanRoutes);
@@ -104,7 +104,7 @@ app.use((err, _req, res, _next) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Fidevo API démarrée sur http://localhost:${PORT}`);
+  console.log(`Fidelyzio API démarrée sur http://localhost:${PORT}`);
 });
 
 module.exports = app;

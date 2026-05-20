@@ -6,11 +6,11 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#0a0a0f">
-  <title>Fidevo — Connexion</title>
+  <title>Fidelyzio — Connexion</title>
   <script>
     // Redirect immediately if already authenticated
     try {
-      const auth = JSON.parse(localStorage.getItem('loyaltypass_auth'));
+      const auth = JSON.parse(localStorage.getItem('fidelyzio_auth'));
       if (auth && auth.token) window.location.replace('/');
     } catch (_) {}
   </script>
@@ -49,7 +49,7 @@
         <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5Z M6.75 6.75h.75v.75h-.75v-.75ZM6.75 16.5h.75v.75h-.75V16.5ZM16.5 6.75h.75v.75h-.75v-.75ZM13.5 13.5h.75v.75h-.75v-.75ZM13.5 19.5h.75v.75h-.75v-.75ZM19.5 13.5h.75v.75h-.75v-.75ZM19.5 19.5h.75v.75h-.75v-.75ZM16.5 16.5h.75v.75h-.75v-.75Z"/>
       </svg>
     </div>
-    <h1 class="text-white text-2xl font-bold tracking-tight">Fidevo</h1>
+    <h1 class="text-white text-2xl font-bold tracking-tight">Fidelyzio</h1>
     <p class="text-gray-500 text-sm mt-1">Espace marchand</p>
   </div>
 
@@ -144,7 +144,7 @@
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Identifiants invalides');
 
-      localStorage.setItem('loyaltypass_auth', JSON.stringify({ merchant: data.merchant, token: data.token }));
+      localStorage.setItem('fidelyzio_auth', JSON.stringify({ merchant: data.merchant, token: data.token }));
       window.location.replace('/');
     } catch (err) {
       showError(err.message);

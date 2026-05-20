@@ -6,7 +6,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#0f0f14">
-  <title>Ma carte Fidevo</title>
+  <title>Ma carte Fidelyzio</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -125,7 +125,7 @@
       <p class="text-gray-500 text-xs font-semibold uppercase tracking-widest mb-1">Votre QR universel</p>
       <p class="text-gray-600 text-xs mb-5">Présentez ce code dans tous les commerces partenaires</p>
       <div id="qr-universal" class="flex justify-center mb-3"></div>
-      <p class="text-gray-700 text-[10px]">Ce QR est votre identité Fidevo</p>
+      <p class="text-gray-700 text-[10px]">Ce QR est votre identité Fidelyzio</p>
     </div>
 
     <!-- Memberships section -->
@@ -390,7 +390,7 @@
     const isStandalone = window.navigator.standalone === true ||
       window.matchMedia('(display-mode: standalone)').matches;
     if (isStandalone) return;
-    try { if (localStorage.getItem('lp_aths_' + qrCode)) return; } catch (_) {}
+    try { if (localStorage.getItem('fidelyzio_aths_' + qrCode)) return; } catch (_) {}
 
     const isIos     = /iphone|ipad|ipod/i.test(navigator.userAgent);
     const isAndroid = /android/i.test(navigator.userAgent);
@@ -401,15 +401,15 @@
   }
 
   function dismissBanner() {
-    try { localStorage.setItem('lp_aths_' + qrCode, '1'); } catch (_) {}
+    try { localStorage.setItem('fidelyzio_aths_' + qrCode, '1'); } catch (_) {}
     $('aths-banner').style.display = 'none';
   }
 
   // ── Language toggle ───────────────────────────────────────────────────────
-  let lang = (() => { try { return localStorage.getItem('fidevo_lang') || 'fr'; } catch { return 'fr'; } })();
+  let lang = (() => { try { return localStorage.getItem('fidelyzio_lang') || 'fr'; } catch { return 'fr'; } })();
   function setLang(l) {
     lang = l;
-    try { localStorage.setItem('fidevo_lang', l); } catch {}
+    try { localStorage.setItem('fidelyzio_lang', l); } catch {}
     document.querySelectorAll('[data-lang-btn]').forEach(b => {
       b.style.color      = b.dataset.langBtn === l ? 'white' : '#6b7280';
       b.style.fontWeight = b.dataset.langBtn === l ? '700' : '400';

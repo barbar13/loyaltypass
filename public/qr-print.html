@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>QR Fidélité — Fidevo</title>
+  <title>QR Fidélité — Fidelyzio</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -233,7 +233,7 @@
           Sans application
         </span>
       </div>
-      <span class="footer-logo">◆ Fidevo</span>
+      <span class="footer-logo">◆ Fidelyzio</span>
     </div>
   </div>
 </div>
@@ -242,7 +242,7 @@
   (function () {
     let auth;
     try {
-      auth = JSON.parse(localStorage.getItem('loyaltypass_auth'));
+      auth = JSON.parse(localStorage.getItem('fidelyzio_auth'));
     } catch (_) {}
 
     if (!auth || !auth.merchant) {
@@ -263,7 +263,7 @@
     document.getElementById('header-merchant-name').textContent  = merchant.name;
 
     // Set page title
-    document.title = `QR ${merchant.name} — Fidevo`;
+    document.title = `QR ${merchant.name} — Fidelyzio`;
 
     // Load high-res QR for print quality
     const qr = document.getElementById('qr-img');

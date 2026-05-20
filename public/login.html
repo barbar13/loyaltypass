@@ -11,7 +11,7 @@
     // Redirect immediately if already authenticated
     try {
       const auth = JSON.parse(localStorage.getItem('fidelyzio_auth'));
-      if (auth && auth.token) window.location.replace('/');
+      if (auth && auth.token) window.location.replace('/scanner');
     } catch (_) {}
   </script>
   <script src="https://cdn.tailwindcss.com"></script>
@@ -145,7 +145,7 @@
       if (!res.ok) throw new Error(data.error || 'Identifiants invalides');
 
       localStorage.setItem('fidelyzio_auth', JSON.stringify({ merchant: data.merchant, token: data.token }));
-      window.location.replace('/');
+      window.location.replace('/scanner');
     } catch (err) {
       showError(err.message);
       btn.disabled = false;

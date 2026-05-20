@@ -86,7 +86,7 @@ router.post('/register', async (req, res) => {
       to: merchant.email,
       merchantName: merchant.name,
       enrollUrl:    `${baseUrl}/enroll/${merchant.id}`,
-      dashboardUrl: `${baseUrl}/`,
+      dashboardUrl: `${baseUrl}/scanner`,
     }).catch(() => {});
 
     res.status(201).json({ merchant, token });

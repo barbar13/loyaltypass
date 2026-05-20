@@ -87,7 +87,18 @@ app.use('/api/billing',       billing.router);
 app.use('/api/notifications', notifRouter);
 app.get('/api/google-wallet/:qr_code', generateWalletPass);
 
-// ── Scanner SPA ───────────────────────────────────────────────────────────────
+// ── Root → landing page ───────────────────────────────────────────────────────
+app.get('/', (_req, res) => res.redirect('/home'));
+
+// ── Scanner SPA (/scanner and /app) ──────────────────────────────────────────
+const serveScanner = (_req, res) => {
+  const index = path.join(SCANNER_DIST, 'index.html');
+  if (fs.existsSync(index)) return res.sendFile(index);
+  res.status(503).send('Scanner not built. Run: npm run build');
+};
+app.get('/scanner', serveScanner);
+app.get('/app',     serveScanner);
+
 app.use(express.static(SCANNER_DIST));
 
 app.use('/api', (_req, res) => res.status(404).json({ error: 'Route introuvable' }));
@@ -95,7 +106,7 @@ app.use('/api', (_req, res) => res.status(404).json({ error: 'Route introuvable'
 app.get('*', (_req, res) => {
   const index = path.join(SCANNER_DIST, 'index.html');
   if (fs.existsSync(index)) return res.sendFile(index);
-  res.status(404).send('Scanner not built. Run: npm run build');
+  res.redirect('/home');
 });
 
 app.use((err, _req, res, _next) => {

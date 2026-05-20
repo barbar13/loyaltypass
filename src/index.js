@@ -2,10 +2,12 @@ require('dotenv').config();
 const express = require('express');
 const path    = require('path');
 const fs      = require('fs');
+const QRCode  = require('qrcode');
 
-const merchantRoutes = require('./routes/merchants');
-const cardRoutes     = require('./routes/cards');
-const adminRoutes    = require('./routes/admin');
+const merchantRoutes  = require('./routes/merchants');
+const customerRoutes  = require('./routes/customers');
+const scanRoutes      = require('./routes/scan');
+const adminRoutes     = require('./routes/admin');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -25,39 +27,48 @@ app.use((req, _res, next) => {
   next();
 });
 
-// ─── Static directories ───────────────────────────────────────────────────────
+// ─── Static pages ─────────────────────────────────────────────────────────────
 const PUBLIC       = path.join(__dirname, '../public');
 const SCANNER_DIST = path.join(__dirname, '../scanner/dist');
 
-// /enroll/:merchantId — self-enrollment page
 app.get('/enroll/:merchantId', (_req, res) => res.sendFile(path.join(PUBLIC, 'enroll.html')));
+app.get('/card/:qrCode',       (_req, res) => res.sendFile(path.join(PUBLIC, 'card.html')));
+app.get('/admin',              (_req, res) => res.sendFile(path.join(PUBLIC, 'admin.html')));
+app.get('/register',           (_req, res) => res.sendFile(path.join(PUBLIC, 'register.html')));
 
-// /admin — platform owner dashboard
-app.get('/admin', (_req, res) => res.sendFile(path.join(PUBLIC, 'admin.html')));
+// ─── Utility: server-side QR PNG (used by enroll + card pages) ───────────────
+app.get('/api/qr/:text', async (req, res) => {
+  const { text } = req.params;
+  if (!text || text.length > 256) return res.status(400).json({ error: 'Invalid text' });
+  const size = Math.min(parseInt(req.query.size, 10) || 200, 400);
+  try {
+    const buf = await QRCode.toBuffer(text, { type: 'png', width: size, margin: 1 });
+    res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    res.send(buf);
+  } catch (err) {
+    res.status(500).json({ error: 'Erreur QR', detail: err.message });
+  }
+});
 
-// /register — new merchant registration
-app.get('/register', (_req, res) => res.sendFile(path.join(PUBLIC, 'register.html')));
-
-// ─── API ─────────────────────────────────────────────────────────────────────
+// ─── API ──────────────────────────────────────────────────────────────────────
 app.get('/health', (_req, res) => res.json({ status: 'ok', service: 'LoyaltyPass API' }));
 app.use('/api/merchants', merchantRoutes);
-app.use('/api/cards',     cardRoutes);
+app.use('/api/customers', customerRoutes);
+app.use('/api/scan',      scanRoutes);
 app.use('/api/admin',     adminRoutes);
 
-// ─── Scanner SPA (production build) ──────────────────────────────────────────
+// ─── Scanner SPA (merchant dashboard, built by Vite) ─────────────────────────
 app.use(express.static(SCANNER_DIST));
 
-// JSON 404 for unmatched /api/* routes
 app.use('/api', (_req, res) => res.status(404).json({ error: 'Route introuvable' }));
 
-// SPA fallback for all other routes (scanner React app)
 app.get('*', (_req, res) => {
   const index = path.join(SCANNER_DIST, 'index.html');
   if (fs.existsSync(index)) return res.sendFile(index);
   res.status(404).send('Scanner not built. Run: npm run build');
 });
 
-// ─── Error handler ────────────────────────────────────────────────────────────
 app.use((err, _req, res, _next) => {
   console.error(err);
   res.status(500).json({ error: 'Erreur interne du serveur' });

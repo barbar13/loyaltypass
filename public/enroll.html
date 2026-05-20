@@ -7,7 +7,6 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#0f0f14">
   <title>LoyaltyPass – Inscription</title>
-
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -27,46 +26,27 @@
       },
     };
   </script>
-
-
   <style>
     *, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     html, body { height: 100%; overflow-x: hidden; overscroll-behavior: none; }
     body { background: #0f0f14; color: white; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
-
-    /* Prevent iOS input zoom (font-size must be ≥ 16px) */
     input, select, textarea { font-size: 16px !important; }
-
-    /* Safe-area padding */
     .pb-safe { padding-bottom: env(safe-area-inset-bottom, 1.5rem); }
     .pt-safe { padding-top:    env(safe-area-inset-top,    1.5rem); }
-
-    /* Animated ring on focus */
     .ring-brand:focus { outline: none; box-shadow: 0 0 0 3px var(--brand-glow); }
-
-    /* Staggered animation delays */
-    .delay-1 { animation-delay: 0.05s; }
-    .delay-2 { animation-delay: 0.1s; }
-    .delay-3 { animation-delay: 0.15s; }
-    .delay-4 { animation-delay: 0.2s; }
+    .delay-1 { animation-delay: 0.05s; } .delay-2 { animation-delay: 0.1s; }
+    .delay-3 { animation-delay: 0.15s; } .delay-4 { animation-delay: 0.2s; }
     .delay-5 { animation-delay: 0.25s; }
-
-    /* Wallet card shine */
     .card-shine::before {
-      content: '';
-      position: absolute;
-      inset: 0;
+      content: ''; position: absolute; inset: 0;
       background: radial-gradient(ellipse at 80% 15%, rgba(255,255,255,0.18) 0%, transparent 65%);
-      border-radius: inherit;
-      pointer-events: none;
+      border-radius: inherit; pointer-events: none;
     }
-
   </style>
 </head>
-
 <body>
 
-<!-- ── LOADING ────────────────────────────────────────────────────────────── -->
+<!-- LOADING -->
 <div id="s-loading" style="min-height:100dvh" class="flex items-center justify-center">
   <div class="flex flex-col items-center gap-4">
     <div class="w-12 h-12 rounded-full border-2 border-white/10 border-t-white/60 animate-spin"></div>
@@ -74,10 +54,8 @@
   </div>
 </div>
 
-<!-- ── FORM ───────────────────────────────────────────────────────────────── -->
+<!-- FORM -->
 <div id="s-form" style="min-height:100dvh;display:none" class="flex flex-col">
-
-  <!-- Hero header -->
   <div class="flex flex-col items-center px-6 pt-safe pt-10 pb-8">
     <div id="merchant-avatar"
          class="w-20 h-20 rounded-[1.5rem] flex items-center justify-center text-3xl font-bold text-white mb-5 shadow-2xl animate-pop">
@@ -88,44 +66,33 @@
     </p>
   </div>
 
-  <!-- Card form -->
   <div class="flex-1 bg-gray-900/60 rounded-t-[2rem] px-6 pt-8 pb-safe backdrop-blur-sm border-t border-white/5">
     <form id="enroll-form" class="max-w-sm mx-auto space-y-4" novalidate>
-
       <div class="animate-fade-up delay-2">
         <label class="block text-sm font-medium text-gray-300 mb-2">Prénom</label>
-        <input id="inp-name" type="text" autocomplete="given-name" required
-               placeholder="Marie"
+        <input id="inp-name" type="text" autocomplete="given-name" required placeholder="Marie"
                class="w-full bg-gray-800 border border-gray-700 rounded-2xl px-4 py-3.5 text-white placeholder-gray-500 transition-shadow ring-brand">
       </div>
-
       <div class="animate-fade-up delay-3">
         <label class="block text-sm font-medium text-gray-300 mb-2">Numéro de téléphone</label>
-        <input id="inp-phone" type="tel" autocomplete="tel" required
-               placeholder="06 12 34 56 78"
+        <input id="inp-phone" type="tel" autocomplete="tel" required placeholder="06 12 34 56 78"
                class="w-full bg-gray-800 border border-gray-700 rounded-2xl px-4 py-3.5 text-white placeholder-gray-500 transition-shadow ring-brand">
       </div>
-
-      <!-- Error banner -->
       <div id="form-error" class="hidden rounded-2xl px-4 py-3 bg-red-500/10 border border-red-500/30 text-red-400 text-sm animate-fade-up"></div>
-
-      <!-- Submit button -->
       <div class="animate-fade-up delay-4 pt-1">
         <button id="submit-btn" type="submit"
                 class="w-full py-4 rounded-2xl font-semibold text-white text-base active:scale-[0.98] disabled:opacity-60 transition-all shadow-xl">
           Obtenir ma carte gratuite →
         </button>
       </div>
-
       <p class="text-center text-gray-600 text-xs pb-2 animate-fade-up delay-5">
         Gratuit · Sans application · Vos données restent privées
       </p>
-
     </form>
   </div>
 </div>
 
-<!-- ── SUCCESS ─────────────────────────────────────────────────────────────── -->
+<!-- SUCCESS -->
 <div id="s-success" style="min-height:100dvh;display:none" class="flex flex-col items-center px-5 pt-safe pt-8 pb-safe pb-10 gap-5">
 
   <!-- Loyalty card widget -->
@@ -144,55 +111,42 @@
           <p class="text-white/40 text-[9px] uppercase tracking-widest mb-0.5">Titulaire</p>
           <p id="card-customer-name" class="text-white font-semibold text-sm"></p>
         </div>
-        <!-- Mini QR on card -->
         <div id="qr-mini" class="rounded-lg overflow-hidden bg-white p-0.5"></div>
       </div>
     </div>
   </div>
 
-  <!-- Welcome text -->
+  <!-- Welcome -->
   <div class="text-center animate-fade-up delay-1">
     <h2 id="welcome-title" class="text-xl font-bold"></h2>
-    <p class="text-gray-400 text-sm mt-1">Votre carte est prête à l'emploi !</p>
+    <p class="text-gray-400 text-sm mt-1">Votre carte universelle est prête !</p>
+    <p class="text-gray-600 text-xs mt-1">Elle fonctionne dans tous les commerces partenaires</p>
   </div>
 
-  <!-- Apple Wallet button -->
-  <a id="wallet-btn" href="#"
-     class="hidden w-full max-w-sm animate-fade-up delay-2"
-     download>
-    <div class="bg-black border border-white/15 rounded-2xl px-6 py-4 flex items-center gap-4 shadow-xl active:scale-[0.98] transition-transform">
-      <!-- Apple logo -->
-      <svg width="22" height="27" viewBox="0 0 22 27" fill="white" xmlns="http://www.w3.org/2000/svg">
-        <path d="M18.09 14.13c-.02-2.9 2.37-4.31 2.47-4.37-1.35-1.97-3.44-2.24-4.19-2.27-1.78-.18-3.48 1.05-4.38 1.05-.9 0-2.29-1.03-3.76-1-1.92.03-3.7 1.12-4.68 2.83-2 3.46-.52 8.59 1.43 11.4.96 1.37 2.1 2.91 3.59 2.86 1.44-.06 1.99-.93 3.73-.93 1.74 0 2.24.93 3.76.9 1.56-.03 2.54-1.4 3.49-2.77 1.1-1.59 1.56-3.13 1.58-3.21-.04-.01-3.02-1.16-3.04-4.49zM15.3 5.18c.79-.96 1.33-2.29 1.18-3.62-1.14.05-2.52.76-3.34 1.72-.73.85-1.38 2.21-1.2 3.51 1.27.1 2.57-.64 3.36-1.61z"/>
-      </svg>
-      <div>
-        <p class="text-white/50 text-[10px] leading-none mb-0.5">Ajouter à</p>
-        <p class="text-white font-semibold text-sm">Apple Wallet</p>
-      </div>
+  <!-- Rewards at this merchant -->
+  <div id="rewards-section" class="w-full max-w-sm hidden animate-fade-up delay-2">
+    <div class="bg-gray-900 border border-white/5 rounded-3xl p-5">
+      <p class="text-gray-500 text-xs font-semibold uppercase tracking-widest mb-3">Récompenses disponibles</p>
+      <div id="rewards-list" class="space-y-2"></div>
     </div>
-  </a>
+  </div>
 
-  <!-- Google Wallet note -->
-  <p id="google-note" class="hidden text-gray-600 text-xs text-center -mt-2 animate-fade-up delay-2">
-    Google Wallet disponible prochainement
-  </p>
-
-  <!-- QR code section -->
+  <!-- Big QR (their universal card) -->
   <div class="w-full max-w-sm animate-fade-up delay-3">
     <div class="bg-gray-900 border border-white/5 rounded-3xl p-6 text-center">
-      <p class="text-gray-500 text-xs font-semibold uppercase tracking-widest mb-5">Votre code fidélité</p>
-      <div id="qr-big" class="flex justify-center mb-4">
-        <!-- QR injected here -->
-      </div>
-      <p class="text-gray-500 text-xs leading-relaxed">
-        Présentez ce code à la caisse pour cumuler vos points à chaque visite
-      </p>
+      <p class="text-gray-500 text-xs font-semibold uppercase tracking-widest mb-1">Votre carte de fidélité</p>
+      <p class="text-gray-600 text-xs mb-5">Montrez ce QR à chaque visite pour cumuler vos points</p>
+      <div id="qr-big" class="flex justify-center mb-4"></div>
+      <a id="see-card-link" href="#"
+         class="inline-block mt-2 text-indigo-400 hover:text-indigo-300 text-sm font-medium transition underline underline-offset-2">
+        Voir tous mes points →
+      </a>
     </div>
   </div>
 
 </div>
 
-<!-- ── ERROR ───────────────────────────────────────────────────────────────── -->
+<!-- ERROR -->
 <div id="s-error" style="min-height:100dvh;display:none" class="flex items-center justify-center px-8">
   <div class="text-center animate-scale-in">
     <div class="w-16 h-16 rounded-full bg-red-500/15 flex items-center justify-center mx-auto mb-4">
@@ -213,49 +167,42 @@
   const $ = id => document.getElementById(id);
 
   function show(id) {
-    STATES.forEach(s => $( s).style.display = s === id ? 'flex' : 'none');
-    if (id === 's-form') $('s-form').style.flexDirection = 'column';
-    if (id === 's-success') { $('s-success').style.flexDirection = 'column'; $('s-success').style.alignItems = 'center'; }
+    STATES.forEach(s => $(s).style.display = 'none');
+    const el = $(id);
+    el.style.display = 'flex';
+    if (id === 's-form')    el.style.flexDirection = 'column';
+    if (id === 's-success') { el.style.flexDirection = 'column'; el.style.alignItems = 'center'; }
   }
 
-  // ── Extract merchant ID from URL path (/enroll/42) ────────────────────────
   const merchantId = window.location.pathname.split('/').filter(Boolean).pop();
 
-  // ── Colour helpers ────────────────────────────────────────────────────────
   function hexToRgb(hex) {
     const n = parseInt((hex || '#6366f1').replace('#', ''), 16);
     return [(n >> 16) & 0xff, (n >> 8) & 0xff, n & 0xff];
   }
   function luminance([r, g, b]) { return 0.299 * r + 0.587 * g + 0.114 * b; }
 
-  // ── Apply merchant branding throughout the form ───────────────────────────
   function applyBranding(merchant) {
     const color = merchant.color || '#6366f1';
     const rgb   = hexToRgb(color);
-
-    $('merchant-avatar').textContent        = merchant.name.charAt(0).toUpperCase();
+    $('merchant-avatar').textContent       = merchant.name.charAt(0).toUpperCase();
     $('merchant-avatar').style.background  = color;
     $('merchant-avatar').style.boxShadow   = `0 20px 50px ${color}50`;
-    $('merchant-name').textContent          = merchant.name;
-
+    $('merchant-name').textContent         = merchant.name;
     const btn = $('submit-btn');
-    btn.style.background  = color;
-    btn.style.boxShadow   = `0 12px 32px ${color}40`;
-
-    // Make text dark on very light brand colours
+    btn.style.background = color;
+    btn.style.boxShadow  = `0 12px 32px ${color}40`;
     if (luminance(rgb) > 180) btn.style.color = '#111';
-
     document.documentElement.style.setProperty('--brand-glow', `${color}50`);
     document.querySelectorAll('input').forEach(el => {
-      el.addEventListener('focus',  () => el.style.borderColor = color);
-      el.addEventListener('blur',   () => el.style.borderColor = '');
+      el.addEventListener('focus', () => el.style.borderColor = color);
+      el.addEventListener('blur',  () => el.style.borderColor = '');
     });
   }
 
-  // ── Fetch merchant info ───────────────────────────────────────────────────
   async function init() {
     try {
-      const res  = await fetch(`/api/merchants/${merchantId}/enroll`);
+      const res = await fetch(`/api/merchants/${merchantId}/enroll`);
       if (!res.ok) throw new Error(await res.json().then(d => d.error).catch(() => 'Marchand introuvable'));
       const { merchant } = await res.json();
       applyBranding(merchant);
@@ -266,18 +213,13 @@
     }
   }
 
-  // ── Form submit ───────────────────────────────────────────────────────────
   $('enroll-form').addEventListener('submit', async e => {
     e.preventDefault();
     $('form-error').classList.add('hidden');
 
     const firstName = $('inp-name').value.trim();
     const phone     = $('inp-phone').value.trim();
-
-    if (!firstName || !phone) {
-      showFormError('Veuillez remplir tous les champs.');
-      return;
-    }
+    if (!firstName || !phone) { showFormError('Veuillez remplir tous les champs.'); return; }
 
     const btn = $('submit-btn');
     btn.disabled  = true;
@@ -288,10 +230,10 @@
       </svg>En cours…</span>`;
 
     try {
-      const res  = await fetch('/api/cards/enroll', {
-        method:  'POST',
+      const res  = await fetch('/api/customers/enroll', {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ merchant_id: parseInt(merchantId, 10), first_name: firstName, phone }),
+        body: JSON.stringify({ merchant_id: parseInt(merchantId, 10), first_name: firstName, phone }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Erreur serveur');
@@ -309,45 +251,48 @@
     el.classList.remove('hidden');
   }
 
-  // ── Success screen ────────────────────────────────────────────────────────
-  function renderSuccess({ card, customer, merchant, pkpass_url }, firstName) {
+  function renderSuccess({ customer, membership, merchant, rewards }, firstName) {
     const color = merchant.color || '#6366f1';
 
     // Card widget
     $('loyalty-card').style.background = `linear-gradient(140deg, ${color} 0%, ${adjustBrightness(color, -30)} 100%)`;
     $('loyalty-card').style.boxShadow  = `0 30px 70px ${color}45`;
     $('card-merchant-name').textContent = merchant.name;
-    $('card-points').textContent        = card.points;
+    $('card-points').textContent        = membership.points;
     $('card-customer-name').textContent = firstName;
 
-    // Welcome
     $('welcome-title').textContent = `Bienvenue, ${firstName} !`;
 
-    // Apple Wallet
-    if (pkpass_url) {
-      const wb   = $('wallet-btn');
-      wb.href    = pkpass_url;
-      wb.classList.remove('hidden');
-    } else {
-      $('google-note').classList.remove('hidden');
+    // Rewards
+    if (rewards && rewards.length > 0) {
+      $('rewards-section').classList.remove('hidden');
+      $('rewards-list').innerHTML = rewards.map(r => `
+        <div class="flex items-center justify-between bg-gray-800 rounded-2xl px-4 py-3">
+          <span class="text-white text-sm">🎁 ${esc(r.description)}</span>
+          <span class="text-gray-400 text-xs font-semibold">${r.points_required} pts</span>
+        </div>
+      `).join('');
     }
 
-    // Big QR code — rendered server-side to avoid CDN/SRI issues on Safari
-    $('qr-big').innerHTML = `<img src="/api/cards/qr-image/${encodeURIComponent(card.qr_code)}?size=200"
-      width="200" height="200" alt="QR code fidélité" style="display:block;border-radius:8px">`;
+    // QR codes (server-side rendered)
+    const qrUrl = `/api/qr/${encodeURIComponent(customer.qr_code)}`;
+    $('qr-big').innerHTML  = `<img src="${qrUrl}?size=200" width="200" height="200" alt="QR code fidélité" style="display:block;border-radius:8px">`;
+    $('qr-mini').innerHTML = `<img src="${qrUrl}?size=48"  width="48"  height="48"  alt="" style="display:block">`;
 
-    // Mini QR on card
-    $('qr-mini').innerHTML = `<img src="/api/cards/qr-image/${encodeURIComponent(card.qr_code)}?size=48"
-      width="48" height="48" alt="" style="display:block">`;
+    // Link to universal card
+    $('see-card-link').href = `/card/${encodeURIComponent(customer.qr_code)}`;
 
     show('s-success');
   }
 
-  // Darken/lighten a hex colour by `amount` (±0–255)
   function adjustBrightness(hex, amount) {
-    const [r, g, b] = hexToRgb(hex);
     const clamp = v => Math.min(255, Math.max(0, v + amount));
-    return `rgb(${clamp(r)}, ${clamp(g)}, ${clamp(b)})`;
+    const n = parseInt(hex.replace('#', ''), 16);
+    return `rgb(${clamp((n >> 16) & 0xff)}, ${clamp((n >> 8) & 0xff)}, ${clamp(n & 0xff)})`;
+  }
+
+  function esc(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
   init();

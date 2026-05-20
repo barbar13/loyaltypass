@@ -17,14 +17,37 @@ export function login(email, password) {
   });
 }
 
-export function getCard(qrCode) {
-  return request(`/cards/${qrCode}`);
+export function getDashboard(token) {
+  return request('/merchants/dashboard', {
+    headers: { Authorization: `Bearer ${token}` },
+  });
 }
 
-export function scanCard(qrCode, points, token) {
-  return request('/cards/scan', {
+export function lookupCustomer(customerQrCode, token) {
+  return request(`/scan/lookup/${encodeURIComponent(customerQrCode)}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+export function scanCustomer(customerQrCode, points, token) {
+  return request('/scan', {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}` },
-    body: JSON.stringify({ qr_code: qrCode, points }),
+    body: JSON.stringify({ customer_qr_code: customerQrCode, points }),
+  });
+}
+
+export function addReward(description, pointsRequired, token) {
+  return request('/merchants/rewards', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ description, points_required: pointsRequired }),
+  });
+}
+
+export function deleteReward(id, token) {
+  return request(`/merchants/rewards/${id}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
   });
 }

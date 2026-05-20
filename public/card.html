@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0f0f14">
+  <title>Ma carte LoyaltyPass</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          keyframes: {
+            'fade-up':  { from: { opacity:'0', transform:'translateY(14px)' }, to: { opacity:'1', transform:'translateY(0)' } },
+            'scale-in': { from: { opacity:'0', transform:'scale(0.92)' },      to: { opacity:'1', transform:'scale(1)' }      },
+            'pop':      { '0%':{ transform:'scale(0.8)',opacity:'0' }, '70%':{ transform:'scale(1.05)' }, '100%':{ transform:'scale(1)',opacity:'1' } },
+          },
+          animation: {
+            'fade-up':  'fade-up 0.4s cubic-bezier(0.16,1,0.3,1) both',
+            'scale-in': 'scale-in 0.35s cubic-bezier(0.16,1,0.3,1) both',
+            'pop':      'pop 0.4s cubic-bezier(0.34,1.56,0.64,1) both',
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { min-height: 100%; overscroll-behavior: none; }
+    body { background: #0f0f14; color: white; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    .pt-safe { padding-top: max(1.5rem, env(safe-area-inset-top)); }
+    .pb-safe { padding-bottom: max(1.5rem, env(safe-area-inset-bottom)); }
+    .delay-1 { animation-delay:.06s; } .delay-2 { animation-delay:.12s; }
+    .delay-3 { animation-delay:.18s; } .delay-4 { animation-delay:.24s; }
+    .delay-5 { animation-delay:.30s; }
+    .card-shine::before {
+      content:''; position:absolute; inset:0;
+      background: radial-gradient(ellipse at 80% 15%, rgba(255,255,255,0.15) 0%, transparent 65%);
+      border-radius: inherit; pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="s-loading" style="min-height:100dvh" class="flex items-center justify-center">
+  <div class="flex flex-col items-center gap-4">
+    <div class="w-12 h-12 rounded-full border-2 border-white/10 border-t-white/60 animate-spin"></div>
+    <p class="text-gray-500 text-sm">Chargement…</p>
+  </div>
+</div>
+
+<!-- CARD VIEW -->
+<div id="s-card" style="display:none" class="min-h-dvh flex flex-col px-5 pt-safe pb-safe">
+  <div class="max-w-sm mx-auto w-full">
+
+    <!-- Header -->
+    <div class="text-center py-8 animate-fade-up">
+      <div class="w-14 h-14 rounded-2xl bg-indigo-600/20 border border-indigo-500/25 flex items-center justify-center mx-auto mb-4">
+        <svg class="w-7 h-7 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z"/>
+        </svg>
+      </div>
+      <h1 id="customer-name" class="text-2xl font-bold text-white"></h1>
+      <p class="text-gray-500 text-sm mt-1">Carte de fidélité universelle</p>
+    </div>
+
+    <!-- Universal QR -->
+    <div class="bg-gray-900 border border-white/5 rounded-3xl p-6 text-center mb-5 animate-scale-in">
+      <p class="text-gray-500 text-xs font-semibold uppercase tracking-widest mb-1">Votre QR universel</p>
+      <p class="text-gray-600 text-xs mb-5">Présentez ce code dans tous les commerces partenaires</p>
+      <div id="qr-universal" class="flex justify-center mb-3"></div>
+      <p class="text-gray-700 text-[10px]">Ce QR est votre identité LoyaltyPass</p>
+    </div>
+
+    <!-- Merchant memberships -->
+    <div class="mb-5 animate-fade-up delay-2">
+      <p class="text-gray-500 text-xs font-semibold uppercase tracking-widest mb-3">Mes points</p>
+      <div id="memberships-list" class="space-y-3"></div>
+    </div>
+
+    <!-- Empty state -->
+    <div id="no-memberships" style="display:none" class="text-center py-8 animate-fade-up delay-2">
+      <p class="text-gray-600 text-sm">Vous n'êtes encore inscrit(e) chez aucun commerce.</p>
+      <p class="text-gray-700 text-xs mt-2">Scannez le QR d'un commerçant partenaire pour commencer !</p>
+    </div>
+
+  </div>
+</div>
+
+<!-- ERROR -->
+<div id="s-error" style="min-height:100dvh;display:none" class="flex items-center justify-center px-8">
+  <div class="text-center">
+    <div class="w-16 h-16 rounded-full bg-red-500/15 flex items-center justify-center mx-auto mb-4">
+      <svg class="w-8 h-8 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"/>
+      </svg>
+    </div>
+    <p id="error-msg" class="text-red-400 font-medium mb-6">Carte introuvable</p>
+    <a href="/" class="px-6 py-3 bg-gray-800 hover:bg-gray-700 rounded-2xl text-white text-sm font-medium transition inline-block">
+      Retour à l'accueil
+    </a>
+  </div>
+</div>
+
+<script>
+  const $ = id => document.getElementById(id);
+
+  function show(id) {
+    ['s-loading','s-card','s-error'].forEach(s => $(s).style.display = 'none');
+    $(id).style.display = id === 's-card' ? 'flex' : 'flex';
+    if (id === 's-card') { $(id).style.flexDirection = 'column'; }
+  }
+
+  function fmtDate(iso) {
+    if (!iso) return null;
+    const diff = Date.now() - new Date(iso).getTime();
+    const mins  = Math.floor(diff / 60000);
+    const hours = Math.floor(mins / 60);
+    const days  = Math.floor(hours / 24);
+    if (mins  <  2) return 'À l\'instant';
+    if (mins  < 60) return `Il y a ${mins} min`;
+    if (hours < 24) return `Il y a ${hours}h`;
+    if (days  <  7) return `Il y a ${days}j`;
+    return new Date(iso).toLocaleDateString('fr-FR', { day:'numeric', month:'short' });
+  }
+
+  function esc(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // Extract qr_code from URL path: /card/:qr_code
+  const qrCode = window.location.pathname.split('/').filter(Boolean).pop();
+
+  async function init() {
+    try {
+      const res  = await fetch(`/api/customers/${encodeURIComponent(qrCode)}`);
+      if (!res.ok) throw new Error('Carte introuvable');
+      const { customer, memberships } = await res.json();
+
+      $('customer-name').textContent = customer.first_name;
+
+      // Universal QR
+      $('qr-universal').innerHTML = `<img
+        src="/api/qr/${encodeURIComponent(customer.qr_code)}?size=200"
+        width="200" height="200"
+        alt="QR code universel"
+        style="display:block;border-radius:8px">`;
+
+      // Memberships
+      if (memberships.length === 0) {
+        $('no-memberships').style.display = 'block';
+      } else {
+        $('memberships-list').innerHTML = memberships.map((mb, i) => {
+          const color    = mb.color || '#6366f1';
+          const initial  = (mb.merchant_name || '?').charAt(0).toUpperCase();
+          const lastVisit = mb.last_visit ? fmtDate(mb.last_visit) : null;
+
+          // Which rewards are unlocked vs locked?
+          const unlocked = mb.rewards.filter(r => mb.points >= r.points_required);
+          const next     = mb.rewards.find(r => mb.points < r.points_required);
+
+          let rewardsHtml = '';
+          if (unlocked.length > 0) {
+            rewardsHtml += unlocked.map(r => `
+              <div class="flex items-center gap-2 text-emerald-400 text-xs">
+                <span>🎁</span>
+                <span class="font-semibold">${esc(r.description)}</span>
+                <span class="text-emerald-600">Disponible !</span>
+              </div>`).join('');
+          }
+          if (next) {
+            const progress = Math.min(100, Math.round((mb.points / next.points_required) * 100));
+            rewardsHtml += `
+              <div class="mt-2">
+                <div class="flex justify-between text-xs text-gray-500 mb-1">
+                  <span>${esc(next.description)}</span>
+                  <span>${mb.points}/${next.points_required} pts</span>
+                </div>
+                <div class="h-1.5 bg-gray-800 rounded-full overflow-hidden">
+                  <div class="h-full rounded-full transition-all" style="width:${progress}%;background:${color}"></div>
+                </div>
+              </div>`;
+          }
+
+          return `
+            <div class="bg-gray-900 border border-white/5 rounded-2xl p-4 animate-fade-up" style="animation-delay:${0.08 * i}s">
+              <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm shrink-0"
+                     style="background:${color}">${initial}</div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-white font-semibold text-sm truncate">${esc(mb.merchant_name)}</p>
+                  ${lastVisit ? `<p class="text-gray-600 text-xs">Dernière visite : ${lastVisit}</p>` : ''}
+                </div>
+                <div class="text-right shrink-0">
+                  <p class="text-2xl font-black text-white leading-none">${mb.points}</p>
+                  <p class="text-gray-600 text-[10px] uppercase tracking-wide">points</p>
+                </div>
+              </div>
+              ${rewardsHtml ? `<div class="border-t border-white/5 pt-3 space-y-1">${rewardsHtml}</div>` : ''}
+            </div>`;
+        }).join('');
+      }
+
+      show('s-card');
+    } catch (e) {
+      $('error-msg').textContent = e.message;
+      show('s-error');
+    }
+  }
+
+  init();
+</script>
+</body>
+</html>

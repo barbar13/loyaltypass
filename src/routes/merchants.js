@@ -10,9 +10,8 @@ const SALT_ROUNDS = 12;
 const JWT_SECRET  = () => process.env.JWT_SECRET  || 'loyaltypass_dev_secret_change_in_prod';
 const JWT_EXPIRES = () => process.env.JWT_EXPIRES_IN || '7d';
 
-// ─── Public: enrollment info ──────────────────────────────────────────────────
+// ─── Public: enrollment branding ─────────────────────────────────────────────
 
-// GET /api/merchants/:id/enroll — merchant branding for the enrollment page
 router.get('/:id/enroll', (req, res) => {
   const merchant = db.prepare(
     'SELECT id, name, logo_url, color, plan FROM merchants WHERE id = ?'
@@ -21,7 +20,6 @@ router.get('/:id/enroll', (req, res) => {
   res.json({ merchant });
 });
 
-// GET /api/merchants/:id/enroll-qr — QR code PNG of the enrollment URL (public)
 router.get('/:id/enroll-qr', async (req, res) => {
   const merchant = db.prepare('SELECT id, name FROM merchants WHERE id = ?').get(req.params.id);
   if (!merchant) return res.status(404).json({ error: 'Marchand introuvable' });
@@ -31,9 +29,7 @@ router.get('/:id/enroll-qr', async (req, res) => {
 
   try {
     const buf = await QRCode.toBuffer(enrollUrl, {
-      width: 400,
-      margin: 2,
-      errorCorrectionLevel: 'M',
+      width: 400, margin: 2, errorCorrectionLevel: 'M',
       color: { dark: '#000000', light: '#ffffff' },
     });
     res.setHeader('Content-Type', 'image/png');
@@ -44,9 +40,8 @@ router.get('/:id/enroll-qr', async (req, res) => {
   }
 });
 
-// ─── Auth routes ──────────────────────────────────────────────────────────────
+// ─── Auth ─────────────────────────────────────────────────────────────────────
 
-// POST /api/merchants/register
 router.post('/register', async (req, res) => {
   const { name, email, password, logo_url, color, plan } = req.body;
 
@@ -82,7 +77,6 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// POST /api/merchants/login
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
@@ -91,15 +85,11 @@ router.post('/login', async (req, res) => {
   }
 
   const merchant = db.prepare('SELECT * FROM merchants WHERE email = ?').get(email);
-  if (!merchant) {
-    return res.status(401).json({ error: 'Identifiants invalides' });
-  }
+  if (!merchant) return res.status(401).json({ error: 'Identifiants invalides' });
 
   try {
     const match = await bcrypt.compare(password, merchant.password);
-    if (!match) {
-      return res.status(401).json({ error: 'Identifiants invalides' });
-    }
+    if (!match) return res.status(401).json({ error: 'Identifiants invalides' });
 
     const { password: _, ...merchantSafe } = merchant;
     const token = jwt.sign(
@@ -114,42 +104,84 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// GET /api/merchants/:id/stats
-router.get('/:id/stats', auth, (req, res) => {
-  const merchantId = parseInt(req.params.id, 10);
+// ─── Authenticated: dashboard ─────────────────────────────────────────────────
 
-  if (req.merchant.id !== merchantId) {
-    return res.status(403).json({ error: 'Accès refusé' });
-  }
+router.get('/dashboard', auth, (req, res) => {
+  const merchantId = req.merchant.id;
 
   const merchant = db.prepare(
     'SELECT id, name, email, logo_url, color, plan FROM merchants WHERE id = ?'
   ).get(merchantId);
-
   if (!merchant) return res.status(404).json({ error: 'Marchand introuvable' });
 
-  const { total_customers } = db.prepare(`
-    SELECT COUNT(DISTINCT customer_id) AS total_customers FROM cards WHERE merchant_id = ?
+  const { total_customers } = db.prepare(
+    'SELECT COUNT(*) as total_customers FROM memberships WHERE merchant_id = ?'
+  ).get(merchantId);
+
+  const { total_points } = db.prepare(
+    'SELECT COALESCE(SUM(points), 0) as total_points FROM transactions WHERE merchant_id = ?'
+  ).get(merchantId);
+
+  const { scans_today } = db.prepare(`
+    SELECT COUNT(*) as scans_today FROM transactions
+    WHERE merchant_id = ? AND DATE(created_at) = DATE('now', 'localtime')
   `).get(merchantId);
 
-  const { total_cards } = db.prepare(`
-    SELECT COUNT(*) AS total_cards FROM cards WHERE merchant_id = ?
-  `).get(merchantId);
+  const customers = db.prepare(`
+    SELECT
+      c.id, c.first_name, c.phone, c.qr_code,
+      mb.points, mb.joined_at,
+      (SELECT MAX(t.created_at) FROM transactions t
+       WHERE t.merchant_id = ? AND t.customer_id = c.id) as last_visit
+    FROM memberships mb
+    JOIN customers c ON c.id = mb.customer_id
+    WHERE mb.merchant_id = ?
+    ORDER BY mb.points DESC
+    LIMIT 100
+  `).all(merchantId, merchantId);
 
-  const { total_points } = db.prepare(`
-    SELECT COALESCE(SUM(t.points_added), 0) AS total_points
-    FROM transactions t JOIN cards c ON c.id = t.card_id
-    WHERE c.merchant_id = ?
-  `).get(merchantId);
+  const rewards = db.prepare(
+    'SELECT * FROM rewards WHERE merchant_id = ? ORDER BY points_required ASC'
+  ).all(merchantId);
 
-  const top_customers = db.prepare(`
-    SELECT cu.id, cu.first_name, cu.phone, cu.email, c.points, c.qr_code
-    FROM cards c JOIN customers cu ON cu.id = c.customer_id
-    WHERE c.merchant_id = ?
-    ORDER BY c.points DESC LIMIT 5
-  `).all(merchantId);
+  res.json({
+    merchant,
+    stats: { total_customers, total_points, scans_today },
+    customers,
+    rewards,
+  });
+});
 
-  res.json({ merchant, stats: { total_customers, total_cards, total_points, top_customers } });
+// ─── Authenticated: rewards ───────────────────────────────────────────────────
+
+router.post('/rewards', auth, (req, res) => {
+  const { description, points_required } = req.body;
+  const merchantId = req.merchant.id;
+
+  if (!description || !points_required) {
+    return res.status(400).json({ error: 'description et points_required sont requis' });
+  }
+  const pts = parseInt(points_required, 10);
+  if (isNaN(pts) || pts <= 0) {
+    return res.status(400).json({ error: 'points_required doit être un entier positif' });
+  }
+
+  const result = db.prepare(
+    'INSERT INTO rewards (merchant_id, description, points_required) VALUES (?, ?, ?)'
+  ).run(merchantId, description.trim(), pts);
+
+  const reward = db.prepare('SELECT * FROM rewards WHERE id = ?').get(result.lastInsertRowid);
+  res.status(201).json({ reward });
+});
+
+router.delete('/rewards/:id', auth, (req, res) => {
+  const rewardId = parseInt(req.params.id, 10);
+  const reward   = db.prepare('SELECT * FROM rewards WHERE id = ?').get(rewardId);
+  if (!reward) return res.status(404).json({ error: 'Récompense introuvable' });
+  if (reward.merchant_id !== req.merchant.id) return res.status(403).json({ error: 'Accès refusé' });
+
+  db.prepare('UPDATE rewards SET active = 0 WHERE id = ?').run(rewardId);
+  res.json({ success: true });
 });
 
 module.exports = router;

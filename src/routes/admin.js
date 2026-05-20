@@ -12,18 +12,17 @@ function adminAuth(req, res, next) {
   next();
 }
 
-// GET /api/admin/merchants — all merchants with aggregated stats
+// GET /api/admin/merchants — platform overview
 router.get('/merchants', adminAuth, (req, res) => {
   const merchants = db.prepare(`
     SELECT
       m.id, m.name, m.email, m.color, m.plan, m.created_at,
-      COUNT(DISTINCT c.customer_id) AS customer_count,
-      COUNT(DISTINCT c.id)          AS card_count,
-      COALESCE(SUM(t.points_added), 0) AS total_points,
-      MAX(t.date) AS last_activity
+      COUNT(DISTINCT mb.customer_id)    AS customer_count,
+      COALESCE(SUM(t.points), 0)        AS total_points,
+      MAX(t.created_at)                 AS last_activity
     FROM merchants m
-    LEFT JOIN cards c ON c.merchant_id = m.id
-    LEFT JOIN transactions t ON t.card_id = c.id
+    LEFT JOIN memberships mb ON mb.merchant_id = m.id
+    LEFT JOIN transactions t  ON t.merchant_id  = m.id
     GROUP BY m.id
     ORDER BY m.created_at DESC
   `).all();

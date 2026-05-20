@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: loyaltypass
+    env: node
+    plan: free
+    buildCommand: npm run build
+    startCommand: npm start
+    disk:
+      name: loyaltypass-data
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_PATH
+        value: /data/loyaltypass.db
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: BASE_URL
+        sync: false

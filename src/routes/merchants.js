@@ -5,8 +5,10 @@ const QRCode   = require('qrcode');
 const db       = require('../database');
 const auth     = require('../middleware/auth');
 
-const router = express.Router();
+const router      = express.Router();
 const SALT_ROUNDS = 12;
+const JWT_SECRET  = () => process.env.JWT_SECRET  || 'loyaltypass_dev_secret_change_in_prod';
+const JWT_EXPIRES = () => process.env.JWT_EXPIRES_IN || '7d';
 
 // ─── Public: enrollment info ──────────────────────────────────────────────────
 
@@ -70,8 +72,8 @@ router.post('/register', async (req, res) => {
 
     const token = jwt.sign(
       { id: merchant.id, email: merchant.email },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN }
+      JWT_SECRET(),
+      { expiresIn: JWT_EXPIRES() }
     );
 
     res.status(201).json({ merchant, token });
@@ -102,8 +104,8 @@ router.post('/login', async (req, res) => {
     const { password: _, ...merchantSafe } = merchant;
     const token = jwt.sign(
       { id: merchant.id, email: merchant.email },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN }
+      JWT_SECRET(),
+      { expiresIn: JWT_EXPIRES() }
     );
 
     res.json({ merchant: merchantSafe, token });

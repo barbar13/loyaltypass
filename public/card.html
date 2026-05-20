@@ -416,58 +416,39 @@
     });
   }
   // ── Push notifications ────────────────────────────────────────────────────
-  async function setupPushNotifications() {
+  function setupPushNotifications() {
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
-    try {
-      // Register SW
-      const reg = await navigator.serviceWorker.register('/sw.js');
-      await navigator.serviceWorker.ready;
-
-      // Check if already subscribed
-      const existing = await reg.pushManager.getSubscription();
-      if (existing) return; // already subscribed
-
-      // Get VAPID public key
-      const res = await fetch('/api/notifications/vapid-public-key');
-      if (!res.ok) return;
-      const vapidKey = await res.text();
-      if (!vapidKey) return;
-
-      // Request permission
-      const permission = await Notification.requestPermission();
-      if (permission !== 'granted') return;
-
-      // Subscribe
-      function urlBase64ToUint8Array(b64) {
-        const pad = '='.repeat((4 - b64.length % 4) % 4);
-        const raw = atob((b64 + pad).replace(/-/g, '+').replace(/_/g, '/'));
-        return Uint8Array.from(raw, c => c.charCodeAt(0));
-      }
-
-      const sub = await reg.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(vapidKey),
-      });
-
-      // Send to server
-      await fetch('/api/notifications/subscribe', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ subscription: sub.toJSON(), customer_qr_code: qrCode }),
-      });
-    } catch (_) {}
+    // Fetch VAPID key first — skip entirely if not configured
+    fetch('/api/notifications/vapid-public-key')
+      .then(r => r.ok ? r.text() : null)
+      .then(vapidKey => {
+        if (!vapidKey || !vapidKey.trim()) return;
+        // Register SW without blocking; use registration promise directly
+        navigator.serviceWorker.register('/sw.js')
+          .then(reg => reg.pushManager.getSubscription().then(existing => {
+            if (existing) return;
+            return Notification.requestPermission().then(permission => {
+              if (permission !== 'granted') return;
+              function urlBase64ToUint8Array(b64) {
+                const pad = '='.repeat((4 - b64.length % 4) % 4);
+                const raw = atob((b64 + pad).replace(/-/g, '+').replace(/_/g, '/'));
+                return Uint8Array.from(raw, c => c.charCodeAt(0));
+              }
+              return reg.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: urlBase64ToUint8Array(vapidKey.trim()),
+              }).then(sub => fetch('/api/notifications/subscribe', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ subscription: sub.toJSON(), customer_qr_code: qrCode }),
+              }));
+            });
+          }))
+          .catch(() => {});
+      })
+      .catch(() => {});
   }
 
-  // ── Language toggle ───────────────────────────────────────────────────────
-  let lang = (() => { try { return localStorage.getItem('fidevo_lang') || 'fr'; } catch { return 'fr'; } })();
-  function setLang(l) {
-    lang = l;
-    try { localStorage.setItem('fidevo_lang', l); } catch {}
-    document.querySelectorAll('[data-lang-btn]').forEach(b => {
-      b.style.color      = b.dataset.langBtn === l ? 'white' : '#6b7280';
-      b.style.fontWeight = b.dataset.langBtn === l ? '700' : '400';
-    });
-  }
   document.addEventListener('DOMContentLoaded', () => {
     const hdr = document.querySelector('#s-card .max-w-sm');
     if (hdr) {

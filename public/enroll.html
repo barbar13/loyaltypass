@@ -197,6 +197,14 @@
   const STATES = ['s-loading', 's-form', 's-success', 's-error'];
   const $ = id => document.getElementById(id);
 
+  function fetchWithTimeout(url, options = {}, ms = 5000) {
+    const ctrl = new AbortController();
+    const id = setTimeout(() => ctrl.abort(), ms);
+    return fetch(url, { ...options, signal: ctrl.signal })
+      .then(r => { clearTimeout(id); return r; })
+      .catch(err => { clearTimeout(id); throw err.name === 'AbortError' ? new Error('Délai dépassé. Vérifiez votre connexion.') : err; });
+  }
+
   function show(id) {
     STATES.forEach(s => $(s).style.display = 'none');
     const el = $(id);
@@ -233,7 +241,7 @@
 
   async function init() {
     try {
-      const res = await fetch(`/api/merchants/${merchantId}/enroll`);
+      const res = await fetchWithTimeout(`/api/merchants/${merchantId}/enroll`);
       if (!res.ok) throw new Error(await res.json().then(d => d.error).catch(() => 'Marchand introuvable'));
       const { merchant } = await res.json();
       applyBranding(merchant);
@@ -262,7 +270,7 @@
       </svg>En cours…</span>`;
 
     try {
-      const res  = await fetch('/api/customers/enroll', {
+      const res  = await fetchWithTimeout('/api/customers/enroll', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ merchant_id: parseInt(merchantId, 10), first_name: firstName, phone, email: emailVal || undefined }),

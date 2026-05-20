@@ -12,22 +12,27 @@ const JWT_EXPIRES = () => process.env.JWT_EXPIRES_IN || '7d';
 
 // ─── Public: enrollment branding ─────────────────────────────────────────────
 
-router.get('/:id/enroll', (req, res) => {
-  const merchant = db.prepare(
-    'SELECT id, name, logo_url, color, plan FROM merchants WHERE id = ?'
-  ).get(req.params.id);
-  if (!merchant) return res.status(404).json({ error: 'Marchand introuvable' });
-  res.json({ merchant });
+router.get('/:id/enroll', async (req, res) => {
+  try {
+    const merchant = await db.one(
+      'SELECT id, name, logo_url, color, plan FROM merchants WHERE id = $1',
+      [req.params.id]
+    );
+    if (!merchant) return res.status(404).json({ error: 'Marchand introuvable' });
+    res.json({ merchant });
+  } catch (err) {
+    res.status(500).json({ error: 'Erreur serveur', detail: err.message });
+  }
 });
 
 router.get('/:id/enroll-qr', async (req, res) => {
-  const merchant = db.prepare('SELECT id, name FROM merchants WHERE id = ?').get(req.params.id);
-  if (!merchant) return res.status(404).json({ error: 'Marchand introuvable' });
-
-  const baseUrl   = process.env.BASE_URL || `${req.protocol}://${req.get('host')}`;
-  const enrollUrl = `${baseUrl}/enroll/${merchant.id}`;
-
   try {
+    const merchant = await db.one('SELECT id, name FROM merchants WHERE id = $1', [req.params.id]);
+    if (!merchant) return res.status(404).json({ error: 'Marchand introuvable' });
+
+    const baseUrl   = process.env.BASE_URL || `${req.protocol}://${req.get('host')}`;
+    const enrollUrl = `${baseUrl}/enroll/${merchant.id}`;
+
     const buf = await QRCode.toBuffer(enrollUrl, {
       width: 400, margin: 2, errorCorrectionLevel: 'M',
       color: { dark: '#000000', light: '#ffffff' },
@@ -49,21 +54,20 @@ router.post('/register', async (req, res) => {
     return res.status(400).json({ error: 'name, email et password sont requis' });
   }
 
-  const existing = db.prepare('SELECT id FROM merchants WHERE email = ?').get(email);
-  if (existing) {
-    return res.status(409).json({ error: 'Cet email est déjà utilisé' });
-  }
-
   try {
-    const hashed = await bcrypt.hash(password, SALT_ROUNDS);
-    const result = db.prepare(`
-      INSERT INTO merchants (name, email, password, logo_url, color, plan)
-      VALUES (?, ?, ?, ?, ?, ?)
-    `).run(name, email, hashed, logo_url || null, color || '#6366f1', plan || 'free');
+    const existing = await db.one('SELECT id FROM merchants WHERE email = $1', [email]);
+    if (existing) return res.status(409).json({ error: 'Cet email est déjà utilisé' });
 
-    const merchant = db.prepare(
-      'SELECT id, name, email, logo_url, color, plan, created_at FROM merchants WHERE id = ?'
-    ).get(result.lastInsertRowid);
+    const hashed = await bcrypt.hash(password, SALT_ROUNDS);
+    const id = await db.insert(
+      'INSERT INTO merchants (name, email, password, logo_url, color, plan) VALUES ($1, $2, $3, $4, $5, $6)',
+      [name, email, hashed, logo_url || null, color || '#6366f1', plan || 'free']
+    );
+
+    const merchant = await db.one(
+      'SELECT id, name, email, logo_url, color, plan, created_at FROM merchants WHERE id = $1',
+      [id]
+    );
 
     const token = jwt.sign(
       { id: merchant.id, email: merchant.email },
@@ -84,10 +88,10 @@ router.post('/login', async (req, res) => {
     return res.status(400).json({ error: 'email et password sont requis' });
   }
 
-  const merchant = db.prepare('SELECT * FROM merchants WHERE email = ?').get(email);
-  if (!merchant) return res.status(401).json({ error: 'Identifiants invalides' });
-
   try {
+    const merchant = await db.one('SELECT * FROM merchants WHERE email = $1', [email]);
+    if (!merchant) return res.status(401).json({ error: 'Identifiants invalides' });
+
     const match = await bcrypt.compare(password, merchant.password);
     if (!match) return res.status(401).json({ error: 'Identifiants invalides' });
 
@@ -106,55 +110,58 @@ router.post('/login', async (req, res) => {
 
 // ─── Authenticated: dashboard ─────────────────────────────────────────────────
 
-router.get('/dashboard', auth, (req, res) => {
+router.get('/dashboard', auth, async (req, res) => {
   const merchantId = req.merchant.id;
+  try {
+    const merchant = await db.one(
+      'SELECT id, name, email, logo_url, color, plan FROM merchants WHERE id = $1',
+      [merchantId]
+    );
+    if (!merchant) return res.status(404).json({ error: 'Marchand introuvable' });
 
-  const merchant = db.prepare(
-    'SELECT id, name, email, logo_url, color, plan FROM merchants WHERE id = ?'
-  ).get(merchantId);
-  if (!merchant) return res.status(404).json({ error: 'Marchand introuvable' });
+    const [{ total_customers }, { total_points }, { scans_today }] = await Promise.all([
+      db.one('SELECT COUNT(*) as total_customers FROM memberships WHERE merchant_id = $1', [merchantId]),
+      db.one('SELECT COALESCE(SUM(points), 0) as total_points FROM transactions WHERE merchant_id = $1', [merchantId]),
+      db.one(`SELECT COUNT(*) as scans_today FROM transactions WHERE merchant_id = $1 AND ${db.todayExpr}`, [merchantId]),
+    ]);
 
-  const { total_customers } = db.prepare(
-    'SELECT COUNT(*) as total_customers FROM memberships WHERE merchant_id = ?'
-  ).get(merchantId);
+    const [customers, rewards] = await Promise.all([
+      db.all(`
+        SELECT
+          c.id, c.first_name, c.phone, c.qr_code,
+          mb.points, mb.joined_at,
+          (SELECT MAX(t.created_at) FROM transactions t
+           WHERE t.merchant_id = $1 AND t.customer_id = c.id) AS last_visit
+        FROM memberships mb
+        JOIN customers c ON c.id = mb.customer_id
+        WHERE mb.merchant_id = $2
+        ORDER BY mb.points DESC
+        LIMIT 100
+      `, [merchantId, merchantId]),
+      db.all(
+        'SELECT * FROM rewards WHERE merchant_id = $1 ORDER BY points_required ASC',
+        [merchantId]
+      ),
+    ]);
 
-  const { total_points } = db.prepare(
-    'SELECT COALESCE(SUM(points), 0) as total_points FROM transactions WHERE merchant_id = ?'
-  ).get(merchantId);
-
-  const { scans_today } = db.prepare(`
-    SELECT COUNT(*) as scans_today FROM transactions
-    WHERE merchant_id = ? AND DATE(created_at) = DATE('now', 'localtime')
-  `).get(merchantId);
-
-  const customers = db.prepare(`
-    SELECT
-      c.id, c.first_name, c.phone, c.qr_code,
-      mb.points, mb.joined_at,
-      (SELECT MAX(t.created_at) FROM transactions t
-       WHERE t.merchant_id = ? AND t.customer_id = c.id) as last_visit
-    FROM memberships mb
-    JOIN customers c ON c.id = mb.customer_id
-    WHERE mb.merchant_id = ?
-    ORDER BY mb.points DESC
-    LIMIT 100
-  `).all(merchantId, merchantId);
-
-  const rewards = db.prepare(
-    'SELECT * FROM rewards WHERE merchant_id = ? ORDER BY points_required ASC'
-  ).all(merchantId);
-
-  res.json({
-    merchant,
-    stats: { total_customers, total_points, scans_today },
-    customers,
-    rewards,
-  });
+    res.json({
+      merchant,
+      stats: {
+        total_customers: Number(total_customers),
+        total_points:    Number(total_points),
+        scans_today:     Number(scans_today),
+      },
+      customers,
+      rewards,
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Erreur serveur', detail: err.message });
+  }
 });
 
 // ─── Authenticated: rewards ───────────────────────────────────────────────────
 
-router.post('/rewards', auth, (req, res) => {
+router.post('/rewards', auth, async (req, res) => {
   const { description, points_required } = req.body;
   const merchantId = req.merchant.id;
 
@@ -166,22 +173,30 @@ router.post('/rewards', auth, (req, res) => {
     return res.status(400).json({ error: 'points_required doit être un entier positif' });
   }
 
-  const result = db.prepare(
-    'INSERT INTO rewards (merchant_id, description, points_required) VALUES (?, ?, ?)'
-  ).run(merchantId, description.trim(), pts);
-
-  const reward = db.prepare('SELECT * FROM rewards WHERE id = ?').get(result.lastInsertRowid);
-  res.status(201).json({ reward });
+  try {
+    const id = await db.insert(
+      'INSERT INTO rewards (merchant_id, description, points_required) VALUES ($1, $2, $3)',
+      [merchantId, description.trim(), pts]
+    );
+    const reward = await db.one('SELECT * FROM rewards WHERE id = $1', [id]);
+    res.status(201).json({ reward });
+  } catch (err) {
+    res.status(500).json({ error: 'Erreur serveur', detail: err.message });
+  }
 });
 
-router.delete('/rewards/:id', auth, (req, res) => {
+router.delete('/rewards/:id', auth, async (req, res) => {
   const rewardId = parseInt(req.params.id, 10);
-  const reward   = db.prepare('SELECT * FROM rewards WHERE id = ?').get(rewardId);
-  if (!reward) return res.status(404).json({ error: 'Récompense introuvable' });
-  if (reward.merchant_id !== req.merchant.id) return res.status(403).json({ error: 'Accès refusé' });
+  try {
+    const reward = await db.one('SELECT * FROM rewards WHERE id = $1', [rewardId]);
+    if (!reward) return res.status(404).json({ error: 'Récompense introuvable' });
+    if (reward.merchant_id !== req.merchant.id) return res.status(403).json({ error: 'Accès refusé' });
 
-  db.prepare('UPDATE rewards SET active = 0 WHERE id = ?').run(rewardId);
-  res.json({ success: true });
+    await db.run('UPDATE rewards SET active = 0 WHERE id = $1', [rewardId]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Erreur serveur', detail: err.message });
+  }
 });
 
 module.exports = router;

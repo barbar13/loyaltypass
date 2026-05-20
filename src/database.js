@@ -1,76 +1,236 @@
-const { DatabaseSync } = require('node:sqlite');
-const path = require('path');
+'use strict';
 
-const DB_PATH = process.env.DATABASE_PATH || path.join(__dirname, '../loyaltypass.db');
-const db = new DatabaseSync(DB_PATH);
+// ── PostgreSQL (production / Render) ──────────────────────────────────────────
+if (process.env.DATABASE_URL) {
+  const pg = require('pg');
 
-db.exec('PRAGMA journal_mode = WAL');
-db.exec('PRAGMA foreign_keys = ON');
+  // Parse COUNT(*) / SUM() columns as JS Numbers instead of strings
+  pg.types.setTypeParser(20,   v => parseInt(v, 10));  // BIGINT
+  pg.types.setTypeParser(1700, v => parseFloat(v));    // NUMERIC
 
-// ── Drop legacy tables if they have the old schema ──────────────────────────
-// Old transactions had card_id; new ones have merchant_id + customer_id.
-const txCols = db.prepare("PRAGMA table_info(transactions)").all();
-if (txCols.length > 0 && txCols.find(c => c.name === 'card_id')) {
-  db.exec('DROP TABLE IF EXISTS transactions');
-  db.exec('DROP TABLE IF EXISTS cards');
+  const { Pool } = pg;
+  const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    // Render's managed PostgreSQL requires SSL; skip cert verification for self-signed certs
+    ssl: process.env.DATABASE_URL.includes('localhost') ? false : { rejectUnauthorized: false },
+    max: 10,
+  });
+
+  // ── Schema ─────────────────────────────────────────────────────────────────
+  pool.query(`
+    CREATE TABLE IF NOT EXISTS merchants (
+      id         SERIAL PRIMARY KEY,
+      name       TEXT    NOT NULL,
+      email      TEXT    UNIQUE NOT NULL,
+      password   TEXT    NOT NULL,
+      logo_url   TEXT,
+      color      TEXT    DEFAULT '#6366f1',
+      plan       TEXT    DEFAULT 'free',
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS customers (
+      id         SERIAL PRIMARY KEY,
+      first_name TEXT    NOT NULL,
+      phone      TEXT    UNIQUE NOT NULL,
+      qr_code    TEXT    UNIQUE NOT NULL,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS memberships (
+      id          SERIAL PRIMARY KEY,
+      merchant_id INTEGER NOT NULL REFERENCES merchants(id) ON DELETE CASCADE,
+      customer_id INTEGER NOT NULL REFERENCES customers(id)  ON DELETE CASCADE,
+      points      INTEGER NOT NULL DEFAULT 0,
+      joined_at   TIMESTAMPTZ DEFAULT NOW(),
+      UNIQUE (merchant_id, customer_id)
+    );
+
+    CREATE TABLE IF NOT EXISTS rewards (
+      id              SERIAL PRIMARY KEY,
+      merchant_id     INTEGER NOT NULL REFERENCES merchants(id) ON DELETE CASCADE,
+      description     TEXT    NOT NULL,
+      points_required INTEGER NOT NULL,
+      active          INTEGER NOT NULL DEFAULT 1,
+      created_at      TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS transactions (
+      id          SERIAL PRIMARY KEY,
+      merchant_id INTEGER NOT NULL REFERENCES merchants(id) ON DELETE CASCADE,
+      customer_id INTEGER NOT NULL REFERENCES customers(id)  ON DELETE CASCADE,
+      points      INTEGER NOT NULL,
+      note        TEXT,
+      created_at  TIMESTAMPTZ DEFAULT NOW()
+    );
+  `).catch(err => {
+    console.error('PostgreSQL schema init failed:', err.message);
+    process.exit(1);
+  });
+
+  // ── Client factory (used for both pool and transaction clients) ────────────
+  function makeClient(client) {
+    return {
+      async one(sql, params = []) {
+        const { rows } = await client.query(sql, params);
+        return rows[0] ?? null;
+      },
+      async all(sql, params = []) {
+        const { rows } = await client.query(sql, params);
+        return rows;
+      },
+      async insert(sql, params = []) {
+        const { rows } = await client.query(`${sql} RETURNING id`, params);
+        return rows[0].id;
+      },
+      async run(sql, params = []) {
+        await client.query(sql, params);
+      },
+    };
+  }
+
+  // "today" expression for anti-fraud query (UTC)
+  const todayExpr = "DATE(created_at) = CURRENT_DATE";
+
+  module.exports = {
+    ...makeClient(pool),
+    todayExpr,
+    async transaction(fn) {
+      const client = await pool.connect();
+      try {
+        await client.query('BEGIN');
+        const result = await fn(makeClient(client));
+        await client.query('COMMIT');
+        return result;
+      } catch (err) {
+        await client.query('ROLLBACK');
+        throw err;
+      } finally {
+        client.release();
+      }
+    },
+  };
+
+// ── SQLite (local development fallback) ──────────────────────────────────────
+} else {
+  const { DatabaseSync } = require('node:sqlite');
+  const path = require('path');
+
+  const DB_PATH = process.env.DATABASE_PATH || path.join(__dirname, '../loyaltypass.db');
+  const sqlite  = new DatabaseSync(DB_PATH);
+
+  sqlite.exec('PRAGMA journal_mode = WAL');
+  sqlite.exec('PRAGMA foreign_keys = ON');
+
+  // Drop tables that still have the old card_id schema (pre-universal-card migration)
+  const txCols = sqlite.prepare("PRAGMA table_info(transactions)").all();
+  if (txCols.length > 0 && txCols.find(c => c.name === 'card_id')) {
+    sqlite.exec('DROP TABLE IF EXISTS transactions');
+    sqlite.exec('DROP TABLE IF EXISTS cards');
+  }
+
+  sqlite.exec(`
+    CREATE TABLE IF NOT EXISTS merchants (
+      id         INTEGER PRIMARY KEY AUTOINCREMENT,
+      name       TEXT    NOT NULL,
+      email      TEXT    UNIQUE NOT NULL,
+      password   TEXT    NOT NULL,
+      logo_url   TEXT,
+      color      TEXT    DEFAULT '#6366f1',
+      plan       TEXT    DEFAULT 'free',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS customers (
+      id         INTEGER PRIMARY KEY AUTOINCREMENT,
+      first_name TEXT    NOT NULL,
+      phone      TEXT    UNIQUE NOT NULL,
+      qr_code    TEXT    UNIQUE NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS memberships (
+      id          INTEGER PRIMARY KEY AUTOINCREMENT,
+      merchant_id INTEGER NOT NULL,
+      customer_id INTEGER NOT NULL,
+      points      INTEGER NOT NULL DEFAULT 0,
+      joined_at   DATETIME DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE (merchant_id, customer_id),
+      FOREIGN KEY (merchant_id) REFERENCES merchants(id) ON DELETE CASCADE,
+      FOREIGN KEY (customer_id) REFERENCES customers(id)  ON DELETE CASCADE
+    );
+
+    CREATE TABLE IF NOT EXISTS rewards (
+      id              INTEGER PRIMARY KEY AUTOINCREMENT,
+      merchant_id     INTEGER NOT NULL,
+      description     TEXT    NOT NULL,
+      points_required INTEGER NOT NULL,
+      active          INTEGER NOT NULL DEFAULT 1,
+      created_at      DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (merchant_id) REFERENCES merchants(id) ON DELETE CASCADE
+    );
+
+    CREATE TABLE IF NOT EXISTS transactions (
+      id          INTEGER PRIMARY KEY AUTOINCREMENT,
+      merchant_id INTEGER NOT NULL,
+      customer_id INTEGER NOT NULL,
+      points      INTEGER NOT NULL,
+      note        TEXT,
+      created_at  DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (merchant_id) REFERENCES merchants(id) ON DELETE CASCADE,
+      FOREIGN KEY (customer_id) REFERENCES customers(id)  ON DELETE CASCADE
+    );
+  `);
+
+  // Convert $1, $2, ... → ? (SQLite positional) and reorder params accordingly.
+  // Handles repeated $N correctly: each occurrence pushes the corresponding param value.
+  function toSqlite(sql, params) {
+    const bound = [];
+    const converted = sql.replace(/\$(\d+)/g, (_, n) => {
+      bound.push(params[+n - 1]);
+      return '?';
+    });
+    return [converted, bound];
+  }
+
+  function makeClient(sq) {
+    return {
+      one(sql, params = []) {
+        const [s, p] = toSqlite(sql, params);
+        return Promise.resolve(sq.prepare(s).get(...p) ?? null);
+      },
+      all(sql, params = []) {
+        const [s, p] = toSqlite(sql, params);
+        return Promise.resolve(sq.prepare(s).all(...p));
+      },
+      insert(sql, params = []) {
+        const [s, p] = toSqlite(sql, params);
+        const result = sq.prepare(s).run(...p);
+        return Promise.resolve(Number(result.lastInsertRowid));
+      },
+      run(sql, params = []) {
+        const [s, p] = toSqlite(sql, params);
+        sq.prepare(s).run(...p);
+        return Promise.resolve();
+      },
+    };
+  }
+
+  const client = makeClient(sqlite);
+
+  module.exports = {
+    ...client,
+    todayExpr: "DATE(created_at) = DATE('now')",
+    async transaction(fn) {
+      sqlite.exec('BEGIN');
+      try {
+        const result = await fn(client);
+        sqlite.exec('COMMIT');
+        return result;
+      } catch (err) {
+        sqlite.exec('ROLLBACK');
+        throw err;
+      }
+    },
+  };
 }
-
-// ── Schema ───────────────────────────────────────────────────────────────────
-db.exec(`
-  CREATE TABLE IF NOT EXISTS merchants (
-    id         INTEGER PRIMARY KEY AUTOINCREMENT,
-    name       TEXT    NOT NULL,
-    email      TEXT    UNIQUE NOT NULL,
-    password   TEXT    NOT NULL,
-    logo_url   TEXT,
-    color      TEXT    DEFAULT '#6366f1',
-    plan       TEXT    DEFAULT 'free',
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-  );
-
-  -- Universal customer identity — one QR per person across all merchants
-  CREATE TABLE IF NOT EXISTS customers (
-    id         INTEGER PRIMARY KEY AUTOINCREMENT,
-    first_name TEXT    NOT NULL,
-    phone      TEXT    UNIQUE NOT NULL,
-    qr_code    TEXT    UNIQUE NOT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-  );
-
-  -- Per-merchant membership with individual point balance
-  CREATE TABLE IF NOT EXISTS memberships (
-    id          INTEGER PRIMARY KEY AUTOINCREMENT,
-    merchant_id INTEGER NOT NULL,
-    customer_id INTEGER NOT NULL,
-    points      INTEGER DEFAULT 0,
-    joined_at   DATETIME DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE (merchant_id, customer_id),
-    FOREIGN KEY (merchant_id) REFERENCES merchants(id) ON DELETE CASCADE,
-    FOREIGN KEY (customer_id) REFERENCES customers(id)  ON DELETE CASCADE
-  );
-
-  -- Rewards defined by the merchant
-  CREATE TABLE IF NOT EXISTS rewards (
-    id              INTEGER PRIMARY KEY AUTOINCREMENT,
-    merchant_id     INTEGER NOT NULL,
-    description     TEXT    NOT NULL,
-    points_required INTEGER NOT NULL,
-    active          INTEGER DEFAULT 1,
-    created_at      DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (merchant_id) REFERENCES merchants(id) ON DELETE CASCADE
-  );
-
-  -- Immutable point log; enforces 1 scan per customer per merchant per day
-  CREATE TABLE IF NOT EXISTS transactions (
-    id          INTEGER PRIMARY KEY AUTOINCREMENT,
-    merchant_id INTEGER NOT NULL,
-    customer_id INTEGER NOT NULL,
-    points      INTEGER NOT NULL,
-    note        TEXT,
-    created_at  DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (merchant_id) REFERENCES merchants(id) ON DELETE CASCADE,
-    FOREIGN KEY (customer_id) REFERENCES customers(id)  ON DELETE CASCADE
-  );
-`);
-
-module.exports = db;

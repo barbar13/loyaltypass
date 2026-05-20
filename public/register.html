@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#0a0a0f">
-  <title>LoyaltyPass — Créer un compte</title>
+  <title>Fidevo — Créer un compte</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -162,6 +162,16 @@
         <span id="form-error-msg"></span>
       </div>
 
+      <!-- RGPD -->
+      <div class="flex items-start gap-3 animate-fade-up delay-5">
+        <input type="checkbox" id="inp-rgpd" required
+               class="mt-0.5 w-4 h-4 accent-indigo-500 cursor-pointer shrink-0">
+        <label for="inp-rgpd" class="text-gray-500 text-xs leading-relaxed cursor-pointer">
+          J'accepte la <a href="/privacy" target="_blank" class="text-indigo-400 underline underline-offset-1">politique de confidentialité</a>
+          et les <a href="/cgu" target="_blank" class="text-indigo-400 underline underline-offset-1">CGU</a> de Fidevo.
+        </label>
+      </div>
+
       <!-- Submit -->
       <div class="animate-fade-up delay-5">
         <button id="submit-btn" type="submit" class="btn-primary">
@@ -172,6 +182,7 @@
       <p class="text-center text-gray-600 text-xs mt-4 mb-2 animate-fade-up delay-6">
         Déjà inscrit ?
         <a href="/login" class="text-gray-400 hover:text-white transition underline underline-offset-2">Se connecter →</a>
+        · <a href="/forgot-password" class="text-gray-400 hover:text-white transition underline underline-offset-2">Mot de passe oublié</a>
       </p>
 
     </form>

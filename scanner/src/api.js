@@ -55,6 +55,24 @@ export function redeemReward(membershipId, rewardId, token) {
   });
 }
 
+export function updateProfile(data, token) {
+  return request('/merchants/profile', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify(data),
+  });
+}
+
+export function getScans(token, { dateFrom, dateTo } = {}) {
+  const p = new URLSearchParams();
+  if (dateFrom) p.set('date_from', dateFrom);
+  if (dateTo)   p.set('date_to', dateTo);
+  const qs = p.toString();
+  return request(`/merchants/scans${qs ? '?' + qs : ''}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
 export function deleteReward(id, token) {
   return request(`/merchants/rewards/${id}`, {
     method: 'DELETE',

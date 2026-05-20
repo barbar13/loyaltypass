@@ -37,7 +37,12 @@ app.get('/my-card',             (_req, res) => res.sendFile(path.join(PUBLIC, 'm
 app.get('/admin',               (_req, res) => res.sendFile(path.join(PUBLIC, 'admin.html')));
 app.get('/login',               (_req, res) => res.sendFile(path.join(PUBLIC, 'login.html')));
 app.get('/register',            (_req, res) => res.sendFile(path.join(PUBLIC, 'register.html')));
+app.get('/forgot-password',     (_req, res) => res.sendFile(path.join(PUBLIC, 'forgot-password.html')));
+app.get('/reset-password',      (_req, res) => res.sendFile(path.join(PUBLIC, 'reset-password.html')));
 app.get('/merchant/qr-print',   (_req, res) => res.sendFile(path.join(PUBLIC, 'qr-print.html')));
+app.get('/home',                (_req, res) => res.sendFile(path.join(PUBLIC, 'home.html')));
+app.get('/cgu',                 (_req, res) => res.sendFile(path.join(PUBLIC, 'cgu.html')));
+app.get('/privacy',             (_req, res) => res.sendFile(path.join(PUBLIC, 'privacy.html')));
 
 // ─── Utility: server-side QR PNG (used by enroll + card pages) ───────────────
 app.get('/api/qr/:text', async (req, res) => {
@@ -55,7 +60,7 @@ app.get('/api/qr/:text', async (req, res) => {
 });
 
 // ─── API ──────────────────────────────────────────────────────────────────────
-app.get('/health', (_req, res) => res.json({ status: 'ok', service: 'LoyaltyPass API' }));
+app.get('/health', (_req, res) => res.json({ status: 'ok', service: 'Fidevo API' }));
 app.use('/api/merchants', merchantRoutes);
 app.use('/api/customers', customerRoutes);
 app.use('/api/scan',      scanRoutes);

@@ -6,7 +6,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#0f0f14">
-  <title>Ma carte LoyaltyPass</title>
+  <title>Ma carte Fidevo</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -125,7 +125,7 @@
       <p class="text-gray-500 text-xs font-semibold uppercase tracking-widest mb-1">Votre QR universel</p>
       <p class="text-gray-600 text-xs mb-5">Présentez ce code dans tous les commerces partenaires</p>
       <div id="qr-universal" class="flex justify-center mb-3"></div>
-      <p class="text-gray-700 text-[10px]">Ce QR est votre identité LoyaltyPass</p>
+      <p class="text-gray-700 text-[10px]">Ce QR est votre identité Fidevo</p>
     </div>
 
     <!-- Memberships section -->
@@ -404,6 +404,28 @@
     try { localStorage.setItem('lp_aths_' + qrCode, '1'); } catch (_) {}
     $('aths-banner').style.display = 'none';
   }
+
+  // ── Language toggle ───────────────────────────────────────────────────────
+  let lang = (() => { try { return localStorage.getItem('fidevo_lang') || 'fr'; } catch { return 'fr'; } })();
+  function setLang(l) {
+    lang = l;
+    try { localStorage.setItem('fidevo_lang', l); } catch {}
+    document.querySelectorAll('[data-lang-btn]').forEach(b => {
+      b.style.color      = b.dataset.langBtn === l ? 'white' : '#6b7280';
+      b.style.fontWeight = b.dataset.langBtn === l ? '700' : '400';
+    });
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    const hdr = document.querySelector('#s-card .max-w-sm');
+    if (hdr) {
+      const tog = document.createElement('div');
+      tog.style.cssText = 'position:absolute;top:1.5rem;right:0;display:flex;gap:6px';
+      tog.innerHTML = `<button data-lang-btn="fr" onclick="setLang('fr')" style="background:none;border:none;font-size:11px;cursor:pointer;color:#6b7280">FR</button><span style="color:#374151;font-size:11px">|</span><button data-lang-btn="en" onclick="setLang('en')" style="background:none;border:none;font-size:11px;cursor:pointer;color:#6b7280">EN</button>`;
+      hdr.style.position = 'relative';
+      hdr.appendChild(tog);
+      setLang(lang);
+    }
+  });
 
   init();
 </script>

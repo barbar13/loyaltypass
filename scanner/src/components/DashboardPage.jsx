@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ScanModal  from './ScanModal.jsx';
-import { addReward, deleteReward, redeemReward } from '../api.js';
+import { addReward, deleteReward, redeemReward, updateProfile, getScans } from '../api.js';
 
 // ── Tab icons ─────────────────────────────────────────────────────────────────
 
@@ -17,6 +17,18 @@ const IconUsers = () => (
 const IconGift = () => (
   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
+  </svg>
+);
+
+const IconHistory = () => (
+  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+  </svg>
+);
+const IconSettings = () => (
+  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
   </svg>
 );
 
@@ -104,6 +116,27 @@ function HomeTab({ merchant, stats, onScanClick }) {
   );
 }
 
+function exportCSV(customers) {
+  const headers = ['Prénom', 'Téléphone', 'Points', 'Dernière visite', 'Inscrit le'];
+  const rows = customers.map(c => [
+    c.first_name,
+    c.phone || '',
+    c.points,
+    c.last_visit ? new Date(c.last_visit).toLocaleDateString('fr-FR') : '',
+    c.joined_at  ? new Date(c.joined_at).toLocaleDateString('fr-FR')  : '',
+  ]);
+  const csv = [headers, ...rows]
+    .map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(','))
+    .join('\n');
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  a.download = `clients-fidevo-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 function ClientsTab({ customers, rewards, token, onRewardsChange }) {
   const [search, setSearch]           = useState('');
   const [offerTarget, setOfferTarget] = useState(null); // { customer, available }
@@ -142,15 +175,25 @@ function ClientsTab({ customers, rewards, token, onRewardsChange }) {
 
   return (
     <div className="px-5 pt-2 pb-6">
-      {/* Search */}
-      <div className="relative mb-4">
-        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600 pointer-events-none"
-          fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-        </svg>
-        <input type="search" placeholder="Rechercher par prénom ou téléphone…"
-          value={search} onChange={e => setSearch(e.target.value)}
-          className="w-full bg-gray-900 border border-white/5 rounded-2xl pl-9 pr-4 py-3 text-white placeholder-gray-600 text-sm focus:outline-none focus:ring-1 focus:ring-brand-500 focus:border-brand-500 transition" />
+      {/* Search + CSV export */}
+      <div className="flex gap-2 mb-4">
+        <div className="relative flex-1">
+          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600 pointer-events-none"
+            fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+          </svg>
+          <input type="search" placeholder="Rechercher…"
+            value={search} onChange={e => setSearch(e.target.value)}
+            className="w-full bg-gray-900 border border-white/5 rounded-2xl pl-9 pr-4 py-3 text-white placeholder-gray-600 text-sm focus:outline-none focus:ring-1 focus:ring-brand-500 focus:border-brand-500 transition" />
+        </div>
+        {customers.length > 0 && (
+          <button onClick={() => exportCSV(filtered)} title="Exporter CSV"
+            className="px-3 py-3 bg-gray-900 border border-white/5 rounded-2xl text-gray-500 hover:text-white hover:bg-gray-800 active:scale-95 transition-all shrink-0">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+            </svg>
+          </button>
+        )}
       </div>
 
       {customers.length === 0 && (
@@ -387,6 +430,177 @@ function RewardsTab({ rewards, token, onRewardsChange }) {
   );
 }
 
+// ── History tab ───────────────────────────────────────────────────────────────
+
+function HistoryTab({ token }) {
+  const [scans, setScans]         = useState(null);
+  const [dateFrom, setDateFrom]   = useState('');
+  const [dateTo,   setDateTo]     = useState('');
+  const [loading,  setLoading]    = useState(false);
+
+  async function load() {
+    setLoading(true);
+    try {
+      const data = await getScans(token, { dateFrom, dateTo });
+      setScans(data.scans);
+    } catch (_) {}
+    finally { setLoading(false); }
+  }
+
+  // Load on first mount
+  useEffect(() => { load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  function fmtDT(iso) {
+    if (!iso) return '—';
+    return new Date(iso).toLocaleString('fr-FR', {
+      day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit',
+    });
+  }
+
+  return (
+    <div className="px-5 pt-2 pb-6">
+      {/* Filters */}
+      <div className="flex gap-2 mb-4 flex-wrap">
+        <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)}
+          className="bg-gray-900 border border-white/5 rounded-xl px-3 py-2 text-gray-300 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500 flex-1 min-w-0" />
+        <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)}
+          className="bg-gray-900 border border-white/5 rounded-xl px-3 py-2 text-gray-300 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500 flex-1 min-w-0" />
+        <button onClick={load} disabled={loading}
+          className="px-4 py-2 bg-brand-600 hover:bg-brand-700 active:scale-95 rounded-xl text-white text-xs font-semibold disabled:opacity-60 transition-all shrink-0">
+          {loading ? '…' : 'Filtrer'}
+        </button>
+      </div>
+
+      {scans === null && (
+        <div className="flex justify-center py-12">
+          <div className="w-6 h-6 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
+        </div>
+      )}
+
+      {scans !== null && scans.length === 0 && (
+        <div className="text-center py-12 text-gray-600 text-sm">Aucun scan sur cette période.</div>
+      )}
+
+      {scans !== null && scans.length > 0 && (
+        <>
+          <p className="text-gray-600 text-xs mb-3">{scans.length} transaction{scans.length > 1 ? 's' : ''}</p>
+          <div className="space-y-2">
+            {scans.map(s => {
+              const isRedeem = s.points < 0;
+              return (
+                <div key={s.id} className="bg-gray-900 border border-white/5 rounded-xl px-4 py-3 flex items-center gap-3">
+                  <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-sm shrink-0 ${
+                    isRedeem ? 'bg-red-500/15 text-red-400' : 'bg-emerald-500/15 text-emerald-400'
+                  }`}>
+                    {isRedeem ? '🎁' : '+'}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white text-sm font-semibold truncate">{s.first_name}</p>
+                    <p className="text-gray-600 text-xs truncate">{s.note || s.phone || '—'}</p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className={`text-sm font-bold ${isRedeem ? 'text-red-400' : 'text-emerald-400'}`}>
+                      {isRedeem ? '' : '+'}{s.points} pts
+                    </p>
+                    <p className="text-gray-600 text-[10px]">{fmtDT(s.created_at)}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+// ── Settings tab ──────────────────────────────────────────────────────────────
+
+function SettingsTab({ merchant, token, onRefresh }) {
+  const [name,    setName]    = useState(merchant.name);
+  const [color,   setColor]   = useState(merchant.color || '#6366f1');
+  const [pwd,     setPwd]     = useState('');
+  const [pwd2,    setPwd2]    = useState('');
+  const [saving,  setSaving]  = useState(false);
+  const [msg,     setMsg]     = useState('');
+  const [err,     setErr]     = useState('');
+
+  async function handleSave(e) {
+    e.preventDefault();
+    if (pwd && pwd !== pwd2) { setErr('Les mots de passe ne correspondent pas.'); return; }
+    if (pwd && pwd.length < 6) { setErr('Minimum 6 caractères.'); return; }
+    setSaving(true); setErr(''); setMsg('');
+    try {
+      const payload = { name: name.trim(), color };
+      if (pwd) payload.password = pwd;
+      await updateProfile(payload, token);
+      setPwd(''); setPwd2('');
+      setMsg('Profil mis à jour !');
+      onRefresh();
+    } catch (e) {
+      setErr(e.message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="px-5 pt-2 pb-6">
+      <form onSubmit={handleSave} className="space-y-5">
+
+        <div className="bg-gray-900 border border-white/5 rounded-2xl p-5 space-y-4">
+          <p className="text-gray-400 text-sm font-semibold">Informations de l'établissement</p>
+
+          <div>
+            <label className="block text-xs text-gray-500 mb-1.5">Nom de l'établissement</label>
+            <input value={name} onChange={e => setName(e.target.value)} required
+              className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:ring-1 focus:ring-brand-500 focus:border-brand-500 transition" />
+          </div>
+
+          <div>
+            <label className="block text-xs text-gray-500 mb-1.5">Couleur de marque</label>
+            <div className="flex items-center gap-3">
+              <input type="color" value={color} onChange={e => setColor(e.target.value)}
+                className="w-12 h-12 rounded-xl cursor-pointer border-0 bg-transparent" />
+              <div className="flex-1 bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white text-sm font-mono">
+                {color}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-gray-900 border border-white/5 rounded-2xl p-5 space-y-4">
+          <p className="text-gray-400 text-sm font-semibold">Changer le mot de passe</p>
+
+          <div>
+            <label className="block text-xs text-gray-500 mb-1.5">Nouveau mot de passe</label>
+            <input type="password" value={pwd} onChange={e => setPwd(e.target.value)}
+              placeholder="Laisser vide pour ne pas changer"
+              className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-600 text-sm focus:outline-none focus:ring-1 focus:ring-brand-500 focus:border-brand-500 transition" />
+          </div>
+
+          {pwd && (
+            <div>
+              <label className="block text-xs text-gray-500 mb-1.5">Confirmer</label>
+              <input type="password" value={pwd2} onChange={e => setPwd2(e.target.value)}
+                placeholder="••••••••"
+                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-600 text-sm focus:outline-none focus:ring-1 focus:ring-brand-500 focus:border-brand-500 transition" />
+            </div>
+          )}
+        </div>
+
+        {err && <p className="text-red-400 text-sm">{err}</p>}
+        {msg && <p className="text-emerald-400 text-sm">{msg}</p>}
+
+        <button type="submit" disabled={saving}
+          className="w-full py-4 rounded-2xl bg-brand-600 hover:bg-brand-700 active:scale-[.98] disabled:opacity-60 text-white font-semibold text-base transition-all">
+          {saving ? 'Enregistrement…' : 'Enregistrer les modifications'}
+        </button>
+      </form>
+    </div>
+  );
+}
+
 // ── Main DashboardPage ────────────────────────────────────────────────────────
 
 export default function DashboardPage({ auth, dashData, dashLoading, onLogout, onRefresh }) {
@@ -405,9 +619,11 @@ export default function DashboardPage({ auth, dashData, dashLoading, onLogout, o
   }
 
   const TABS = [
-    { id: 'home',    label: 'Accueil',     Icon: IconHome  },
-    { id: 'clients', label: 'Clients',     Icon: IconUsers },
-    { id: 'rewards', label: 'Récompenses', Icon: IconGift  },
+    { id: 'home',     label: 'Accueil',  Icon: IconHome     },
+    { id: 'clients',  label: 'Clients',  Icon: IconUsers    },
+    { id: 'rewards',  label: 'Primes',   Icon: IconGift     },
+    { id: 'history',  label: 'Scans',    Icon: IconHistory  },
+    { id: 'settings', label: 'Compte',   Icon: IconSettings },
   ];
 
   return (
@@ -448,11 +664,13 @@ export default function DashboardPage({ auth, dashData, dashLoading, onLogout, o
 
       {/* Tab content */}
       <main className="flex-1 overflow-y-auto" style={{ paddingBottom: '5rem' }}>
-        {tab === 'home'    && <HomeTab    merchant={merchant} stats={stats} onScanClick={() => setShowScan(true)} />}
-        {tab === 'clients' && (
+        {tab === 'home'     && <HomeTab merchant={merchant} stats={stats} onScanClick={() => setShowScan(true)} />}
+        {tab === 'clients'  && (
           <ClientsTab customers={customers} rewards={rewards} token={auth.token} onRewardsChange={onRefresh} />
         )}
-        {tab === 'rewards' && <RewardsTab rewards={rewards} token={auth.token} onRewardsChange={onRefresh} />}
+        {tab === 'rewards'  && <RewardsTab rewards={rewards} token={auth.token} onRewardsChange={onRefresh} />}
+        {tab === 'history'  && <HistoryTab token={auth.token} />}
+        {tab === 'settings' && <SettingsTab merchant={merchant} token={auth.token} onRefresh={onRefresh} />}
       </main>
 
       {/* Bottom tab bar */}

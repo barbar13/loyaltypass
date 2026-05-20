@@ -1,6 +1,7 @@
 const express = require('express');
-const db   = require('../database');
-const auth = require('../middleware/auth');
+const db    = require('../database');
+const auth  = require('../middleware/auth');
+const email = require('../email');
 
 const router = express.Router();
 
@@ -60,7 +61,7 @@ router.post('/', auth, async (req, res) => {
 
   try {
     const customer = await db.one(
-      'SELECT id, first_name, phone FROM customers WHERE qr_code = $1',
+      'SELECT id, first_name, phone, email, qr_code FROM customers WHERE qr_code = $1',
       [customer_qr_code]
     );
     if (!customer) {
@@ -117,6 +118,20 @@ router.post('/', auth, async (req, res) => {
       'SELECT * FROM rewards WHERE merchant_id = $1 AND active = 1 ORDER BY points_required ASC',
       [merchantId]
     );
+
+    // Points-earned email (fire-and-forget)
+    if (customer.email) {
+      const merchant = await db.one('SELECT name FROM merchants WHERE id = $1', [merchantId]);
+      const baseUrl  = process.env.BASE_URL || 'https://fidevo.app';
+      email.sendPointsEarned({
+        to: customer.email,
+        firstName: customer.first_name,
+        points: pts,
+        totalPoints: updatedMembership.points,
+        merchantName: merchant.name,
+        cardUrl: `${baseUrl}/card/${customer.qr_code}`,
+      }).catch(() => {});
+    }
 
     res.json({
       customer:   { id: customer.id, first_name: customer.first_name, phone: customer.phone },

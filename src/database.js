@@ -73,7 +73,10 @@ if (process.env.DATABASE_URL) {
       created_at  TIMESTAMPTZ DEFAULT NOW()
     );
 
-    ALTER TABLE merchants ADD COLUMN IF NOT EXISTS disabled INTEGER NOT NULL DEFAULT 0;
+    ALTER TABLE merchants ADD COLUMN IF NOT EXISTS disabled         INTEGER     NOT NULL DEFAULT 0;
+    ALTER TABLE merchants ADD COLUMN IF NOT EXISTS reset_token        TEXT;
+    ALTER TABLE merchants ADD COLUMN IF NOT EXISTS reset_token_exp    TIMESTAMPTZ;
+    ALTER TABLE customers ADD COLUMN IF NOT EXISTS email              TEXT;
   `).catch(err => {
     console.error('PostgreSQL schema init failed:', err.message);
     process.exit(1);
@@ -204,11 +207,18 @@ if (process.env.DATABASE_URL) {
     );
   `);
 
-  // Migration: add disabled column to existing merchants table
+  // Migrations for new columns
   const merchantCols = sqlite.prepare('PRAGMA table_info(merchants)').all();
-  if (!merchantCols.find(c => c.name === 'disabled')) {
+  if (!merchantCols.find(c => c.name === 'disabled'))
     sqlite.exec('ALTER TABLE merchants ADD COLUMN disabled INTEGER NOT NULL DEFAULT 0');
-  }
+  if (!merchantCols.find(c => c.name === 'reset_token'))
+    sqlite.exec('ALTER TABLE merchants ADD COLUMN reset_token TEXT');
+  if (!merchantCols.find(c => c.name === 'reset_token_exp'))
+    sqlite.exec('ALTER TABLE merchants ADD COLUMN reset_token_exp DATETIME');
+
+  const customerCols = sqlite.prepare('PRAGMA table_info(customers)').all();
+  if (!customerCols.find(c => c.name === 'email'))
+    sqlite.exec('ALTER TABLE customers ADD COLUMN email TEXT');
 
   // Convert $1, $2, ... → ? (SQLite positional) and reorder params accordingly.
   // Handles repeated $N correctly: each occurrence pushes the corresponding param value.

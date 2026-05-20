@@ -1,13 +1,14 @@
 const express = require('express');
 const { v4: uuidv4 } = require('uuid');
-const db = require('../database');
+const db    = require('../database');
+const email = require('../email');
 
 const router = express.Router();
 
 // POST /api/customers/enroll
 // Customer scans a merchant QR → creates or finds their universal card + membership
 router.post('/enroll', async (req, res) => {
-  const { merchant_id, first_name, phone } = req.body;
+  const { merchant_id, first_name, phone, email: customerEmail } = req.body;
 
   if (!merchant_id || !first_name || !phone) {
     return res.status(400).json({ error: 'merchant_id, first_name et phone sont requis' });
@@ -29,8 +30,15 @@ router.post('/enroll', async (req, res) => {
       );
       customer = await db.one('SELECT * FROM customers WHERE id = $1', [id]);
     } else {
-      await db.run('UPDATE customers SET first_name = $1 WHERE id = $2', [first_name.trim(), customer.id]);
-      customer = { ...customer, first_name: first_name.trim() };
+      const upEmail = customerEmail ? customerEmail.trim() : customer.email;
+      await db.run('UPDATE customers SET first_name = $1, email = $2 WHERE id = $3',
+        [first_name.trim(), upEmail || null, customer.id]);
+      customer = { ...customer, first_name: first_name.trim(), email: upEmail };
+    }
+    // Store email for new customer if provided
+    if (!customer.email && customerEmail) {
+      await db.run('UPDATE customers SET email = $1 WHERE id = $2', [customerEmail.trim(), customer.id]);
+      customer = { ...customer, email: customerEmail.trim() };
     }
 
     // Idempotent membership

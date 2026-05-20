@@ -30,10 +30,12 @@ export function lookupCustomer(customerQrCode, token) {
 }
 
 export function scanCustomer(customerQrCode, points, token) {
+  const body = JSON.stringify({ customer_qr_code: customerQrCode, points });
+  console.log('[api] scanCustomer → body:', body);
   return request('/scan', {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}` },
-    body: JSON.stringify({ customer_qr_code: customerQrCode, points }),
+    body,
   });
 }
 

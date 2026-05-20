@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import QrReader from './QrReader.jsx';
 import { lookupCustomer, scanCustomer } from '../api.js';
 
@@ -11,13 +11,18 @@ export default function ScanModal({ token, onClose, onSuccess }) {
   const [points, setPoints]       = useState(10);
   const [result, setResult]       = useState(null);
   const [errMsg, setErrMsg]       = useState('');
-  const [scannedQr, setScannedQr] = useState('');
+
+  // useRef instead of useState: always holds the current value regardless of
+  // render cycles, so handleConfirm never reads a stale closure copy.
+  const scannedQrRef = useRef('');
 
   const handleScan = useCallback(async (qrCode) => {
-    setScannedQr(qrCode);
+    console.log('[ScanModal] QR scanned:', qrCode);
+    scannedQrRef.current = qrCode;
     setPhase('loading');
     try {
       const data = await lookupCustomer(qrCode, token);
+      console.log('[ScanModal] lookup ok, already_scanned_today:', data.already_scanned_today);
       if (data.already_scanned_today) {
         setPreview(data);
         setPhase('fraud');
@@ -27,30 +32,35 @@ export default function ScanModal({ token, onClose, onSuccess }) {
         setPhase('preview');
       }
     } catch (err) {
+      console.error('[ScanModal] lookup error:', err.message);
       setErrMsg(err.message);
       setPhase('error');
     }
   }, [token]);
 
   async function handleConfirm() {
+    const qrCode = scannedQrRef.current;
+    console.log('[ScanModal] confirm clicked — qrCode:', qrCode, 'points:', points);
     setPhase('confirming');
     try {
-      const data = await scanCustomer(scannedQr, points, token);
+      const data = await scanCustomer(qrCode, points, token);
+      console.log('[ScanModal] scan success:', data);
       setResult(data);
       setPhase('success');
       setTimeout(() => { onSuccess(); }, 2500);
     } catch (err) {
+      console.error('[ScanModal] scan error:', err.message);
       setErrMsg(err.message);
       setPhase('error');
     }
   }
 
   function reset() {
+    scannedQrRef.current = '';
     setPhase('scanning');
     setPreview(null);
     setResult(null);
     setErrMsg('');
-    setScannedQr('');
   }
 
   const isScanning = phase === 'scanning';

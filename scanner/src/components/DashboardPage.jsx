@@ -191,9 +191,9 @@ function HomeTab({ merchant, stats, onScanClick }) {
   const enrollUrl = `${window.location.origin}/enroll/${merchant.id}`;
 
   return (
-    <div className="px-5 pt-2 pb-6 space-y-5">
+    <div className="px-5 md:px-6 pt-2 pb-6">
       {/* Stats row */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-3 gap-3 mb-5">
         {[
           { label: 'Clients',    value: stats?.total_customers ?? '—' },
           { label: 'Pts total',  value: stats?.total_points    ?? '—' },
@@ -206,21 +206,25 @@ function HomeTab({ merchant, stats, onScanClick }) {
         ))}
       </div>
 
-      {/* Scan button */}
-      <button
-        onClick={onScanClick}
-        className="w-full py-5 rounded-3xl font-bold text-white text-base flex items-center justify-center gap-3 active:scale-[0.98] transition-all shadow-2xl"
-        style={{ background: color, boxShadow: `0 20px 50px ${color}40` }}
-      >
-        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5Z" />
-          <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75ZM6.75 16.5h.75v.75h-.75V16.5ZM16.5 6.75h.75v.75h-.75v-.75ZM13.5 13.5h.75v.75h-.75v-.75ZM13.5 19.5h.75v.75h-.75v-.75ZM19.5 13.5h.75v.75h-.75v-.75ZM19.5 19.5h.75v.75h-.75v-.75ZM16.5 16.5h.75v.75h-.75v-.75Z" />
-        </svg>
-        Scanner un client
-      </button>
+      {/* Desktop: 2-col layout for scan + QR */}
+      <div className="md:grid md:grid-cols-2 md:gap-6 space-y-5 md:space-y-0">
+        {/* Left: scan button */}
+        <div className="flex flex-col gap-5">
+          <button
+            onClick={onScanClick}
+            className="w-full py-5 rounded-3xl font-bold text-white text-base flex items-center justify-center gap-3 active:scale-[0.98] transition-all shadow-2xl"
+            style={{ background: color, boxShadow: `0 20px 50px ${color}40` }}
+          >
+            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5Z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75ZM6.75 16.5h.75v.75h-.75V16.5ZM16.5 6.75h.75v.75h-.75v-.75ZM13.5 13.5h.75v.75h-.75v-.75ZM13.5 19.5h.75v.75h-.75v-.75ZM19.5 13.5h.75v.75h-.75v-.75ZM19.5 19.5h.75v.75h-.75v-.75ZM16.5 16.5h.75v.75h-.75v-.75Z" />
+            </svg>
+            Scanner un client
+          </button>
+        </div>
 
-      {/* Enrollment QR */}
-      <div className="bg-gray-900 border border-white/5 rounded-3xl p-5">
+        {/* Right (desktop) / stacked (mobile): Enrollment QR */}
+        <div className="bg-gray-900 border border-white/5 rounded-3xl p-5">
         <p className="text-gray-500 text-xs font-semibold uppercase tracking-widest mb-1">QR d'inscription</p>
         <p className="text-gray-600 text-xs mb-4">Affichez ce code en caisse — vos clients s'inscrivent eux-mêmes</p>
         <div className="flex justify-center mb-4">
@@ -247,6 +251,7 @@ function HomeTab({ merchant, stats, onScanClick }) {
           </svg>
           Imprimer mon QR d'inscription
         </a>
+        </div>
       </div>
     </div>
   );
@@ -310,7 +315,7 @@ function ClientsTab({ customers, rewards, token, onRewardsChange }) {
   }
 
   return (
-    <div className="px-5 pt-2 pb-6">
+    <div className="px-5 md:px-6 pt-2 pb-6">
       {/* Search + CSV export */}
       <div className="flex gap-2 mb-4">
         <div className="relative flex-1">
@@ -490,7 +495,7 @@ function RewardsTab({ rewards, token, onRewardsChange }) {
   const inactive = rewards.filter(r => !r.active);
 
   return (
-    <div className="px-5 pt-2 pb-6 space-y-5">
+    <div className="px-5 md:px-6 pt-2 pb-6 md:grid md:grid-cols-2 md:gap-6 md:items-start">
       {/* Active rewards */}
       <div>
         <p className="text-gray-500 text-xs font-semibold uppercase tracking-widest mb-3">
@@ -594,7 +599,7 @@ function HistoryTab({ token }) {
   }
 
   return (
-    <div className="px-5 pt-2 pb-6">
+    <div className="px-5 md:px-6 pt-2 pb-6 md:max-w-3xl">
       {/* Filters */}
       <div className="flex gap-2 mb-4 flex-wrap">
         <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)}
@@ -681,7 +686,7 @@ function SettingsTab({ merchant, token, onRefresh }) {
   }
 
   return (
-    <div className="px-5 pt-2 pb-6">
+    <div className="px-5 md:px-6 pt-2 pb-6 md:max-w-lg">
       <form onSubmit={handleSave} className="space-y-5">
 
         <div className="bg-gray-900 border border-white/5 rounded-2xl p-5 space-y-4">
@@ -848,7 +853,7 @@ function AnalyticsTab({ token, color }) {
   const activePct = totalCustomers > 0 ? Math.round((data.active_customers / totalCustomers) * 100) : 0;
 
   return (
-    <div className="px-5 pt-2 pb-6 space-y-1">
+    <div className="px-5 md:px-6 pt-2 pb-6 space-y-1">
 
       {/* Refresh */}
       <div className="flex justify-end pt-2 pb-1">
@@ -961,9 +966,9 @@ function AnalyticsTab({ token, color }) {
       {/* ── Time analysis ──────────────────────────────────────────────────── */}
       <SectionLabel>Activité dans le temps</SectionLabel>
 
-      {/* Scans per day */}
+      {/* Scans per day — full width */}
       <ACard title="Scans par jour" subtitle="30 derniers jours">
-        <CanvasChart key="scan-day" type="line" height={150}
+        <CanvasChart key="scan-day" type="line" height={160}
           data={{
             labels: data.scans_per_day.map(d => d.day.slice(5)),
             datasets: [{ data: data.scans_per_day.map(d => d.count), borderColor: brand, backgroundColor: brand + '18', fill: true, tension: 0.4, pointRadius: 0, pointHoverRadius: 4, borderWidth: 2 }],
@@ -972,27 +977,28 @@ function AnalyticsTab({ token, color }) {
         />
       </ACard>
 
-      {/* Scans by weekday */}
-      <ACard title="Scans par jour de semaine" subtitle="30 derniers jours">
-        <CanvasChart key="scan-dow" type="bar" height={140}
-          data={{
-            labels: DOW,
-            datasets: [{ data: data.scans_by_weekday, backgroundColor: brand + 'aa', hoverBackgroundColor: brand, borderRadius: 4, borderSkipped: false }],
-          }}
-          options={CHART_OPTS}
-        />
-      </ACard>
+      {/* Weekday + hour side-by-side on desktop */}
+      <div className="md:grid md:grid-cols-2 md:gap-4 space-y-1 md:space-y-0">
+        <ACard title="Scans par jour de semaine" subtitle="30 derniers jours">
+          <CanvasChart key="scan-dow" type="bar" height={140}
+            data={{
+              labels: DOW,
+              datasets: [{ data: data.scans_by_weekday, backgroundColor: brand + 'aa', hoverBackgroundColor: brand, borderRadius: 4, borderSkipped: false }],
+            }}
+            options={CHART_OPTS}
+          />
+        </ACard>
 
-      {/* Scans by hour */}
-      <ACard title="Scans par heure" subtitle="30 derniers jours">
-        <CanvasChart key="scan-hour" type="bar" height={130}
-          data={{
-            labels: Array.from({ length: 24 }, (_, i) => i + 'h'),
-            datasets: [{ data: data.scans_by_hour, backgroundColor: '#22c55e99', hoverBackgroundColor: '#22c55e', borderRadius: 3, borderSkipped: false }],
-          }}
-          options={{ ...CHART_OPTS, scales: { ...CHART_OPTS.scales, x: { ...CHART_OPTS.scales.x, ticks: { ...CHART_OPTS.scales.x.ticks, maxTicksLimit: 8 } } } }}
-        />
-      </ACard>
+        <ACard title="Scans par heure" subtitle="30 derniers jours">
+          <CanvasChart key="scan-hour" type="bar" height={140}
+            data={{
+              labels: Array.from({ length: 24 }, (_, i) => i + 'h'),
+              datasets: [{ data: data.scans_by_hour, backgroundColor: '#22c55e99', hoverBackgroundColor: '#22c55e', borderRadius: 3, borderSkipped: false }],
+            }}
+            options={{ ...CHART_OPTS, scales: { ...CHART_OPTS.scales, x: { ...CHART_OPTS.scales.x, ticks: { ...CHART_OPTS.scales.x.ticks, maxTicksLimit: 8 } } } }}
+          />
+        </ACard>
+      </div>
 
       {/* Monthly comparison */}
       <div className="bg-gray-900 border border-white/5 rounded-2xl p-4">
@@ -1048,13 +1054,15 @@ function AnalyticsTab({ token, color }) {
       {/* ── Business indicators ─────────────────────────────────────────────── */}
       <SectionLabel>Indicateurs business</SectionLabel>
 
-      <KpiRow items={[
-        { label: 'Score fidélité moy.', value: data.avg_loyalty_score, sub: 'pts / visite' },
-        { label: 'Taux rétention', value: `${data.retention_rate}%`, sub: 'clients revenus' },
-      ]} />
-
-      {/* Customer growth chart */}
-      <ACard title="Croissance clients" subtitle="12 dernières semaines">
+      <div className="md:grid md:grid-cols-2 md:gap-4 space-y-1 md:space-y-0">
+        <div className="space-y-1">
+          <KpiRow items={[
+            { label: 'Score fidélité moy.', value: data.avg_loyalty_score, sub: 'pts / visite' },
+            { label: 'Taux rétention', value: `${data.retention_rate}%`, sub: 'clients revenus' },
+          ]} />
+        </div>
+        {/* Customer growth chart */}
+        <ACard title="Croissance clients" subtitle="12 dernières semaines">
         <CanvasChart key="cust-growth" type="line" height={140}
           data={{
             labels: data.cumulative_customers.map(c => c.label),
@@ -1062,7 +1070,8 @@ function AnalyticsTab({ token, color }) {
           }}
           options={{ ...CHART_OPTS, scales: { ...CHART_OPTS.scales, x: { ...CHART_OPTS.scales.x, ticks: { ...CHART_OPTS.scales.x.ticks, maxTicksLimit: 6 } } } }}
         />
-      </ACard>
+        </ACard>
+      </div>
 
       <div style={{ height: '0.5rem' }} />
     </div>
@@ -1095,82 +1104,151 @@ export default function DashboardPage({ auth, dashData, dashLoading, onLogout, o
     { id: 'settings',  label: 'Compte',  Icon: IconSettings },
   ];
 
+  const TAB_TITLES = {
+    home: 'Tableau de bord', clients: 'Clients', rewards: 'Récompenses',
+    analytics: 'Statistiques', history: 'Historique', settings: 'Paramètres',
+  };
+
   return (
-    <div className="min-h-dvh bg-[#0f0f14] flex flex-col">
+    <div className="min-h-dvh bg-[#0f0f14] flex">
 
-      {/* Header */}
-      <header className="flex items-center justify-between px-5 pt-safe-top pb-4 pt-5 border-b border-white/5">
-        <div className="flex items-center gap-3">
-          <div
-            className="w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm font-bold shrink-0"
-            style={{ backgroundColor: color }}
-          >
-            {merchant.name.charAt(0).toUpperCase()}
-          </div>
-          <div>
-            <p className="text-white font-semibold text-sm leading-tight">{merchant.name}</p>
-            <p className="text-gray-600 text-xs capitalize">{merchant.plan ?? 'free'}</p>
+      {/* ── Desktop sidebar ───────────────────────────────────────────────────── */}
+      <aside className="hidden md:flex flex-col fixed inset-y-0 left-0 w-56 bg-[#0c0c14] border-r border-white/5 z-40">
+        {/* Merchant identity */}
+        <div className="px-4 py-5 border-b border-white/5 shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white text-sm font-bold shrink-0"
+                 style={{ backgroundColor: color }}>
+              {merchant.name.charAt(0).toUpperCase()}
+            </div>
+            <div className="min-w-0">
+              <p className="text-white font-semibold text-sm truncate leading-none">{merchant.name}</p>
+              <p className="text-gray-600 text-xs capitalize mt-0.5">{merchant.plan ?? 'free'}</p>
+            </div>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          {dashLoading && (
-            <div className="w-4 h-4 border border-gray-700 border-t-gray-400 rounded-full animate-spin" />
-          )}
-          <button onClick={onRefresh} title="Actualiser"
-            className="w-9 h-9 rounded-xl bg-gray-900 hover:bg-gray-800 active:scale-90 flex items-center justify-center text-gray-500 hover:text-white transition-all">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
-            </svg>
-          </button>
-          <button onClick={onLogout} title="Déconnexion"
-            className="w-9 h-9 rounded-xl bg-gray-900 hover:bg-gray-800 active:scale-90 flex items-center justify-center text-gray-500 hover:text-white transition-all">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" />
-            </svg>
-          </button>
-        </div>
-      </header>
-
-      {/* Tab content */}
-      <main className="flex-1 overflow-y-auto" style={{ paddingBottom: '5rem' }}>
-        {/* Trial banner — always visible */}
-        <TrialBanner merchant={merchant} token={auth.token} />
-        {/* Onboarding — only on home tab */}
-        {tab === 'home' && merchant.subscription_status !== 'suspended' && (
-          <OnboardingChecklist merchant={merchant} stats={stats} rewards={rewards} />
-        )}
-        {tab === 'home'      && <HomeTab merchant={merchant} stats={stats} onScanClick={() => setShowScan(true)} />}
-        {tab === 'clients'   && (
-          <ClientsTab customers={customers} rewards={rewards} token={auth.token} onRewardsChange={onRefresh} />
-        )}
-        {tab === 'rewards'   && <RewardsTab rewards={rewards} token={auth.token} onRewardsChange={onRefresh} />}
-        {tab === 'analytics' && <AnalyticsTab token={auth.token} color={color} />}
-        {tab === 'history'   && <HistoryTab token={auth.token} />}
-        {tab === 'settings'  && <SettingsTab merchant={merchant} token={auth.token} onRefresh={onRefresh} />}
-      </main>
-
-      {/* Bottom tab bar */}
-      <nav className="fixed bottom-0 inset-x-0 bg-[#0f0f14]/95 backdrop-blur border-t border-white/5 pb-safe-bottom">
-        <div className="flex">
+        {/* Nav items */}
+        <nav className="flex-1 px-3 py-3 space-y-0.5 overflow-y-auto">
           {TABS.map(({ id, label, Icon }) => {
             const active = tab === id;
             return (
               <button key={id} onClick={() => setTab(id)}
-                className={`flex-1 flex flex-col items-center justify-center gap-1 py-3 transition-colors ${
-                  active ? 'text-white' : 'text-gray-600 hover:text-gray-400'
+                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-left ${
+                  active ? 'bg-indigo-500/12 text-indigo-300' : 'text-gray-500 hover:bg-white/[0.04] hover:text-gray-200'
                 }`}>
-                <div className={`transition-transform ${active ? 'scale-110' : ''}`}>
-                  <Icon />
-                </div>
-                <span className="text-[10px] font-medium">{label}</span>
-                {active && (
-                  <span className="absolute bottom-0 w-6 h-0.5 rounded-full" style={{ background: color }} />
-                )}
+                <span className="shrink-0"><Icon /></span>
+                {label}
+                {active && <span className="ml-auto w-1.5 h-1.5 rounded-full shrink-0" style={{ background: color }} />}
               </button>
             );
           })}
+        </nav>
+        {/* Bottom actions */}
+        <div className="px-3 py-3 border-t border-white/5 space-y-0.5 shrink-0">
+          <button onClick={onRefresh}
+            className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-500 hover:bg-white/[0.04] hover:text-gray-200 transition-all">
+            <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+            </svg>
+            Actualiser
+            {dashLoading && <div className="ml-auto w-3.5 h-3.5 border border-gray-600 border-t-gray-300 rounded-full animate-spin" />}
+          </button>
+          <button onClick={onLogout}
+            className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-red-400/70 hover:text-red-300 hover:bg-white/[0.04] transition-all">
+            <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" />
+            </svg>
+            Déconnexion
+          </button>
         </div>
-      </nav>
+      </aside>
+
+      {/* ── Main area ─────────────────────────────────────────────────────────── */}
+      <div className="flex-1 flex flex-col min-h-dvh md:ml-56">
+
+        {/* Mobile header */}
+        <header className="md:hidden flex items-center justify-between px-5 pt-safe-top pb-4 pt-5 border-b border-white/5 shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm font-bold shrink-0"
+                 style={{ backgroundColor: color }}>
+              {merchant.name.charAt(0).toUpperCase()}
+            </div>
+            <div>
+              <p className="text-white font-semibold text-sm leading-tight">{merchant.name}</p>
+              <p className="text-gray-600 text-xs capitalize">{merchant.plan ?? 'free'}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            {dashLoading && <div className="w-4 h-4 border border-gray-700 border-t-gray-400 rounded-full animate-spin" />}
+            <button onClick={onRefresh} title="Actualiser"
+              className="w-9 h-9 rounded-xl bg-gray-900 hover:bg-gray-800 active:scale-90 flex items-center justify-center text-gray-500 hover:text-white transition-all">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+              </svg>
+            </button>
+            <button onClick={onLogout} title="Déconnexion"
+              className="w-9 h-9 rounded-xl bg-gray-900 hover:bg-gray-800 active:scale-90 flex items-center justify-center text-gray-500 hover:text-white transition-all">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" />
+              </svg>
+            </button>
+          </div>
+        </header>
+
+        {/* Desktop header */}
+        <header className="hidden md:flex items-center justify-between px-6 py-3.5 border-b border-white/5 shrink-0 sticky top-0 bg-[#0f0f14]/95 backdrop-blur z-20">
+          <h1 className="text-white font-semibold text-base">{TAB_TITLES[tab] || 'Dashboard'}</h1>
+          <div className="flex items-center gap-2">
+            {dashLoading && <div className="w-4 h-4 border border-gray-700 border-t-gray-400 rounded-full animate-spin" />}
+            <button onClick={onRefresh}
+              className="flex items-center gap-1.5 text-gray-500 hover:text-white text-xs px-3 py-1.5 rounded-lg hover:bg-white/5 transition-all">
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+              </svg>
+              Actualiser
+            </button>
+          </div>
+        </header>
+
+        {/* Tab content */}
+        <main className="flex-1 overflow-y-auto pb-20 md:pb-6">
+          <TrialBanner merchant={merchant} token={auth.token} />
+          {tab === 'home' && merchant.subscription_status !== 'suspended' && (
+            <OnboardingChecklist merchant={merchant} stats={stats} rewards={rewards} />
+          )}
+          {tab === 'home'      && <HomeTab merchant={merchant} stats={stats} onScanClick={() => setShowScan(true)} />}
+          {tab === 'clients'   && (
+            <ClientsTab customers={customers} rewards={rewards} token={auth.token} onRewardsChange={onRefresh} />
+          )}
+          {tab === 'rewards'   && <RewardsTab rewards={rewards} token={auth.token} onRewardsChange={onRefresh} />}
+          {tab === 'analytics' && <AnalyticsTab token={auth.token} color={color} />}
+          {tab === 'history'   && <HistoryTab token={auth.token} />}
+          {tab === 'settings'  && <SettingsTab merchant={merchant} token={auth.token} onRefresh={onRefresh} />}
+        </main>
+
+        {/* Mobile bottom tab bar */}
+        <nav className="md:hidden fixed bottom-0 inset-x-0 bg-[#0f0f14]/95 backdrop-blur border-t border-white/5 pb-safe-bottom z-30">
+          <div className="flex">
+            {TABS.map(({ id, label, Icon }) => {
+              const active = tab === id;
+              return (
+                <button key={id} onClick={() => setTab(id)}
+                  className={`flex-1 flex flex-col items-center justify-center gap-1 py-3 transition-colors ${
+                    active ? 'text-white' : 'text-gray-600 hover:text-gray-400'
+                  }`}>
+                  <div className={`transition-transform ${active ? 'scale-110' : ''}`}>
+                    <Icon />
+                  </div>
+                  <span className="text-[10px] font-medium">{label}</span>
+                  {active && (
+                    <span className="absolute bottom-0 w-6 h-0.5 rounded-full" style={{ background: color }} />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </nav>
+      </div>
 
       {/* Scan modal */}
       {showScan && (

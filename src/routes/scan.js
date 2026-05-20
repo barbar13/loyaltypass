@@ -73,6 +73,11 @@ router.post('/', auth, async (req, res) => {
       [merchantId, customer.id]
     );
     if (Number(cnt) > 0) {
+      // Log blocked attempt for fraud detection (fire-and-forget)
+      db.run(
+        'INSERT INTO scan_attempts (merchant_id, customer_id, points, blocked) VALUES ($1, $2, $3, 1)',
+        [merchantId, customer.id, pts]
+      ).catch(() => {});
       return res.status(429).json({
         error: "Ce client a déjà reçu des points aujourd'hui chez vous.",
         already_scanned: true,

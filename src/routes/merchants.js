@@ -92,6 +92,10 @@ router.post('/login', async (req, res) => {
     const merchant = await db.one('SELECT * FROM merchants WHERE email = $1', [email]);
     if (!merchant) return res.status(401).json({ error: 'Identifiants invalides' });
 
+    if (merchant.disabled) {
+      return res.status(403).json({ error: 'Compte désactivé. Contactez le support.' });
+    }
+
     const match = await bcrypt.compare(password, merchant.password);
     if (!match) return res.status(401).json({ error: 'Identifiants invalides' });
 

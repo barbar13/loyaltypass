@@ -63,6 +63,17 @@ if (process.env.DATABASE_URL) {
       note        TEXT,
       created_at  TIMESTAMPTZ DEFAULT NOW()
     );
+
+    CREATE TABLE IF NOT EXISTS scan_attempts (
+      id          SERIAL PRIMARY KEY,
+      merchant_id INTEGER NOT NULL REFERENCES merchants(id) ON DELETE CASCADE,
+      customer_id INTEGER NOT NULL REFERENCES customers(id)  ON DELETE CASCADE,
+      points      INTEGER,
+      blocked     INTEGER NOT NULL DEFAULT 0,
+      created_at  TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    ALTER TABLE merchants ADD COLUMN IF NOT EXISTS disabled INTEGER NOT NULL DEFAULT 0;
   `).catch(err => {
     console.error('PostgreSQL schema init failed:', err.message);
     process.exit(1);
@@ -180,7 +191,24 @@ if (process.env.DATABASE_URL) {
       FOREIGN KEY (merchant_id) REFERENCES merchants(id) ON DELETE CASCADE,
       FOREIGN KEY (customer_id) REFERENCES customers(id)  ON DELETE CASCADE
     );
+
+    CREATE TABLE IF NOT EXISTS scan_attempts (
+      id          INTEGER PRIMARY KEY AUTOINCREMENT,
+      merchant_id INTEGER NOT NULL,
+      customer_id INTEGER NOT NULL,
+      points      INTEGER,
+      blocked     INTEGER NOT NULL DEFAULT 0,
+      created_at  DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (merchant_id) REFERENCES merchants(id) ON DELETE CASCADE,
+      FOREIGN KEY (customer_id) REFERENCES customers(id)  ON DELETE CASCADE
+    );
   `);
+
+  // Migration: add disabled column to existing merchants table
+  const merchantCols = sqlite.prepare('PRAGMA table_info(merchants)').all();
+  if (!merchantCols.find(c => c.name === 'disabled')) {
+    sqlite.exec('ALTER TABLE merchants ADD COLUMN disabled INTEGER NOT NULL DEFAULT 0');
+  }
 
   // Convert $1, $2, ... → ? (SQLite positional) and reorder params accordingly.
   // Handles repeated $N correctly: each occurrence pushes the corresponding param value.

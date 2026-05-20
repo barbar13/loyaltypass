@@ -143,6 +143,15 @@
       <p class="text-gray-700 text-xs mt-2">Scannez le QR d'un commerçant partenaire pour commencer !</p>
     </div>
 
+    <!-- Redemption history -->
+    <div id="redemptions-section" style="display:none" class="mb-5 animate-fade-up delay-3">
+      <div class="flex items-center justify-between mb-3">
+        <p class="text-gray-500 text-xs font-semibold uppercase tracking-widest">Mes récompenses</p>
+        <span id="redemptions-count" class="bg-emerald-500/15 text-emerald-400 text-[10px] font-semibold px-2.5 py-1 rounded-full"></span>
+      </div>
+      <div id="redemptions-list" class="space-y-2"></div>
+    </div>
+
   </div>
 </div>
 
@@ -251,12 +260,36 @@
     }).join('');
   }
 
+  // ── Render redemption history ─────────────────────────────────────────────
+  function renderRedemptions(redemptions) {
+    if (!redemptions || redemptions.length === 0) {
+      $('redemptions-section').style.display = 'none';
+      return;
+    }
+    $('redemptions-section').style.display = 'block';
+    $('redemptions-count').textContent =
+      `${redemptions.length} ${redemptions.length > 1 ? 'récompenses obtenues' : 'récompense obtenue'}`;
+
+    $('redemptions-list').innerHTML = redemptions.map(r => {
+      const name = (r.note || '').replace(/^Récompense\s*:\s*/i, '') || 'Récompense';
+      return `
+        <div class="bg-gray-900 border border-white/5 rounded-xl px-4 py-3 flex items-center gap-3">
+          <span class="text-lg shrink-0">🎁</span>
+          <div class="flex-1 min-w-0">
+            <p class="text-white text-sm font-semibold truncate">${esc(name)}</p>
+            <p class="text-gray-500 text-xs">${esc(r.merchant_name)} · ${fmtDate(r.created_at) || '—'}</p>
+          </div>
+          <p class="text-red-400 text-xs font-semibold shrink-0">${r.points} pts</p>
+        </div>`;
+    }).join('');
+  }
+
   // ── Initial load ──────────────────────────────────────────────────────────
   async function init() {
     try {
       const res = await fetch(`/api/customers/${encodeURIComponent(qrCode)}`);
       if (!res.ok) throw new Error('Carte introuvable');
-      const { customer, memberships } = await res.json();
+      const { customer, memberships, redemptions } = await res.json();
 
       $('customer-name').textContent = customer.first_name;
       $('qr-universal').innerHTML = `<img
@@ -265,6 +298,7 @@
         style="display:block;border-radius:8px">`;
 
       renderMemberships(memberships);
+      renderRedemptions(redemptions);
       markUpdated();
       show('s-card');
       showBanner();
@@ -279,8 +313,9 @@
     try {
       const res = await fetch(`/api/customers/${encodeURIComponent(qrCode)}`);
       if (!res.ok) return;
-      const { memberships } = await res.json();
+      const { memberships, redemptions } = await res.json();
       renderMemberships(memberships);
+      renderRedemptions(redemptions);
       markUpdated();
     } catch (_) {}
   }

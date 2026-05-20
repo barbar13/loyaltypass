@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import ScanModal  from './ScanModal.jsx';
-import { addReward, deleteReward } from '../api.js';
+import { addReward, deleteReward, redeemReward } from '../api.js';
 
 // ── Tab icons ─────────────────────────────────────────────────────────────────
 
@@ -104,8 +104,13 @@ function HomeTab({ merchant, stats, onScanClick }) {
   );
 }
 
-function ClientsTab({ customers }) {
-  const [search, setSearch] = useState('');
+function ClientsTab({ customers, rewards, token, onRewardsChange }) {
+  const [search, setSearch]           = useState('');
+  const [offerTarget, setOfferTarget] = useState(null); // { customer, available }
+  const [offering, setOffering]       = useState(false);
+  const [offerErr, setOfferErr]       = useState('');
+
+  const activeRewards = (rewards || []).filter(r => r.active);
 
   const filtered = search.trim()
     ? customers.filter(c =>
@@ -113,6 +118,27 @@ function ClientsTab({ customers }) {
         (c.phone || '').includes(search)
       )
     : customers;
+
+  function openOffer(c) {
+    const available = activeRewards.filter(r => c.points >= r.points_required);
+    if (!available.length) return;
+    setOfferTarget({ customer: c, available });
+    setOfferErr('');
+  }
+
+  async function handleOffer(reward) {
+    setOffering(true);
+    setOfferErr('');
+    try {
+      await redeemReward(offerTarget.customer.membership_id, reward.id, token);
+      setOfferTarget(null);
+      onRewardsChange();
+    } catch (err) {
+      setOfferErr(err.message);
+    } finally {
+      setOffering(false);
+    }
+  }
 
   return (
     <div className="px-5 pt-2 pb-6">
@@ -122,13 +148,9 @@ function ClientsTab({ customers }) {
           fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
         </svg>
-        <input
-          type="search"
-          placeholder="Rechercher par prénom ou téléphone…"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          className="w-full bg-gray-900 border border-white/5 rounded-2xl pl-9 pr-4 py-3 text-white placeholder-gray-600 text-sm focus:outline-none focus:ring-1 focus:ring-brand-500 focus:border-brand-500 transition"
-        />
+        <input type="search" placeholder="Rechercher par prénom ou téléphone…"
+          value={search} onChange={e => setSearch(e.target.value)}
+          className="w-full bg-gray-900 border border-white/5 rounded-2xl pl-9 pr-4 py-3 text-white placeholder-gray-600 text-sm focus:outline-none focus:ring-1 focus:ring-brand-500 focus:border-brand-500 transition" />
       </div>
 
       {customers.length === 0 && (
@@ -149,27 +171,103 @@ function ClientsTab({ customers }) {
 
       <div className="space-y-3">
         {filtered.map(c => {
-          const lastVisit = c.last_visit ? fmtRelative(c.last_visit) : null;
+          const lastVisit  = c.last_visit ? fmtRelative(c.last_visit) : null;
+          const available  = activeRewards.filter(r => c.points >= r.points_required);
+          const hasRewards = available.length > 0;
           return (
-            <div key={c.id} className="bg-gray-900 border border-white/5 rounded-2xl px-4 py-4 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gray-800 flex items-center justify-center text-white font-bold text-sm shrink-0">
-                {c.first_name.charAt(0).toUpperCase()}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-white font-semibold text-sm truncate">{c.first_name}</p>
-                <p className="text-gray-600 text-xs truncate">
-                  {c.phone || '—'}
-                  {lastVisit ? ` · ${lastVisit}` : ''}
-                </p>
-              </div>
-              <div className="text-right shrink-0">
-                <p className="text-white font-black text-lg leading-none">{c.points}</p>
-                <p className="text-gray-600 text-[10px] uppercase tracking-wide">pts</p>
+            <div key={c.id}
+              className={`bg-gray-900 rounded-2xl overflow-hidden border ${
+                hasRewards ? 'border-amber-400/25 cursor-pointer active:scale-[0.99] transition-transform' : 'border-white/5'
+              }`}
+              onClick={() => hasRewards && openOffer(c)}>
+              {/* Reward banner */}
+              {hasRewards && (
+                <div className="bg-amber-500/10 border-b border-amber-400/15 px-4 py-2 flex items-center gap-2">
+                  <span className="text-base shrink-0">🎁</span>
+                  <p className="text-amber-300 text-xs font-semibold flex-1">
+                    {available.length === 1 ? '1 récompense disponible' : `${available.length} récompenses disponibles`}
+                  </p>
+                  <span className="text-amber-400/60 text-[10px]">Appuyer pour offrir →</span>
+                </div>
+              )}
+              <div className="px-4 py-4 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gray-800 flex items-center justify-center text-white font-bold text-sm shrink-0">
+                  {c.first_name.charAt(0).toUpperCase()}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-white font-semibold text-sm truncate">{c.first_name}</p>
+                  <p className="text-gray-600 text-xs truncate">
+                    {c.phone || '—'}{lastVisit ? ` · ${lastVisit}` : ''}
+                  </p>
+                </div>
+                <div className="text-right shrink-0">
+                  <p className="text-white font-black text-lg leading-none">{c.points}</p>
+                  <p className="text-gray-600 text-[10px] uppercase tracking-wide">pts</p>
+                </div>
               </div>
             </div>
           );
         })}
       </div>
+
+      {/* ── Offer reward bottom sheet ─────────────────────────────────────── */}
+      {offerTarget && (
+        <>
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40" onClick={() => setOfferTarget(null)} />
+          <div className="fixed inset-x-0 bottom-0 z-50 animate-slide-up">
+            <div className="bg-gray-900 rounded-t-3xl px-5 pb-safe-bottom pb-8 pt-5 shadow-2xl">
+              <div className="w-10 h-1 bg-gray-700 rounded-full mx-auto mb-5" />
+
+              {/* Customer header */}
+              <div className="flex items-center gap-3 mb-5">
+                <div className="w-11 h-11 rounded-2xl bg-gray-800 flex items-center justify-center text-white font-bold text-base shrink-0">
+                  {offerTarget.customer.first_name.charAt(0).toUpperCase()}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-white font-bold">{offerTarget.customer.first_name}</p>
+                  <p className="text-gray-500 text-xs">
+                    {offerTarget.customer.points} pts
+                    {offerTarget.customer.phone ? ` · ${offerTarget.customer.phone}` : ''}
+                  </p>
+                </div>
+                <button onClick={() => setOfferTarget(null)}
+                  className="w-8 h-8 rounded-xl bg-gray-800 hover:bg-gray-700 active:scale-90 flex items-center justify-center text-gray-500 hover:text-white transition-all shrink-0">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-3">
+                Récompenses disponibles
+              </p>
+
+              {offerErr && (
+                <div className="bg-red-500/10 border border-red-500/25 rounded-xl px-4 py-2.5 mb-3 text-red-400 text-sm">
+                  {offerErr}
+                </div>
+              )}
+
+              <div className="space-y-3">
+                {offerTarget.available.map(r => (
+                  <div key={r.id}
+                    className="flex items-center gap-3 bg-gray-800 rounded-2xl px-4 py-3">
+                    <span className="text-xl shrink-0">🎁</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white font-semibold text-sm truncate">{r.description}</p>
+                      <p className="text-amber-400/80 text-xs">{r.points_required} pts requis</p>
+                    </div>
+                    <button onClick={() => handleOffer(r)} disabled={offering}
+                      className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 active:scale-95 text-white font-bold text-xs disabled:opacity-60 transition-all shrink-0">
+                      {offering ? '…' : 'Offrir'}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -351,7 +449,9 @@ export default function DashboardPage({ auth, dashData, dashLoading, onLogout, o
       {/* Tab content */}
       <main className="flex-1 overflow-y-auto" style={{ paddingBottom: '5rem' }}>
         {tab === 'home'    && <HomeTab    merchant={merchant} stats={stats} onScanClick={() => setShowScan(true)} />}
-        {tab === 'clients' && <ClientsTab customers={customers} />}
+        {tab === 'clients' && (
+          <ClientsTab customers={customers} rewards={rewards} token={auth.token} onRewardsChange={onRefresh} />
+        )}
         {tab === 'rewards' && <RewardsTab rewards={rewards} token={auth.token} onRewardsChange={onRefresh} />}
       </main>
 

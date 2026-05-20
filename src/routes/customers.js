@@ -105,7 +105,18 @@ router.get('/:qr_code', async (req, res) => {
       }))
     );
 
-    res.json({ customer, memberships: membershipsFull });
+    // Redemption history (negative-point transactions)
+    const redemptions = await db.all(`
+      SELECT t.id, t.points, t.created_at, t.note,
+             m.id AS merchant_id, m.name AS merchant_name, m.color
+      FROM transactions t
+      JOIN merchants m ON m.id = t.merchant_id
+      WHERE t.customer_id = $1 AND t.points < 0
+      ORDER BY t.created_at DESC
+      LIMIT 20
+    `, [customer.id]);
+
+    res.json({ customer, memberships: membershipsFull, redemptions });
   } catch (err) {
     res.status(500).json({ error: 'Erreur serveur', detail: err.message });
   }

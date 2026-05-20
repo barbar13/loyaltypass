@@ -134,7 +134,7 @@ router.get('/dashboard', auth, async (req, res) => {
       db.all(`
         SELECT
           c.id, c.first_name, c.phone, c.qr_code,
-          mb.points, mb.joined_at,
+          mb.id AS membership_id, mb.points, mb.joined_at,
           (SELECT MAX(t.created_at) FROM transactions t
            WHERE t.merchant_id = $1 AND t.customer_id = c.id) AS last_visit
         FROM memberships mb

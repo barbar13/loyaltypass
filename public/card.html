@@ -33,16 +33,36 @@
     .pt-safe { padding-top: max(1.5rem, env(safe-area-inset-top)); }
     .pb-safe { padding-bottom: max(1.5rem, env(safe-area-inset-bottom)); }
     .delay-1 { animation-delay:.06s; } .delay-2 { animation-delay:.12s; }
-    .delay-3 { animation-delay:.18s; } .delay-4 { animation-delay:.24s; }
-    .delay-5 { animation-delay:.30s; }
     .card-shine::before {
       content:''; position:absolute; inset:0;
       background: radial-gradient(ellipse at 80% 15%, rgba(255,255,255,0.15) 0%, transparent 65%);
       border-radius: inherit; pointer-events: none;
     }
+
+    /* Pull-to-refresh bar */
+    #ptr-bar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+      height: 48px; display: flex; align-items: center; justify-content: center; gap: 8px;
+      background: rgba(10,10,20,.95); border-bottom: 1px solid rgba(99,102,241,.2);
+      transform: translateY(-100%); transition: transform .25s cubic-bezier(.16,1,.3,1);
+      pointer-events: none;
+    }
+    #ptr-bar.visible { transform: translateY(0); }
+    #ptr-spinner { animation: ptr-spin 0.8s linear infinite; display: none; }
+    #ptr-spinner.active { display: block; }
+    @keyframes ptr-spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
+
+<!-- Pull-to-refresh bar -->
+<div id="ptr-bar">
+  <svg id="ptr-spinner" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2.5">
+    <circle cx="12" cy="12" r="10" stroke-opacity=".25"/>
+    <path d="M4 12a8 8 0 018-8"/>
+  </svg>
+  <span id="ptr-label" style="color:#818cf8;font-size:12px;font-weight:500">Tirez pour actualiser</span>
+</div>
 
 <!-- LOADING -->
 <div id="s-loading" style="min-height:100dvh" class="flex items-center justify-center">
@@ -56,7 +76,7 @@
 <div id="s-card" style="display:none" class="min-h-dvh flex flex-col px-5 pt-safe pb-safe">
   <div class="max-w-sm mx-auto w-full">
 
-    <!-- Add to Home Screen banner (dismissible) -->
+    <!-- Add-to-home-screen banner (dismissible) -->
     <div id="aths-banner" style="display:none" class="mt-4 mb-1 rounded-2xl border border-indigo-500/20 bg-indigo-500/8 px-4 py-4 animate-fade-up">
       <div class="flex items-start gap-3">
         <div class="w-9 h-9 rounded-xl bg-indigo-500/15 flex items-center justify-center shrink-0 mt-0.5">
@@ -66,19 +86,16 @@
         </div>
         <div class="flex-1 min-w-0">
           <p class="text-white font-semibold text-sm">Accédez à votre carte en un tap</p>
-          <!-- iOS instructions -->
           <p id="aths-ios" style="display:none" class="text-gray-400 text-xs mt-1 leading-relaxed">
             iPhone : appuyez sur
             <svg class="inline w-3.5 h-3.5 text-indigo-400 mb-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
             puis <strong class="text-white">"Sur l'écran d'accueil"</strong>
           </p>
-          <!-- Android instructions -->
           <p id="aths-android" style="display:none" class="text-gray-400 text-xs mt-1 leading-relaxed">
             Android : menu
             <svg class="inline w-3.5 h-3.5 text-gray-400 mb-0.5" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
             puis <strong class="text-white">"Ajouter à l'écran d'accueil"</strong>
           </p>
-          <!-- Generic / Desktop -->
           <p id="aths-other" style="display:none" class="text-gray-400 text-xs mt-1 leading-relaxed">
             Ajoutez cette page à vos favoris pour y revenir facilement.
           </p>
@@ -93,7 +110,7 @@
     </div>
 
     <!-- Header -->
-    <div class="text-center py-8 animate-fade-up">
+    <div class="text-center py-6 animate-fade-up">
       <div class="w-14 h-14 rounded-2xl bg-indigo-600/20 border border-indigo-500/25 flex items-center justify-center mx-auto mb-4">
         <svg class="w-7 h-7 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
           <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z"/>
@@ -111,9 +128,12 @@
       <p class="text-gray-700 text-[10px]">Ce QR est votre identité LoyaltyPass</p>
     </div>
 
-    <!-- Merchant memberships -->
+    <!-- Memberships section -->
     <div class="mb-5 animate-fade-up delay-2">
-      <p class="text-gray-500 text-xs font-semibold uppercase tracking-widest mb-3">Mes points</p>
+      <div class="flex items-center justify-between mb-3">
+        <p class="text-gray-500 text-xs font-semibold uppercase tracking-widest">Mes points</p>
+        <p id="last-updated" class="text-gray-700 text-[10px]"></p>
+      </div>
       <div id="memberships-list" class="space-y-3"></div>
     </div>
 
@@ -143,23 +163,24 @@
 
 <script>
   const $ = id => document.getElementById(id);
+  const qrCode = window.location.pathname.split('/').filter(Boolean).pop();
 
+  // ── Utilities ────────────────────────────────────────────────────────────────
   function show(id) {
     ['s-loading','s-card','s-error'].forEach(s => $(s).style.display = 'none');
-    $(id).style.display = id === 's-card' ? 'flex' : 'flex';
-    if (id === 's-card') { $(id).style.flexDirection = 'column'; }
+    const el = $(id);
+    el.style.display = 'flex';
+    if (id === 's-card') el.style.flexDirection = 'column';
   }
 
   function fmtDate(iso) {
     if (!iso) return null;
     const diff = Date.now() - new Date(iso).getTime();
-    const mins  = Math.floor(diff / 60000);
-    const hours = Math.floor(mins / 60);
-    const days  = Math.floor(hours / 24);
-    if (mins  <  2) return 'À l\'instant';
-    if (mins  < 60) return `Il y a ${mins} min`;
-    if (hours < 24) return `Il y a ${hours}h`;
-    if (days  <  7) return `Il y a ${days}j`;
+    const m = Math.floor(diff/60000), h = Math.floor(m/60), d = Math.floor(h/24);
+    if (m  <  2) return 'À l\'instant';
+    if (m  < 60) return `Il y a ${m} min`;
+    if (h  < 24) return `Il y a ${h}h`;
+    if (d  <  7) return `Il y a ${d}j`;
     return new Date(iso).toLocaleDateString('fr-FR', { day:'numeric', month:'short' });
   }
 
@@ -167,79 +188,84 @@
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
-  // Extract qr_code from URL path: /card/:qr_code
-  const qrCode = window.location.pathname.split('/').filter(Boolean).pop();
+  // ── Render memberships (called on init + every refresh) ───────────────────
+  function renderMemberships(memberships) {
+    if (memberships.length === 0) {
+      $('no-memberships').style.display = 'block';
+      $('memberships-list').innerHTML = '';
+      return;
+    }
+    $('no-memberships').style.display = 'none';
 
+    $('memberships-list').innerHTML = memberships.map((mb, i) => {
+      const color     = mb.color || '#6366f1';
+      const initial   = (mb.merchant_name || '?').charAt(0).toUpperCase();
+      const lastVisit = mb.last_visit ? fmtDate(mb.last_visit) : null;
+      const unlocked  = mb.rewards.filter(r => mb.points >= r.points_required);
+      const next      = mb.rewards.find(r => mb.points < r.points_required);
+
+      // Progress toward next reward
+      let progressHtml = '';
+      if (next) {
+        const pct = Math.min(100, Math.round((mb.points / next.points_required) * 100));
+        progressHtml = `
+          <div class="border-t border-white/5 pt-3 mt-3">
+            <div class="flex justify-between text-xs mb-1.5">
+              <span class="text-gray-500 truncate mr-2">${esc(next.description)}</span>
+              <span class="text-gray-400 font-medium shrink-0">${mb.points}/${next.points_required} pts</span>
+            </div>
+            <div class="h-2 bg-gray-800 rounded-full overflow-hidden">
+              <div class="h-full rounded-full" style="width:${pct}%;background:${color};transition:width .5s ease"></div>
+            </div>
+          </div>`;
+      }
+
+      // Card with optional reward banner at top
+      const hasReward = unlocked.length > 0;
+      return `
+        <div class="rounded-2xl overflow-hidden ${hasReward ? 'ring-1 ring-amber-400/30' : ''} animate-fade-up" style="animation-delay:${0.06 * i}s">
+          ${hasReward ? `
+            <div class="bg-gradient-to-r from-amber-500/20 to-yellow-400/8 border-b border-amber-400/20 px-4 py-3 flex items-center gap-2.5">
+              <span class="text-xl shrink-0">🎁</span>
+              <div class="flex-1 min-w-0">
+                <p class="text-amber-300 font-bold text-sm leading-none">Récompense disponible !</p>
+                ${unlocked.map(r => `<p class="text-amber-400/70 text-xs mt-0.5 truncate">${esc(r.description)}</p>`).join('')}
+              </div>
+            </div>` : ''}
+          <div class="bg-gray-900 border ${hasReward ? 'border-amber-400/15 border-t-0' : 'border-white/5'} p-4">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm shrink-0"
+                   style="background:${color}">${initial}</div>
+              <div class="flex-1 min-w-0">
+                <p class="text-white font-semibold text-sm truncate">${esc(mb.merchant_name)}</p>
+                ${lastVisit ? `<p class="text-gray-600 text-xs">Dernière visite : ${lastVisit}</p>` : ''}
+              </div>
+              <div class="text-right shrink-0">
+                <p class="text-2xl font-black text-white leading-none">${mb.points}</p>
+                <p class="text-gray-600 text-[10px] uppercase tracking-wide">points</p>
+              </div>
+            </div>
+            ${progressHtml}
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  // ── Initial load ──────────────────────────────────────────────────────────
   async function init() {
     try {
-      const res  = await fetch(`/api/customers/${encodeURIComponent(qrCode)}`);
+      const res = await fetch(`/api/customers/${encodeURIComponent(qrCode)}`);
       if (!res.ok) throw new Error('Carte introuvable');
       const { customer, memberships } = await res.json();
 
       $('customer-name').textContent = customer.first_name;
-
-      // Universal QR
       $('qr-universal').innerHTML = `<img
         src="/api/qr/${encodeURIComponent(customer.qr_code)}?size=200"
-        width="200" height="200"
-        alt="QR code universel"
+        width="200" height="200" alt="QR code universel"
         style="display:block;border-radius:8px">`;
 
-      // Memberships
-      if (memberships.length === 0) {
-        $('no-memberships').style.display = 'block';
-      } else {
-        $('memberships-list').innerHTML = memberships.map((mb, i) => {
-          const color    = mb.color || '#6366f1';
-          const initial  = (mb.merchant_name || '?').charAt(0).toUpperCase();
-          const lastVisit = mb.last_visit ? fmtDate(mb.last_visit) : null;
-
-          // Which rewards are unlocked vs locked?
-          const unlocked = mb.rewards.filter(r => mb.points >= r.points_required);
-          const next     = mb.rewards.find(r => mb.points < r.points_required);
-
-          let rewardsHtml = '';
-          if (unlocked.length > 0) {
-            rewardsHtml += unlocked.map(r => `
-              <div class="flex items-center gap-2 text-emerald-400 text-xs">
-                <span>🎁</span>
-                <span class="font-semibold">${esc(r.description)}</span>
-                <span class="text-emerald-600">Disponible !</span>
-              </div>`).join('');
-          }
-          if (next) {
-            const progress = Math.min(100, Math.round((mb.points / next.points_required) * 100));
-            rewardsHtml += `
-              <div class="mt-2">
-                <div class="flex justify-between text-xs text-gray-500 mb-1">
-                  <span>${esc(next.description)}</span>
-                  <span>${mb.points}/${next.points_required} pts</span>
-                </div>
-                <div class="h-1.5 bg-gray-800 rounded-full overflow-hidden">
-                  <div class="h-full rounded-full transition-all" style="width:${progress}%;background:${color}"></div>
-                </div>
-              </div>`;
-          }
-
-          return `
-            <div class="bg-gray-900 border border-white/5 rounded-2xl p-4 animate-fade-up" style="animation-delay:${0.08 * i}s">
-              <div class="flex items-center gap-3 mb-3">
-                <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm shrink-0"
-                     style="background:${color}">${initial}</div>
-                <div class="flex-1 min-w-0">
-                  <p class="text-white font-semibold text-sm truncate">${esc(mb.merchant_name)}</p>
-                  ${lastVisit ? `<p class="text-gray-600 text-xs">Dernière visite : ${lastVisit}</p>` : ''}
-                </div>
-                <div class="text-right shrink-0">
-                  <p class="text-2xl font-black text-white leading-none">${mb.points}</p>
-                  <p class="text-gray-600 text-[10px] uppercase tracking-wide">points</p>
-                </div>
-              </div>
-              ${rewardsHtml ? `<div class="border-t border-white/5 pt-3 space-y-1">${rewardsHtml}</div>` : ''}
-            </div>`;
-        }).join('');
-      }
-
+      renderMemberships(memberships);
+      markUpdated();
       show('s-card');
       showBanner();
     } catch (e) {
@@ -248,20 +274,91 @@
     }
   }
 
+  // ── Background refresh ────────────────────────────────────────────────────
+  async function refresh() {
+    try {
+      const res = await fetch(`/api/customers/${encodeURIComponent(qrCode)}`);
+      if (!res.ok) return;
+      const { memberships } = await res.json();
+      renderMemberships(memberships);
+      markUpdated();
+    } catch (_) {}
+  }
+
+  function markUpdated() {
+    const el = $('last-updated');
+    if (el) el.textContent = 'Mis à jour à l\'instant';
+  }
+
+  // Auto-refresh every 30 seconds
+  setInterval(refresh, 30000);
+
+  // Page Visibility API — refresh on return if hidden for 30+ seconds
+  let hiddenAt = null;
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      hiddenAt = Date.now();
+    } else if (hiddenAt && Date.now() - hiddenAt >= 30000) {
+      refresh();
+    }
+    hiddenAt = null;
+  });
+
+  // ── Pull-to-refresh ───────────────────────────────────────────────────────
+  const ptrBar   = $('ptr-bar');
+  const ptrSpin  = $('ptr-spinner');
+  const ptrLabel = $('ptr-label');
+  const PTR_THRESHOLD = 70;
+
+  let ptStartY   = 0;
+  let ptPulling  = false;
+  let ptRefreshing = false;
+
+  document.addEventListener('touchstart', e => {
+    if (window.scrollY === 0 && !ptRefreshing) {
+      ptStartY  = e.touches[0].clientY;
+      ptPulling = true;
+    }
+  }, { passive: true });
+
+  document.addEventListener('touchmove', e => {
+    if (!ptPulling) return;
+    const dy = e.touches[0].clientY - ptStartY;
+    if (dy > 0 && window.scrollY === 0) {
+      const ratio = Math.min(dy / PTR_THRESHOLD, 1);
+      ptrBar.style.transform = `translateY(${(ratio - 1) * 100}%)`;
+      ptrLabel.textContent   = dy >= PTR_THRESHOLD ? 'Relâchez pour actualiser' : 'Tirez pour actualiser';
+      ptrSpin.classList.remove('active');
+    }
+  }, { passive: true });
+
+  document.addEventListener('touchend', async e => {
+    if (!ptPulling) return;
+    ptPulling = false;
+    const dy = e.changedTouches[0].clientY - ptStartY;
+
+    if (dy >= PTR_THRESHOLD && window.scrollY === 0) {
+      ptRefreshing = true;
+      ptrBar.style.transform = 'translateY(0)';
+      ptrLabel.textContent   = 'Actualisation…';
+      ptrSpin.classList.add('active');
+      await refresh();
+      ptRefreshing = false;
+    }
+    ptrBar.style.transform = 'translateY(-100%)';
+    ptrSpin.classList.remove('active');
+    ptrLabel.textContent   = 'Tirez pour actualiser';
+  }, { passive: true });
+
+  // ── Add-to-home-screen banner ─────────────────────────────────────────────
   function showBanner() {
-    // Don't show if already running as installed PWA
     const isStandalone = window.navigator.standalone === true ||
       window.matchMedia('(display-mode: standalone)').matches;
     if (isStandalone) return;
-
-    // Don't show if already dismissed for this card
-    try {
-      if (localStorage.getItem('lp_aths_' + qrCode)) return;
-    } catch (_) {}
+    try { if (localStorage.getItem('lp_aths_' + qrCode)) return; } catch (_) {}
 
     const isIos     = /iphone|ipad|ipod/i.test(navigator.userAgent);
     const isAndroid = /android/i.test(navigator.userAgent);
-
     $('aths-ios').style.display     = isIos     ? 'block' : 'none';
     $('aths-android').style.display = isAndroid ? 'block' : 'none';
     $('aths-other').style.display   = (!isIos && !isAndroid) ? 'block' : 'none';

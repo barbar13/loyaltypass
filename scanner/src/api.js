@@ -47,6 +47,14 @@ export function addReward(description, pointsRequired, token) {
   });
 }
 
+export function redeemReward(membershipId, rewardId, token) {
+  return request('/scan/redeem', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ membership_id: membershipId, reward_id: rewardId }),
+  });
+}
+
 export function deleteReward(id, token) {
   return request(`/merchants/rewards/${id}`, {
     method: 'DELETE',

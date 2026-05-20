@@ -129,4 +129,54 @@ router.post('/', auth, async (req, res) => {
   }
 });
 
+// POST /api/scan/redeem
+// Merchant redeems a reward for a customer — deducts points + logs with negative value
+router.post('/redeem', auth, async (req, res) => {
+  const { membership_id, reward_id } = req.body;
+  const merchantId = req.merchant.id;
+
+  if (!membership_id || !reward_id) {
+    return res.status(400).json({ error: 'membership_id et reward_id sont requis' });
+  }
+
+  try {
+    const [membership, reward] = await Promise.all([
+      db.one('SELECT * FROM memberships WHERE id = $1 AND merchant_id = $2', [membership_id, merchantId]),
+      db.one('SELECT * FROM rewards WHERE id = $1 AND merchant_id = $2 AND active = 1', [reward_id, merchantId]),
+    ]);
+
+    if (!membership) return res.status(404).json({ error: 'Adhésion introuvable' });
+    if (!reward)     return res.status(404).json({ error: 'Récompense introuvable ou inactive' });
+    if (membership.points < reward.points_required) {
+      return res.status(400).json({ error: 'Points insuffisants pour cette récompense' });
+    }
+
+    await db.transaction(async (tx) => {
+      await tx.run(
+        'UPDATE memberships SET points = points - $1 WHERE id = $2',
+        [reward.points_required, membership.id]
+      );
+      await tx.run(
+        'INSERT INTO transactions (merchant_id, customer_id, points, note) VALUES ($1, $2, $3, $4)',
+        [merchantId, membership.customer_id, -reward.points_required, `Récompense : ${reward.description}`]
+      );
+    });
+
+    const [updated, customer] = await Promise.all([
+      db.one('SELECT * FROM memberships WHERE id = $1', [membership.id]),
+      db.one('SELECT id, first_name, phone FROM customers WHERE id = $1', [membership.customer_id]),
+    ]);
+
+    res.json({
+      success: true,
+      customer,
+      membership: updated,
+      reward,
+      points_deducted: reward.points_required,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;

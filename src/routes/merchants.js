@@ -62,9 +62,10 @@ router.post('/register', async (req, res) => {
     if (existing) return res.status(409).json({ error: 'Cet email est déjà utilisé' });
 
     const hashed = await bcrypt.hash(password, SALT_ROUNDS);
+    const trialEndsAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString();
     const id = await db.insert(
-      'INSERT INTO merchants (name, email, password, logo_url, color, plan) VALUES ($1, $2, $3, $4, $5, $6)',
-      [name, email, hashed, logo_url || null, color || '#6366f1', plan || 'free']
+      'INSERT INTO merchants (name, email, password, logo_url, color, plan, trial_ends_at) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+      [name, email, hashed, logo_url || null, color || '#6366f1', plan || 'free', trialEndsAt]
     );
 
     const merchant = await db.one(
@@ -130,10 +131,34 @@ router.get('/dashboard', auth, async (req, res) => {
   const merchantId = req.merchant.id;
   try {
     const merchant = await db.one(
-      'SELECT id, name, email, logo_url, color, plan FROM merchants WHERE id = $1',
+      `SELECT id, name, email, logo_url, color, plan,
+              subscription_status, trial_ends_at, trial_reminder_sent,
+              stripe_customer_id
+       FROM merchants WHERE id = $1`,
       [merchantId]
     );
     if (!merchant) return res.status(404).json({ error: 'Marchand introuvable' });
+
+    // Auto-expire trial
+    if (merchant.subscription_status === 'trial' && merchant.trial_ends_at) {
+      if (new Date(merchant.trial_ends_at) < new Date()) {
+        await db.run("UPDATE merchants SET subscription_status = 'suspended' WHERE id = $1", [merchantId]);
+        merchant.subscription_status = 'suspended';
+      } else {
+        // Trial reminder emails at J-3 and J-1
+        const daysLeft  = Math.ceil((new Date(merchant.trial_ends_at) - new Date()) / 86400000);
+        const reminded  = merchant.trial_reminder_sent || '';
+        const baseUrl   = process.env.BASE_URL || `${req.protocol}://${req.get('host')}`;
+        const subUrl    = `${baseUrl}/subscribe`;
+        if (daysLeft <= 3 && daysLeft > 1 && !reminded.includes('3d')) {
+          email.sendTrialReminder({ to: merchant.email, merchantName: merchant.name, daysLeft, subscribeUrl: subUrl }).catch(() => {});
+          db.run("UPDATE merchants SET trial_reminder_sent = $1 WHERE id = $2", [reminded + ',3d', merchantId]).catch(() => {});
+        } else if (daysLeft <= 1 && daysLeft >= 0 && !reminded.includes('1d')) {
+          email.sendTrialReminder({ to: merchant.email, merchantName: merchant.name, daysLeft, subscribeUrl: subUrl }).catch(() => {});
+          db.run("UPDATE merchants SET trial_reminder_sent = $1 WHERE id = $2", [reminded + ',1d', merchantId]).catch(() => {});
+        }
+      }
+    }
 
     const [{ total_customers }, { total_points }, { scans_today }] = await Promise.all([
       db.one('SELECT COUNT(*) as total_customers FROM memberships WHERE merchant_id = $1', [merchantId]),
@@ -160,8 +185,18 @@ router.get('/dashboard', auth, async (req, res) => {
       ),
     ]);
 
+    const trialDaysLeft = merchant.trial_ends_at
+      ? Math.max(0, Math.ceil((new Date(merchant.trial_ends_at) - new Date()) / 86400000))
+      : null;
+
     res.json({
-      merchant,
+      merchant: {
+        id: merchant.id, name: merchant.name, email: merchant.email,
+        logo_url: merchant.logo_url, color: merchant.color, plan: merchant.plan,
+        subscription_status: merchant.subscription_status,
+        trial_days_left: trialDaysLeft,
+        has_stripe: !!merchant.stripe_customer_id,
+      },
       stats: {
         total_customers: Number(total_customers),
         total_points:    Number(total_points),

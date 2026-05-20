@@ -20,6 +20,26 @@ function daysAgo(n) {
 
 // ── Merchants ─────────────────────────────────────────────────────────────────
 
+// PATCH /api/admin/merchants/:id/trial — extend trial (admin)
+router.patch('/merchants/:id/trial', adminAuth, async (req, res) => {
+  const id   = parseInt(req.params.id, 10);
+  const days = parseInt(req.body.days, 10) || 7;
+  try {
+    const merchant = await db.one('SELECT * FROM merchants WHERE id = $1', [id]);
+    if (!merchant) return res.status(404).json({ error: 'Marchand introuvable' });
+    const base = merchant.trial_ends_at && new Date(merchant.trial_ends_at) > new Date()
+      ? new Date(merchant.trial_ends_at)
+      : new Date();
+    base.setDate(base.getDate() + days);
+    await db.run(
+      "UPDATE merchants SET trial_ends_at = $1, subscription_status = 'trial' WHERE id = $2",
+      [base.toISOString(), id]
+    );
+    const updated = await db.one('SELECT id, name, subscription_status, trial_ends_at FROM merchants WHERE id = $1', [id]);
+    res.json({ merchant: updated });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 // GET /api/admin/merchants
 router.get('/merchants', adminAuth, async (req, res) => {
   try {

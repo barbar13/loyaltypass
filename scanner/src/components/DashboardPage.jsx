@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import ScanModal  from './ScanModal.jsx';
-import { addReward, deleteReward, redeemReward, updateProfile, getScans } from '../api.js';
+import { addReward, deleteReward, redeemReward, updateProfile, getScans, createCheckout } from '../api.js';
 
 // ── Tab icons ─────────────────────────────────────────────────────────────────
 
@@ -48,6 +48,134 @@ function fmtRelative(iso) {
 }
 
 // ── Sub-pages ─────────────────────────────────────────────────────────────────
+
+// ── Trial banner ──────────────────────────────────────────────────────────────
+
+function TrialBanner({ merchant, token }) {
+  const [loading, setLoading] = useState(false);
+  const status   = merchant.subscription_status;
+  const days     = merchant.trial_days_left;
+
+  if (status === 'active') return null; // no banner for paying subscribers
+
+  async function handleSubscribe() {
+    setLoading(true);
+    try {
+      const { url } = await createCheckout(token);
+      if (url) window.location.href = url;
+    } catch (_) { setLoading(false); }
+  }
+
+  if (status === 'suspended' || status === 'canceled') {
+    return (
+      <div className="mx-5 mt-4 mb-1 rounded-2xl bg-red-500/10 border border-red-500/25 px-4 py-4">
+        <p className="text-red-400 font-bold text-sm mb-1">Compte suspendu</p>
+        <p className="text-red-300/70 text-xs mb-3">Votre abonnement est inactif. Les scans sont bloqués.</p>
+        <button onClick={handleSubscribe} disabled={loading}
+          className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white font-semibold text-sm disabled:opacity-60 transition-all">
+          {loading ? 'Redirection…' : 'S\'abonner — 19 €/mois →'}
+        </button>
+      </div>
+    );
+  }
+
+  // Trial
+  const urgency = days <= 1 ? 'red' : days <= 3 ? 'amber' : 'indigo';
+  const colors  = {
+    red:    'bg-red-500/10 border-red-500/25 text-red-400',
+    amber:  'bg-amber-500/10 border-amber-500/25 text-amber-400',
+    indigo: 'bg-indigo-500/10 border-indigo-500/25 text-indigo-400',
+  };
+  const label = days === 0 ? 'Essai expiré aujourd\'hui' : `Essai : encore ${days} jour${days > 1 ? 's' : ''}`;
+
+  return (
+    <div className={`mx-5 mt-4 mb-1 rounded-2xl border px-4 py-3 ${colors[urgency]}`}>
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-sm font-semibold">{label}</p>
+        <button onClick={handleSubscribe} disabled={loading}
+          className="shrink-0 px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white text-xs font-bold disabled:opacity-60 transition-all">
+          {loading ? '…' : 'S\'abonner'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── Onboarding checklist ──────────────────────────────────────────────────────
+
+function OnboardingChecklist({ merchant, stats, rewards }) {
+  const key         = `fidevo_ob_${merchant.id}`;
+  const printKey    = `fidevo_ob_print_${merchant.id}`;
+  const [dismissed, setDismissed]   = useState(() => !!localStorage.getItem(key));
+  const [printed,   setPrinted]     = useState(() => !!localStorage.getItem(printKey));
+
+  if (dismissed) return null;
+
+  const hasScanned  = Number(stats?.total_points) > 0;
+  const hasRewards  = (rewards || []).filter(r => r.active).length > 0;
+
+  const steps = [
+    { id: 'account', done: true,      label: 'Compte créé', desc: 'Vous êtes prêt(e) !' },
+    { id: 'print',   done: printed,   label: 'Afficher votre QR en caisse', desc: 'Imprimez votre QR d\'inscription.' },
+    { id: 'scan',    done: hasScanned, label: 'Premier scan client', desc: 'Scannez la carte d\'un client.' },
+    { id: 'reward',  done: hasRewards, label: 'Créer une récompense', desc: 'Ajoutez votre première récompense fidélité.' },
+  ];
+
+  const doneCount = steps.filter(s => s.done).length;
+  const allDone   = doneCount === steps.length;
+
+  function markPrinted() { localStorage.setItem(printKey, '1'); setPrinted(true); }
+  function dismiss()     { localStorage.setItem(key, '1'); setDismissed(true); }
+
+  return (
+    <div className="mx-5 mt-4 mb-1 bg-gray-900 border border-white/5 rounded-2xl p-4">
+      <div className="flex items-center justify-between mb-3">
+        <div>
+          <p className="text-white font-bold text-sm">Premiers pas avec Fidevo</p>
+          <p className="text-gray-600 text-xs">{doneCount}/{steps.length} étapes complétées</p>
+        </div>
+        {allDone && (
+          <button onClick={dismiss} className="text-gray-600 hover:text-gray-400 text-xs underline transition">Masquer</button>
+        )}
+      </div>
+      {/* Progress bar */}
+      <div className="h-1.5 bg-gray-800 rounded-full mb-4 overflow-hidden">
+        <div className="h-full rounded-full bg-indigo-500 transition-all"
+          style={{ width: `${(doneCount / steps.length) * 100}%` }} />
+      </div>
+      <div className="space-y-2.5">
+        {steps.map(s => (
+          <div key={s.id} className="flex items-center gap-3"
+               onClick={s.id === 'print' && !printed ? markPrinted : undefined}
+               style={{ cursor: s.id === 'print' && !printed ? 'pointer' : 'default' }}>
+            <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${
+              s.done ? 'bg-emerald-500 text-white' : 'bg-gray-800 border border-gray-700'
+            }`}>
+              {s.done && <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
+              </svg>}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className={`text-sm font-medium ${s.done ? 'line-through text-gray-600' : 'text-white'}`}>
+                {s.label}
+              </p>
+              {!s.done && <p className="text-gray-600 text-xs">{s.desc}</p>}
+            </div>
+            {s.id === 'print' && !printed && (
+              <span className="text-indigo-400 text-xs shrink-0">Tap pour marquer ✓</span>
+            )}
+          </div>
+        ))}
+      </div>
+      {allDone && (
+        <div className="mt-4 text-center">
+          <p className="text-emerald-400 text-sm font-semibold">🎉 Bravo, vous êtes prêt(e) !</p>
+          <button onClick={dismiss} className="mt-2 text-gray-600 text-xs underline hover:text-gray-400 transition">Masquer ce guide</button>
+        </div>
+      )}
+    </div>
+  );
+}
 
 function HomeTab({ merchant, stats, onScanClick }) {
   const color   = merchant.color || '#6366f1';
@@ -664,6 +792,12 @@ export default function DashboardPage({ auth, dashData, dashLoading, onLogout, o
 
       {/* Tab content */}
       <main className="flex-1 overflow-y-auto" style={{ paddingBottom: '5rem' }}>
+        {/* Trial banner — always visible */}
+        <TrialBanner merchant={merchant} token={auth.token} />
+        {/* Onboarding — only on home tab */}
+        {tab === 'home' && merchant.subscription_status !== 'suspended' && (
+          <OnboardingChecklist merchant={merchant} stats={stats} rewards={rewards} />
+        )}
         {tab === 'home'     && <HomeTab merchant={merchant} stats={stats} onScanClick={() => setShowScan(true)} />}
         {tab === 'clients'  && (
           <ClientsTab customers={customers} rewards={rewards} token={auth.token} onRewardsChange={onRefresh} />

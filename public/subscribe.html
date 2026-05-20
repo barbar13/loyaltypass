@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0a0a0f">
+  <title>S'abonner — Fidevo Pro</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { min-height: 100%; background: #0a0a0f; color: #e5e7eb;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; overscroll-behavior: none; }
+    .pt-safe { padding-top: max(1.5rem, env(safe-area-inset-top)); }
+    .pb-safe { padding-bottom: max(1.5rem, env(safe-area-inset-bottom)); }
+    .gradient-border { background: linear-gradient(135deg, #6366f1, #8b5cf6); padding: 1px; border-radius: 20px; }
+    @keyframes fade-up { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+    .au { animation: fade-up .4s cubic-bezier(.16,1,.3,1) both; }
+    .d1{animation-delay:.06s} .d2{animation-delay:.12s} .d3{animation-delay:.18s}
+  </style>
+</head>
+<body>
+<div class="min-h-dvh flex flex-col items-center justify-center px-5 pt-safe pb-safe">
+
+  <div class="w-full max-w-sm">
+
+    <!-- Header -->
+    <div class="text-center mb-8 au">
+      <a href="/" class="text-gray-600 text-sm hover:text-gray-400 transition">← Retour au tableau de bord</a>
+      <div class="mt-4 text-4xl">◆</div>
+      <h1 class="text-white text-2xl font-black mt-2">Fidevo Pro</h1>
+      <p class="text-gray-500 text-sm mt-1">Continuez à fidéliser vos clients</p>
+    </div>
+
+    <!-- Success banner -->
+    <div id="success-banner" class="hidden mb-5 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 px-5 py-4 flex items-center gap-3 au">
+      <svg class="w-5 h-5 text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
+      </svg>
+      <p class="text-emerald-300 text-sm font-semibold">Abonnement activé ! Bienvenue sur Fidevo Pro.</p>
+    </div>
+
+    <!-- Canceled banner -->
+    <div id="canceled-banner" class="hidden mb-5 rounded-2xl bg-gray-800 border border-white/5 px-5 py-4 au">
+      <p class="text-gray-400 text-sm">Paiement annulé. Votre essai reste actif.</p>
+    </div>
+
+    <!-- Plan card -->
+    <div class="gradient-border au d1">
+      <div class="bg-gray-900 rounded-[19px] p-6">
+        <div class="flex items-start justify-between mb-5">
+          <div>
+            <p class="text-white font-black text-2xl">19 €<span class="text-gray-500 font-normal text-base">/mois</span></p>
+            <p class="text-gray-500 text-xs mt-1">Sans engagement · Annulable à tout moment</p>
+          </div>
+          <span class="bg-indigo-500/20 text-indigo-300 text-xs font-semibold px-3 py-1 rounded-full border border-indigo-500/25">PRO</span>
+        </div>
+        <ul class="space-y-2.5 mb-6">
+          <li class="flex items-center gap-2.5 text-gray-300 text-sm"><span class="text-emerald-400">✓</span>Scans clients illimités</li>
+          <li class="flex items-center gap-2.5 text-gray-300 text-sm"><span class="text-emerald-400">✓</span>Récompenses personnalisées</li>
+          <li class="flex items-center gap-2.5 text-gray-300 text-sm"><span class="text-emerald-400">✓</span>Export CSV clients</li>
+          <li class="flex items-center gap-2.5 text-gray-300 text-sm"><span class="text-emerald-400">✓</span>Historique complet des scans</li>
+          <li class="flex items-center gap-2.5 text-gray-300 text-sm"><span class="text-emerald-400">✓</span>Notifications push clients</li>
+          <li class="flex items-center gap-2.5 text-gray-300 text-sm"><span class="text-emerald-400">✓</span>Support prioritaire</li>
+        </ul>
+        <button id="subscribe-btn" onclick="handleSubscribe()"
+          class="w-full py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-500 active:scale-[.98] disabled:opacity-60 text-white font-bold text-base transition-all shadow-lg shadow-indigo-600/25">
+          S'abonner maintenant →
+        </button>
+      </div>
+    </div>
+
+    <!-- Manage existing subscription -->
+    <div id="portal-wrap" class="hidden mt-4 au d2">
+      <button onclick="handlePortal()"
+        class="w-full py-3 rounded-2xl bg-gray-900 hover:bg-gray-800 active:scale-95 border border-white/5 text-gray-400 hover:text-white text-sm font-medium transition-all">
+        Gérer mon abonnement
+      </button>
+    </div>
+
+    <p class="text-gray-700 text-xs text-center mt-5 au d3">
+      Paiement sécurisé par Stripe · <a href="/cgu" class="underline underline-offset-1 hover:text-gray-500">CGU</a>
+    </p>
+  </div>
+</div>
+
+<script>
+  // Check query params
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('subscription') === 'success' || new URLSearchParams(location.search).get('subscription') === 'success') {
+    const b = document.getElementById('success-banner');
+    b.classList.remove('hidden'); b.style.display = 'flex';
+  }
+  if (params.get('canceled') === 'true') {
+    document.getElementById('canceled-banner').classList.remove('hidden');
+    document.getElementById('canceled-banner').style.display = 'block';
+  }
+
+  // Check if already subscribed
+  const auth = (() => { try { return JSON.parse(localStorage.getItem('loyaltypass_auth')); } catch { return null; } })();
+  if (auth?.merchant?.has_stripe) {
+    document.getElementById('portal-wrap').classList.remove('hidden');
+  }
+
+  async function handleSubscribe() {
+    if (!auth?.token) { window.location.href = '/login'; return; }
+    const btn = document.getElementById('subscribe-btn');
+    btn.disabled = true; btn.textContent = 'Redirection vers Stripe…';
+    try {
+      const res  = await fetch('/api/billing/create-checkout', {
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${auth.token}` },
+      });
+      const data = await res.json();
+      if (data.url) { window.location.href = data.url; }
+      else { alert(data.error || 'Erreur'); btn.disabled = false; btn.textContent = 'S\'abonner maintenant →'; }
+    } catch (err) {
+      alert('Erreur réseau'); btn.disabled = false; btn.textContent = 'S\'abonner maintenant →';
+    }
+  }
+
+  async function handlePortal() {
+    if (!auth?.token) return;
+    const res  = await fetch('/api/billing/portal', {
+      method: 'POST', headers: { 'Authorization': `Bearer ${auth.token}`, 'Content-Type': 'application/json' },
+    });
+    const data = await res.json();
+    if (data.url) window.location.href = data.url;
+  }
+</script>
+</body>
+</html>

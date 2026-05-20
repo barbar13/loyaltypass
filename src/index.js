@@ -8,16 +8,25 @@ const merchantRoutes  = require('./routes/merchants');
 const customerRoutes  = require('./routes/customers');
 const scanRoutes      = require('./routes/scan');
 const adminRoutes     = require('./routes/admin');
+const billing         = require('./routes/billing');
+const { router: notifRouter } = require('./routes/notifications');
+const { generateWalletPass }  = require('./routes/google-wallet');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
+
+// ── Stripe webhook must receive raw body (before express.json()) ──────────────
+app.post('/api/billing/webhook',
+  express.raw({ type: 'application/json' }),
+  billing.webhookHandler
+);
 
 app.use(express.json());
 
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Headers', 'Origin, Content-Type, Accept, Authorization');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
   if (req.method === 'OPTIONS') return res.sendStatus(200);
   next();
 });
@@ -27,7 +36,7 @@ app.use((req, _res, next) => {
   next();
 });
 
-// ─── Static pages ─────────────────────────────────────────────────────────────
+// ── Static pages ──────────────────────────────────────────────────────────────
 const PUBLIC       = path.join(__dirname, '../public');
 const SCANNER_DIST = path.join(__dirname, '../scanner/dist');
 
@@ -43,12 +52,21 @@ app.get('/merchant/qr-print',   (_req, res) => res.sendFile(path.join(PUBLIC, 'q
 app.get('/home',                (_req, res) => res.sendFile(path.join(PUBLIC, 'home.html')));
 app.get('/cgu',                 (_req, res) => res.sendFile(path.join(PUBLIC, 'cgu.html')));
 app.get('/privacy',             (_req, res) => res.sendFile(path.join(PUBLIC, 'privacy.html')));
+app.get('/subscribe',           (_req, res) => res.sendFile(path.join(PUBLIC, 'subscribe.html')));
 
-// ─── Utility: server-side QR PNG (used by enroll + card pages) ───────────────
+// Service worker (must be at root scope)
+app.get('/sw.js', (_req, res) => {
+  res.setHeader('Content-Type', 'application/javascript');
+  res.setHeader('Service-Worker-Allowed', '/');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.sendFile(path.join(PUBLIC, 'sw.js'));
+});
+
+// ── Utility: server-side QR PNG ───────────────────────────────────────────────
 app.get('/api/qr/:text', async (req, res) => {
   const { text } = req.params;
   if (!text || text.length > 256) return res.status(400).json({ error: 'Invalid text' });
-  const size = Math.min(parseInt(req.query.size, 10) || 200, 400);
+  const size = Math.min(parseInt(req.query.size, 10) || 200, 800);
   try {
     const buf = await QRCode.toBuffer(text, { type: 'png', width: size, margin: 1 });
     res.setHeader('Content-Type', 'image/png');
@@ -59,14 +77,17 @@ app.get('/api/qr/:text', async (req, res) => {
   }
 });
 
-// ─── API ──────────────────────────────────────────────────────────────────────
+// ── API ───────────────────────────────────────────────────────────────────────
 app.get('/health', (_req, res) => res.json({ status: 'ok', service: 'Fidevo API' }));
-app.use('/api/merchants', merchantRoutes);
-app.use('/api/customers', customerRoutes);
-app.use('/api/scan',      scanRoutes);
-app.use('/api/admin',     adminRoutes);
+app.use('/api/merchants',     merchantRoutes);
+app.use('/api/customers',     customerRoutes);
+app.use('/api/scan',          scanRoutes);
+app.use('/api/admin',         adminRoutes);
+app.use('/api/billing',       billing.router);
+app.use('/api/notifications', notifRouter);
+app.get('/api/google-wallet/:qr_code', generateWalletPass);
 
-// ─── Scanner SPA (merchant dashboard, built by Vite) ─────────────────────────
+// ── Scanner SPA ───────────────────────────────────────────────────────────────
 app.use(express.static(SCANNER_DIST));
 
 app.use('/api', (_req, res) => res.status(404).json({ error: 'Route introuvable' }));
@@ -83,7 +104,7 @@ app.use((err, _req, res, _next) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`LoyaltyPass API démarrée sur http://localhost:${PORT}`);
+  console.log(`Fidevo API démarrée sur http://localhost:${PORT}`);
 });
 
 module.exports = app;

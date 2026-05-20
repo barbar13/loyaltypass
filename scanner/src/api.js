@@ -55,6 +55,13 @@ export function redeemReward(membershipId, rewardId, token) {
   });
 }
 
+export function createCheckout(token) {
+  return request('/billing/create-checkout', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
 export function updateProfile(data, token) {
   return request('/merchants/profile', {
     method: 'POST',

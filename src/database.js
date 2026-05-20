@@ -73,10 +73,25 @@ if (process.env.DATABASE_URL) {
       created_at  TIMESTAMPTZ DEFAULT NOW()
     );
 
-    ALTER TABLE merchants ADD COLUMN IF NOT EXISTS disabled         INTEGER     NOT NULL DEFAULT 0;
-    ALTER TABLE merchants ADD COLUMN IF NOT EXISTS reset_token        TEXT;
-    ALTER TABLE merchants ADD COLUMN IF NOT EXISTS reset_token_exp    TIMESTAMPTZ;
-    ALTER TABLE customers ADD COLUMN IF NOT EXISTS email              TEXT;
+    ALTER TABLE merchants ADD COLUMN IF NOT EXISTS disabled               INTEGER     NOT NULL DEFAULT 0;
+    ALTER TABLE merchants ADD COLUMN IF NOT EXISTS reset_token            TEXT;
+    ALTER TABLE merchants ADD COLUMN IF NOT EXISTS reset_token_exp        TIMESTAMPTZ;
+    ALTER TABLE merchants ADD COLUMN IF NOT EXISTS subscription_status    TEXT        NOT NULL DEFAULT 'trial';
+    ALTER TABLE merchants ADD COLUMN IF NOT EXISTS trial_ends_at          TIMESTAMPTZ;
+    ALTER TABLE merchants ADD COLUMN IF NOT EXISTS stripe_customer_id     TEXT;
+    ALTER TABLE merchants ADD COLUMN IF NOT EXISTS stripe_subscription_id TEXT;
+    ALTER TABLE merchants ADD COLUMN IF NOT EXISTS trial_reminder_sent    TEXT        NOT NULL DEFAULT '';
+    ALTER TABLE customers ADD COLUMN IF NOT EXISTS email                  TEXT;
+
+    CREATE TABLE IF NOT EXISTS push_subscriptions (
+      id          SERIAL PRIMARY KEY,
+      customer_id INTEGER NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
+      endpoint    TEXT    NOT NULL,
+      auth        TEXT    NOT NULL,
+      p256dh      TEXT    NOT NULL,
+      created_at  TIMESTAMPTZ DEFAULT NOW(),
+      UNIQUE (customer_id, endpoint)
+    );
   `).catch(err => {
     console.error('PostgreSQL schema init failed:', err.message);
     process.exit(1);
@@ -209,16 +224,30 @@ if (process.env.DATABASE_URL) {
 
   // Migrations for new columns
   const merchantCols = sqlite.prepare('PRAGMA table_info(merchants)').all();
-  if (!merchantCols.find(c => c.name === 'disabled'))
-    sqlite.exec('ALTER TABLE merchants ADD COLUMN disabled INTEGER NOT NULL DEFAULT 0');
-  if (!merchantCols.find(c => c.name === 'reset_token'))
-    sqlite.exec('ALTER TABLE merchants ADD COLUMN reset_token TEXT');
-  if (!merchantCols.find(c => c.name === 'reset_token_exp'))
-    sqlite.exec('ALTER TABLE merchants ADD COLUMN reset_token_exp DATETIME');
+  const mcAdd = (col, def) => { if (!merchantCols.find(c => c.name === col)) sqlite.exec(`ALTER TABLE merchants ADD COLUMN ${col} ${def}`); };
+  mcAdd('disabled',               'INTEGER NOT NULL DEFAULT 0');
+  mcAdd('reset_token',            'TEXT');
+  mcAdd('reset_token_exp',        'DATETIME');
+  mcAdd('subscription_status',    "TEXT NOT NULL DEFAULT 'trial'");
+  mcAdd('trial_ends_at',          'DATETIME');
+  mcAdd('stripe_customer_id',     'TEXT');
+  mcAdd('stripe_subscription_id', 'TEXT');
+  mcAdd('trial_reminder_sent',    "TEXT NOT NULL DEFAULT ''");
 
   const customerCols = sqlite.prepare('PRAGMA table_info(customers)').all();
   if (!customerCols.find(c => c.name === 'email'))
     sqlite.exec('ALTER TABLE customers ADD COLUMN email TEXT');
+
+  sqlite.exec(`CREATE TABLE IF NOT EXISTS push_subscriptions (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    customer_id INTEGER NOT NULL,
+    endpoint    TEXT    NOT NULL,
+    auth        TEXT    NOT NULL,
+    p256dh      TEXT    NOT NULL,
+    created_at  DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (customer_id, endpoint),
+    FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE
+  );`);
 
   // Convert $1, $2, ... → ? (SQLite positional) and reorder params accordingly.
   // Handles repeated $N correctly: each occurrence pushes the corresponding param value.

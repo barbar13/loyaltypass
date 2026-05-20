@@ -1,7 +1,8 @@
 const express = require('express');
-const db    = require('../database');
-const auth  = require('../middleware/auth');
-const email = require('../email');
+const db      = require('../database');
+const auth    = require('../middleware/auth');
+const email   = require('../email');
+const { sendToCustomer } = require('./notifications');
 
 const router = express.Router();
 
@@ -60,6 +61,17 @@ router.post('/', auth, async (req, res) => {
   }
 
   try {
+    // Subscription gate — suspended or expired trial cannot scan
+    const merchantFull = await db.one('SELECT subscription_status, trial_ends_at FROM merchants WHERE id = $1', [merchantId]);
+    const subStatus = merchantFull?.subscription_status;
+    if (subStatus === 'suspended' || subStatus === 'canceled') {
+      return res.status(402).json({ error: 'Abonnement inactif. Abonnez-vous sur /subscribe pour continuer.', redirect: '/subscribe' });
+    }
+    if (subStatus === 'trial' && merchantFull.trial_ends_at && new Date(merchantFull.trial_ends_at) < new Date()) {
+      await db.run("UPDATE merchants SET subscription_status = 'suspended' WHERE id = $1", [merchantId]);
+      return res.status(402).json({ error: 'Période d\'essai expirée. Abonnez-vous sur /subscribe.', redirect: '/subscribe' });
+    }
+
     const customer = await db.one(
       'SELECT id, first_name, phone, email, qr_code FROM customers WHERE qr_code = $1',
       [customer_qr_code]
@@ -119,19 +131,33 @@ router.post('/', auth, async (req, res) => {
       [merchantId]
     );
 
-    // Points-earned email (fire-and-forget)
-    if (customer.email) {
-      const merchant = await db.one('SELECT name FROM merchants WHERE id = $1', [merchantId]);
-      const baseUrl  = process.env.BASE_URL || 'https://fidevo.app';
-      email.sendPointsEarned({
-        to: customer.email,
-        firstName: customer.first_name,
-        points: pts,
-        totalPoints: updatedMembership.points,
-        merchantName: merchant.name,
-        cardUrl: `${baseUrl}/card/${customer.qr_code}`,
-      }).catch(() => {});
-    }
+    // Fire-and-forget notifications
+    (async () => {
+      try {
+        const merchant = await db.one('SELECT name FROM merchants WHERE id = $1', [merchantId]);
+        const baseUrl  = process.env.BASE_URL || 'https://fidevo.app';
+        const cardUrl  = `${baseUrl}/card/${customer.qr_code}`;
+
+        if (customer.email) {
+          email.sendPointsEarned({
+            to: customer.email, firstName: customer.first_name,
+            points: pts, totalPoints: updatedMembership.points,
+            merchantName: merchant.name, cardUrl,
+          }).catch(() => {});
+        }
+
+        // Check if reward just became available
+        const unlockedReward = rewards.find(r => updatedMembership.points >= r.points_required);
+        const pushTitle = unlockedReward
+          ? `🎁 Récompense disponible chez ${merchant.name} !`
+          : `+${pts} points chez ${merchant.name} !`;
+        const pushBody  = unlockedReward
+          ? `${unlockedReward.description} — ${updatedMembership.points} pts`
+          : `Votre solde : ${updatedMembership.points} pts`;
+
+        sendToCustomer(customer.id, { title: pushTitle, body: pushBody, url: cardUrl });
+      } catch (_) {}
+    })();
 
     res.json({
       customer:   { id: customer.id, first_name: customer.first_name, phone: customer.phone },

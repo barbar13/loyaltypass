@@ -102,31 +102,45 @@ export default function ScanModal({ token, onClose, onSuccess }) {
         )}
 
         {/* Success */}
-        {phase === 'success' && result && (
-          <div className="flex-1 flex flex-col items-center justify-center mt-6 animate-scale-in gap-4">
-            <div className="w-20 h-20 rounded-full bg-emerald-500/15 flex items-center justify-center">
-              <svg className="w-10 h-10 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-              </svg>
-            </div>
-            <div className="text-center">
-              <p className="text-3xl font-black text-white">+{result.points_added} pts</p>
-              <p className="text-gray-400 mt-1 text-sm">
-                {result.customer.first_name} · Total{' '}
-                <span className="text-white font-semibold">{result.membership.points} pts</span>
-              </p>
-            </div>
-            {result.rewards?.some(r => result.membership.points >= r.points_required) && (
-              <div className="bg-emerald-500/10 border border-emerald-500/25 rounded-2xl px-4 py-3 text-center">
-                <p className="text-emerald-400 text-sm font-semibold">🎁 Récompense disponible !</p>
-                {result.rewards.filter(r => result.membership.points >= r.points_required).map(r => (
-                  <p key={r.id} className="text-emerald-300 text-xs mt-1">{r.description} ({r.points_required} pts)</p>
-                ))}
+        {phase === 'success' && result && (() => {
+          const unlocked = (result.rewards || []).filter(r => result.membership.points >= r.points_required);
+          const hasReward = unlocked.length > 0;
+          return (
+            <div className="flex-1 flex flex-col items-center justify-center mt-6 animate-scale-in gap-4 px-1">
+
+              {/* Reward banner — shown first and prominently when available */}
+              {hasReward && (
+                <div className="w-full rounded-3xl overflow-hidden animate-scale-in">
+                  <div className="bg-gradient-to-br from-amber-500/25 to-yellow-400/10 border border-amber-400/35 rounded-3xl px-5 py-5 text-center">
+                    <div className="text-5xl mb-2 leading-none">🎁</div>
+                    <p className="text-white font-bold text-xl leading-tight">Récompense disponible !</p>
+                    <div className="mt-2 space-y-1">
+                      {unlocked.map(r => (
+                        <p key={r.id} className="text-amber-300 font-semibold text-base">{r.description}</p>
+                      ))}
+                    </div>
+                    <p className="text-gray-400 text-xs mt-3">Proposez la récompense au client maintenant</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Points confirmation */}
+              <div className={`w-16 h-16 rounded-full flex items-center justify-center ${hasReward ? 'bg-amber-500/15' : 'bg-emerald-500/15'}`}>
+                <svg className={`w-8 h-8 ${hasReward ? 'text-amber-400' : 'text-emerald-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
               </div>
-            )}
-            <p className="text-gray-700 text-xs">Fermeture automatique…</p>
-          </div>
-        )}
+              <div className="text-center">
+                <p className="text-3xl font-black text-white">+{result.points_added} pts</p>
+                <p className="text-gray-400 mt-1 text-sm">
+                  {result.customer.first_name} · Total{' '}
+                  <span className="text-white font-semibold">{result.membership.points} pts</span>
+                </p>
+              </div>
+              <p className="text-gray-700 text-xs">Fermeture automatique…</p>
+            </div>
+          );
+        })()}
 
         {/* Anti-fraud: already scanned today */}
         {phase === 'fraud' && previewData && (

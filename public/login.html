@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0a0a0f">
+  <title>LoyaltyPass — Connexion</title>
+  <script>
+    // Redirect immediately if already authenticated
+    try {
+      const auth = JSON.parse(localStorage.getItem('loyaltypass_auth'));
+      if (auth && auth.token) window.location.replace('/');
+    } catch (_) {}
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { min-height: 100%; background: #0a0a0f; color: #e5e7eb;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      overscroll-behavior: none; }
+    input { font-size: 16px !important; }
+    .pt-safe { padding-top: max(1.5rem, env(safe-area-inset-top)); }
+    .pb-safe { padding-bottom: max(1.5rem, env(safe-area-inset-bottom)); }
+
+    @keyframes fade-up { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+    .au  { animation: fade-up .4s cubic-bezier(.16,1,.3,1) both; }
+    .d1  { animation-delay:.06s; }
+    .d2  { animation-delay:.12s; }
+
+    .field {
+      width:100%; background:#1a1a24; border:1px solid rgba(255,255,255,.1);
+      border-radius:14px; padding:14px 16px; color:white; outline:none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .field::placeholder { color:#4b5563; }
+    .field:focus { border-color:#6366f1; box-shadow:0 0 0 3px rgba(99,102,241,.2); }
+  </style>
+</head>
+<body>
+
+<div class="min-h-dvh flex flex-col items-center justify-center px-5 pt-safe pb-safe">
+
+  <!-- Logo -->
+  <div class="mb-10 text-center au">
+    <div class="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-indigo-600 shadow-2xl shadow-indigo-600/30 mb-5">
+      <svg class="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5Z M6.75 6.75h.75v.75h-.75v-.75ZM6.75 16.5h.75v.75h-.75V16.5ZM16.5 6.75h.75v.75h-.75v-.75ZM13.5 13.5h.75v.75h-.75v-.75ZM13.5 19.5h.75v.75h-.75v-.75ZM19.5 13.5h.75v.75h-.75v-.75ZM19.5 19.5h.75v.75h-.75v-.75ZM16.5 16.5h.75v.75h-.75v-.75Z"/>
+      </svg>
+    </div>
+    <h1 class="text-white text-2xl font-bold tracking-tight">LoyaltyPass</h1>
+    <p class="text-gray-500 text-sm mt-1">Espace marchand</p>
+  </div>
+
+  <!-- Form -->
+  <form id="login-form" class="w-full max-w-sm bg-gray-900 rounded-3xl p-6 shadow-2xl space-y-4 au d1" novalidate>
+
+    <div>
+      <label class="block text-sm font-medium text-gray-300 mb-2">Email</label>
+      <input id="inp-email" type="email" autocomplete="email" placeholder="vous@email.com" required
+             class="field">
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-gray-300 mb-2">Mot de passe</label>
+      <div class="relative">
+        <input id="inp-password" type="password" autocomplete="current-password" placeholder="••••••••" required
+               class="field" style="padding-right:48px">
+        <button type="button" onclick="togglePwd()" tabindex="-1"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition p-1">
+          <svg id="eye-icon" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.641 0-8.573-3.007-9.964-7.178Z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Error -->
+    <div id="form-error" class="hidden rounded-xl px-4 py-3 bg-red-500/10 border border-red-500/25 text-red-400 text-sm flex items-center gap-2">
+      <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"/>
+      </svg>
+      <span id="form-error-msg"></span>
+    </div>
+
+    <!-- Submit -->
+    <button id="submit-btn" type="submit"
+            class="w-full py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-500 active:scale-[.98] disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold text-base transition-all shadow-lg shadow-indigo-600/25 mt-2">
+      Se connecter
+    </button>
+  </form>
+
+  <!-- Register link -->
+  <p class="mt-6 text-gray-600 text-sm au d2">
+    Pas encore inscrit ?
+    <a href="/register" class="text-gray-400 hover:text-white transition underline underline-offset-2">Créer un compte →</a>
+  </p>
+
+</div>
+
+<script>
+  function showError(msg) {
+    const el = document.getElementById('form-error');
+    document.getElementById('form-error-msg').textContent = msg;
+    el.classList.remove('hidden');
+    el.style.display = 'flex';
+  }
+  function hideError() { document.getElementById('form-error').classList.add('hidden'); }
+
+  function togglePwd() {
+    const inp  = document.getElementById('inp-password');
+    const icon = document.getElementById('eye-icon');
+    const show = inp.type === 'password';
+    inp.type   = show ? 'text' : 'password';
+    icon.innerHTML = show
+      ? `<path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88"/>`
+      : `<path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.641 0-8.573-3.007-9.964-7.178Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>`;
+  }
+
+  document.getElementById('login-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    hideError();
+
+    const email    = document.getElementById('inp-email').value.trim();
+    const password = document.getElementById('inp-password').value;
+    if (!email || !password) { showError('Veuillez remplir tous les champs.'); return; }
+
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.innerHTML = `<span style="display:flex;align-items:center;justify-content:center;gap:8px">
+      <svg style="width:16px;height:16px;animation:spin 1s linear infinite" fill="none" viewBox="0 0 24 24">
+        <circle style="opacity:.25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+        <path style="opacity:.75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+      </svg>Connexion…</span>`;
+
+    try {
+      const res  = await fetch('/api/merchants/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Identifiants invalides');
+
+      localStorage.setItem('loyaltypass_auth', JSON.stringify({ merchant: data.merchant, token: data.token }));
+      window.location.replace('/');
+    } catch (err) {
+      showError(err.message);
+      btn.disabled = false;
+      btn.textContent = 'Se connecter';
+    }
+  });
+
+  const style = document.createElement('style');
+  style.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
+  document.head.appendChild(style);
+</script>
+</body>
+</html>

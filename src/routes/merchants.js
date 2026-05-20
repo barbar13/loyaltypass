@@ -33,8 +33,9 @@ router.get('/:id/enroll-qr', async (req, res) => {
     const baseUrl   = process.env.BASE_URL || `${req.protocol}://${req.get('host')}`;
     const enrollUrl = `${baseUrl}/enroll/${merchant.id}`;
 
+    const size = Math.min(parseInt(req.query.size, 10) || 400, 800);
     const buf = await QRCode.toBuffer(enrollUrl, {
-      width: 400, margin: 2, errorCorrectionLevel: 'M',
+      width: size, margin: 2, errorCorrectionLevel: 'M',
       color: { dark: '#000000', light: '#ffffff' },
     });
     res.setHeader('Content-Type', 'image/png');

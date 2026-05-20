@@ -31,11 +31,13 @@ app.use((req, _res, next) => {
 const PUBLIC       = path.join(__dirname, '../public');
 const SCANNER_DIST = path.join(__dirname, '../scanner/dist');
 
-app.get('/enroll/:merchantId', (_req, res) => res.sendFile(path.join(PUBLIC, 'enroll.html')));
-app.get('/card/:qrCode',       (_req, res) => res.sendFile(path.join(PUBLIC, 'card.html')));
-app.get('/my-card',            (_req, res) => res.sendFile(path.join(PUBLIC, 'my-card.html')));
-app.get('/admin',              (_req, res) => res.sendFile(path.join(PUBLIC, 'admin.html')));
-app.get('/register',           (_req, res) => res.sendFile(path.join(PUBLIC, 'register.html')));
+app.get('/enroll/:merchantId',  (_req, res) => res.sendFile(path.join(PUBLIC, 'enroll.html')));
+app.get('/card/:qrCode',        (_req, res) => res.sendFile(path.join(PUBLIC, 'card.html')));
+app.get('/my-card',             (_req, res) => res.sendFile(path.join(PUBLIC, 'my-card.html')));
+app.get('/admin',               (_req, res) => res.sendFile(path.join(PUBLIC, 'admin.html')));
+app.get('/login',               (_req, res) => res.sendFile(path.join(PUBLIC, 'login.html')));
+app.get('/register',            (_req, res) => res.sendFile(path.join(PUBLIC, 'register.html')));
+app.get('/merchant/qr-print',   (_req, res) => res.sendFile(path.join(PUBLIC, 'qr-print.html')));
 
 // ─── Utility: server-side QR PNG (used by enroll + card pages) ───────────────
 app.get('/api/qr/:text', async (req, res) => {

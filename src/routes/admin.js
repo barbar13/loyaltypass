@@ -46,13 +46,15 @@ router.get('/merchants', adminAuth, async (req, res) => {
     const merchants = await db.all(`
       SELECT
         m.id, m.name, m.email, m.color, m.plan, m.disabled, m.created_at,
+        m.subscription_status, m.trial_ends_at,
         COUNT(DISTINCT mb.customer_id)  AS customer_count,
         COALESCE(SUM(t.points), 0)      AS total_points,
         MAX(t.created_at)               AS last_activity
       FROM merchants m
       LEFT JOIN memberships mb ON mb.merchant_id = m.id
       LEFT JOIN transactions t  ON t.merchant_id  = m.id
-      GROUP BY m.id, m.name, m.email, m.color, m.plan, m.disabled, m.created_at
+      GROUP BY m.id, m.name, m.email, m.color, m.plan, m.disabled, m.created_at,
+               m.subscription_status, m.trial_ends_at
       ORDER BY m.created_at DESC
     `);
 

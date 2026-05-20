@@ -35,6 +35,9 @@ app.get('/enroll/:merchantId', (_req, res) => res.sendFile(path.join(PUBLIC, 'en
 // /admin — platform owner dashboard
 app.get('/admin', (_req, res) => res.sendFile(path.join(PUBLIC, 'admin.html')));
 
+// /register — new merchant registration
+app.get('/register', (_req, res) => res.sendFile(path.join(PUBLIC, 'register.html')));
+
 // ─── API ─────────────────────────────────────────────────────────────────────
 app.get('/health', (_req, res) => res.json({ status: 'ok', service: 'LoyaltyPass API' }));
 app.use('/api/merchants', merchantRoutes);

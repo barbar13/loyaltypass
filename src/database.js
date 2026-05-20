@@ -73,16 +73,6 @@ if (process.env.DATABASE_URL) {
       created_at  TIMESTAMPTZ DEFAULT NOW()
     );
 
-    ALTER TABLE merchants ADD COLUMN IF NOT EXISTS disabled               INTEGER     NOT NULL DEFAULT 0;
-    ALTER TABLE merchants ADD COLUMN IF NOT EXISTS reset_token            TEXT;
-    ALTER TABLE merchants ADD COLUMN IF NOT EXISTS reset_token_exp        TIMESTAMPTZ;
-    ALTER TABLE merchants ADD COLUMN IF NOT EXISTS subscription_status    TEXT        NOT NULL DEFAULT 'trial';
-    ALTER TABLE merchants ADD COLUMN IF NOT EXISTS trial_ends_at          TIMESTAMPTZ;
-    ALTER TABLE merchants ADD COLUMN IF NOT EXISTS stripe_customer_id     TEXT;
-    ALTER TABLE merchants ADD COLUMN IF NOT EXISTS stripe_subscription_id TEXT;
-    ALTER TABLE merchants ADD COLUMN IF NOT EXISTS trial_reminder_sent    TEXT        NOT NULL DEFAULT '';
-    ALTER TABLE customers ADD COLUMN IF NOT EXISTS email                  TEXT;
-
     CREATE TABLE IF NOT EXISTS push_subscriptions (
       id          SERIAL PRIMARY KEY,
       customer_id INTEGER NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
@@ -92,10 +82,44 @@ if (process.env.DATABASE_URL) {
       created_at  TIMESTAMPTZ DEFAULT NOW(),
       UNIQUE (customer_id, endpoint)
     );
-  `).catch(err => {
+  `).then(() => runPgMigrations()).catch(err => {
     console.error('PostgreSQL schema init failed:', err.message);
     process.exit(1);
   });
+
+  // Run column migrations only when the column is actually missing.
+  // This avoids ACCESS EXCLUSIVE locks on every startup (IF NOT EXISTS still locks).
+  async function runPgMigrations() {
+    const { rows } = await pool.query(
+      "SELECT table_name, column_name FROM information_schema.columns WHERE table_name IN ('merchants','customers')"
+    );
+    const has = (table, col) => rows.some(r => r.table_name === table && r.column_name === col);
+
+    const merchantMigrations = [
+      ['disabled',               'INTEGER     NOT NULL DEFAULT 0'],
+      ['reset_token',            'TEXT'],
+      ['reset_token_exp',        'TIMESTAMPTZ'],
+      ['subscription_status',    "TEXT        NOT NULL DEFAULT 'trial'"],
+      ['trial_ends_at',          'TIMESTAMPTZ'],
+      ['stripe_customer_id',     'TEXT'],
+      ['stripe_subscription_id', 'TEXT'],
+      ['trial_reminder_sent',    "TEXT        NOT NULL DEFAULT ''"],
+    ];
+    const customerMigrations = [
+      ['email', 'TEXT'],
+    ];
+
+    for (const [col, def] of merchantMigrations) {
+      if (!has('merchants', col)) {
+        await pool.query(`ALTER TABLE merchants ADD COLUMN ${col} ${def}`);
+      }
+    }
+    for (const [col, def] of customerMigrations) {
+      if (!has('customers', col)) {
+        await pool.query(`ALTER TABLE customers ADD COLUMN ${col} ${def}`);
+      }
+    }
+  }
 
   // ── Client factory (used for both pool and transaction clients) ────────────
   function makeClient(client) {

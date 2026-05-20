@@ -51,21 +51,22 @@ router.get('/:id/enroll-qr', async (req, res) => {
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 
 router.post('/register', async (req, res) => {
-  const { name, email, password, logo_url, color, plan } = req.body;
+  // Rename destructured `email` to `merchantEmail` to avoid shadowing the email module
+  const { name, email: merchantEmail, password, logo_url, color, plan } = req.body;
 
-  if (!name || !email || !password) {
+  if (!name || !merchantEmail || !password) {
     return res.status(400).json({ error: 'name, email et password sont requis' });
   }
 
   try {
-    const existing = await db.one('SELECT id FROM merchants WHERE email = $1', [email]);
+    const existing = await db.one('SELECT id FROM merchants WHERE email = $1', [merchantEmail]);
     if (existing) return res.status(409).json({ error: 'Cet email est déjà utilisé' });
 
     const hashed = await bcrypt.hash(password, SALT_ROUNDS);
     const trialEndsAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString();
     const id = await db.insert(
       'INSERT INTO merchants (name, email, password, logo_url, color, plan, trial_ends_at) VALUES ($1, $2, $3, $4, $5, $6, $7)',
-      [name, email, hashed, logo_url || null, color || '#6366f1', plan || 'free', trialEndsAt]
+      [name, merchantEmail, hashed, logo_url || null, color || '#6366f1', plan || 'free', trialEndsAt]
     );
 
     const merchant = await db.one(
@@ -95,14 +96,14 @@ router.post('/register', async (req, res) => {
 });
 
 router.post('/login', async (req, res) => {
-  const { email, password } = req.body;
+  const { email: merchantEmail, password } = req.body;
 
-  if (!email || !password) {
+  if (!merchantEmail || !password) {
     return res.status(400).json({ error: 'email et password sont requis' });
   }
 
   try {
-    const merchant = await db.one('SELECT * FROM merchants WHERE email = $1', [email]);
+    const merchant = await db.one('SELECT * FROM merchants WHERE email = $1', [merchantEmail]);
     if (!merchant) return res.status(401).json({ error: 'Identifiants invalides' });
 
     if (merchant.disabled) {

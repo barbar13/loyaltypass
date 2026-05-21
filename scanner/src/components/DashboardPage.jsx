@@ -884,38 +884,83 @@ function TopClientsTable({ customers }) {
 
 // ── AnalyticsTab ──────────────────────────────────────────────────────────────
 
+function ChartEmpty({ icon = '📊', msg, sub, height = 160 }) {
+  return (
+    <div className="flex flex-col items-center justify-center gap-2 text-center" style={{ height }}>
+      <span style={{ fontSize: 28 }}>{icon}</span>
+      <p className="text-gray-500 text-sm font-medium">{msg}</p>
+      {sub && <p className="text-gray-600 text-xs">{sub}</p>}
+    </div>
+  );
+}
+
 function AnalyticsTab({ token, color }) {
-  const [data,    setData]    = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [err,     setErr]     = useState('');
-  const [loadKey, setLoadKey] = useState(0);
+  const [data,       setData]       = useState(null);
+  const [firstLoad,  setFirstLoad]  = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [lastUpdate, setLastUpdate] = useState(null);
+  const [err,        setErr]        = useState('');
+  const [loadKey,    setLoadKey]    = useState(0);
+  const loadingRef   = useRef(false);
+  const hasLoaded    = useRef(false);
 
   async function load() {
-    setLoading(true); setErr('');
-    try { const d = await getAnalytics(token); setData(d); setLoadKey(k => k + 1); }
-    catch (e) { setErr(e.message); }
-    finally { setLoading(false); }
+    if (loadingRef.current) return;
+    loadingRef.current = true;
+    if (!hasLoaded.current) setFirstLoad(true);
+    else setRefreshing(true);
+    setErr('');
+    try {
+      console.log('[Fidelyzio] Analytics: chargement…');
+      const d = await getAnalytics(token);
+      console.log('[Fidelyzio] Analytics: données reçues', {
+        scans_today: d.this_month_scans,
+        total_customers: d.active_customers + d.inactive_customers,
+        total_points: d.total_points_distributed,
+        scans_per_day_count: d.scans_per_day?.length,
+      });
+      setData(d);
+      setLoadKey(k => k + 1);
+      setLastUpdate(new Date());
+      hasLoaded.current = true;
+    } catch (e) {
+      console.error('[Fidelyzio] Analytics: erreur', e.message);
+      setErr(e.message);
+    } finally {
+      setFirstLoad(false);
+      setRefreshing(false);
+      loadingRef.current = false;
+    }
   }
-  useEffect(() => { load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (loading) return (
-    <div className="px-5 md:px-6 pt-5 pb-6 space-y-4">
+  useEffect(() => {
+    load();
+    const id = setInterval(load, 30000);
+    return () => clearInterval(id);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const fmtTime = d => d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+
+  if (firstLoad) return (
+    <div className="px-3 md:px-6 pt-5 pb-6 space-y-4">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {[1,2,3,4].map(i => <div key={i} className="bg-[#0e0e18] border border-white/5 rounded-2xl p-5 space-y-3"><Skel h="h-3" w="w-20" /><Skel h="h-8" w="w-16" /><Skel h="h-3" w="w-24" /></div>)}
+        {[1,2,3,4].map(i => <div key={i} className="bg-[#0e0e18] border border-white/5 rounded-2xl p-4 space-y-3"><Skel h="h-3" w="w-20" /><Skel h="h-8" w="w-16" /><Skel h="h-3" w="w-24" /></div>)}
       </div>
-      <div className="grid md:grid-cols-5 gap-4">
-        <div className="md:col-span-3 bg-[#0e0e18] border border-white/5 rounded-2xl p-5"><Skel h="h-3" w="w-32" /><div className="mt-4"><Skel h="h-44" /></div></div>
-        <div className="md:col-span-2 bg-[#0e0e18] border border-white/5 rounded-2xl p-5"><Skel h="h-3" w="w-28" /><div className="mt-4"><Skel h="h-44" /></div></div>
+      <div className="grid md:grid-cols-5 gap-3 md:gap-4">
+        <div className="md:col-span-3 bg-[#0e0e18] border border-white/5 rounded-2xl p-5"><Skel h="h-3" w="w-32" /><div className="mt-4"><Skel h="h-40" /></div></div>
+        <div className="md:col-span-2 bg-[#0e0e18] border border-white/5 rounded-2xl p-5"><Skel h="h-3" w="w-28" /><div className="mt-4"><Skel h="h-40" /></div></div>
       </div>
-      <div className="grid md:grid-cols-2 gap-4">
-        {[1,2].map(i => <div key={i} className="bg-[#0e0e18] border border-white/5 rounded-2xl p-5"><Skel h="h-3" w="w-36" /><div className="mt-4"><Skel h="h-44" /></div></div>)}
+      <div className="grid md:grid-cols-2 gap-3 md:gap-4">
+        {[1,2].map(i => <div key={i} className="bg-[#0e0e18] border border-white/5 rounded-2xl p-5"><Skel h="h-3" w="w-36" /><div className="mt-4"><Skel h="h-40" /></div></div>)}
       </div>
     </div>
   );
 
-  if (err) return (
+  if (err && !data) return (
     <div className="px-5 py-16 text-center">
-      <p className="text-red-400 text-sm mb-4">{err}</p>
+      <p className="text-4xl mb-3">⚠️</p>
+      <p className="text-red-400 text-sm mb-1">Impossible de charger les statistiques</p>
+      <p className="text-gray-600 text-xs mb-5">{err}</p>
       <button onClick={load} className="px-4 py-2 bg-gray-800 rounded-xl text-white text-sm hover:bg-gray-700 transition">Réessayer</button>
     </div>
   );
@@ -925,67 +970,93 @@ function AnalyticsTab({ token, color }) {
   const DOW   = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
 
   const totalCustomers = data.active_customers + data.inactive_customers;
-  const activePct = totalCustomers > 0 ? Math.round((data.active_customers / totalCustomers) * 100) : 0;
+  const activePct      = totalCustomers > 0 ? Math.round((data.active_customers / totalCustomers) * 100) : 0;
 
   const monthScanTrend = data.last_month_scans > 0
     ? Math.round(((data.this_month_scans - data.last_month_scans) / data.last_month_scans) * 100) : null;
   const monthCustTrend = data.last_month_customers > 0
     ? Math.round(((data.this_month_customers - data.last_month_customers) / data.last_month_customers) * 100) : null;
 
-  // Weekly new customers derived from cumulative
   const weeklyNew = data.cumulative_customers.map((w, i, arr) => ({
     label: w.label,
     count: i === 0 ? w.count : Math.max(0, w.count - arr[i - 1].count),
   })).slice(-8);
 
-  // Points donut
-  const ptsDist    = data.total_points_distributed || 0;
+  const ptsDist     = data.total_points_distributed || 0;
   const ptsRedeemed = Math.min(data.total_points_redeemed || 0, ptsDist);
-  const ptsNet     = Math.max(0, ptsDist - ptsRedeemed);
+  const ptsNet      = Math.max(0, ptsDist - ptsRedeemed);
 
-  const ck = String(loadKey); // chart remount key
+  // Empty state detection
+  const hasScans        = data.scans_per_day.some(d => d.count > 0);
+  const hasWeekdayData  = data.scans_by_weekday.some(v => v > 0);
+  const hasWeeklyData   = weeklyNew.some(w => w.count > 0);
+
+  const ck = String(loadKey);
+
+  const TICK_OPTS_SM = { font: { size: 9 }, color: '#6b7280' };
 
   return (
-    <div className="px-3 md:px-6 pt-5 pb-8 space-y-4 w-full overflow-x-hidden">
+    <div className="px-3 md:px-6 pt-4 pb-8 space-y-4 w-full overflow-x-hidden">
 
-      {/* Refresh */}
-      <div className="flex justify-end">
-        <button onClick={load} className="flex items-center gap-1.5 text-gray-500 hover:text-white text-xs px-3 py-1.5 rounded-xl hover:bg-white/5 transition-all active:scale-95">
-          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
-          Actualiser
+      {/* Header: refresh button + timestamp */}
+      <div className="flex items-center justify-between">
+        {lastUpdate
+          ? <p className="text-gray-600 text-xs">Mis à jour à {fmtTime(lastUpdate)}</p>
+          : <span />}
+        <button onClick={load} disabled={refreshing}
+          className="flex items-center gap-1.5 text-gray-500 hover:text-white text-xs px-3 py-1.5 rounded-xl hover:bg-white/5 transition-all active:scale-95 disabled:opacity-50">
+          <svg className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"/>
+          </svg>
+          {refreshing ? 'Actualisation…' : 'Actualiser'}
         </button>
       </div>
 
+      {/* Erreur non-bloquante */}
+      {err && data && (
+        <div className="bg-red-500/8 border border-red-500/18 rounded-xl px-4 py-2.5 text-red-400 text-xs">
+          Erreur de rafraîchissement : {err}
+        </div>
+      )}
+
       {/* ── Row 1: KPI cards ─────────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <KpiCard label="Total clients"      value={totalCustomers.toLocaleString('fr-FR')} trend={monthCustTrend} sub={monthCustTrend == null ? undefined : 'vs mois dernier'} borderColor={CHART_COLORS.indigo} />
-        <KpiCard label="Scans ce mois"      value={data.this_month_scans.toLocaleString('fr-FR')} trend={monthScanTrend} sub={monthScanTrend == null ? undefined : 'vs mois dernier'} borderColor={CHART_COLORS.amber} />
-        <KpiCard label="Points distribués"  value={ptsDist.toLocaleString('fr-FR')} sub="total cumulé" borderColor={CHART_COLORS.emerald} />
-        <KpiCard label="Récompenses"        value={data.total_redeemed.toLocaleString('fr-FR')} sub="offertes" borderColor={CHART_COLORS.rose} />
+        <KpiCard label="Total clients"     value={totalCustomers.toLocaleString('fr-FR')} trend={monthCustTrend} sub={monthCustTrend == null ? undefined : 'vs mois dernier'} borderColor={CHART_COLORS.indigo} />
+        <KpiCard label="Scans ce mois"     value={data.this_month_scans.toLocaleString('fr-FR')} trend={monthScanTrend} sub={monthScanTrend == null ? undefined : 'vs mois dernier'} borderColor={CHART_COLORS.amber} />
+        <KpiCard label="Points distribués" value={ptsDist.toLocaleString('fr-FR')} sub="total cumulé" borderColor={CHART_COLORS.emerald} />
+        <KpiCard label="Récompenses"       value={data.total_redeemed.toLocaleString('fr-FR')} sub="offertes" borderColor={CHART_COLORS.rose} />
       </div>
 
       {/* ── Row 2: Scans/day (3/5) + Weekday (2/5) ───────────────────────────── */}
       <div className="grid md:grid-cols-5 gap-3 md:gap-4">
         <div className="md:col-span-3 min-w-0">
           <ChartCard title="Scans par jour" subtitle="30 derniers jours">
-            <CanvasChart key={`sd-${ck}`} chartKey={ck} type="line" height={160}
-              data={{
-                labels: data.scans_per_day.map(d => d.day.slice(5)),
-                datasets: [{ data: data.scans_per_day.map(d => d.count), borderColor: brand, backgroundColor: brand + '18', fill: true, tension: 0.4, pointRadius: 0, pointHoverRadius: 4, borderWidth: 2 }],
-              }}
-              options={{ ...BASE_CHART_OPTS, scales: { ...BASE_CHART_OPTS.scales, x: { ...BASE_CHART_OPTS.scales.x, ticks: { ...BASE_CHART_OPTS.scales.x.ticks, maxTicksLimit: 7, font: { size: 9 } } } } }}
-            />
+            {hasScans ? (
+              <CanvasChart key={`sd-${ck}`} chartKey={ck} type="line" height={160}
+                data={{
+                  labels: data.scans_per_day.map(d => d.day.slice(5)),
+                  datasets: [{ data: data.scans_per_day.map(d => d.count), borderColor: brand, backgroundColor: brand + '18', fill: true, tension: 0.4, pointRadius: 0, pointHoverRadius: 4, borderWidth: 2 }],
+                }}
+                options={{ ...BASE_CHART_OPTS, scales: { ...BASE_CHART_OPTS.scales, x: { ...BASE_CHART_OPTS.scales.x, ticks: { ...TICK_OPTS_SM, maxTicksLimit: 7 } }, y: { ...BASE_CHART_OPTS.scales.y, ticks: TICK_OPTS_SM } } }}
+              />
+            ) : (
+              <ChartEmpty icon="📈" msg="Aucun scan encore" sub="Commencez à scanner vos clients !" />
+            )}
           </ChartCard>
         </div>
         <div className="md:col-span-2 min-w-0">
-          <ChartCard title="Visites par jour" subtitle="30 derniers jours">
-            <CanvasChart key={`dow-${ck}`} chartKey={ck} type="bar" height={160}
-              data={{
-                labels: DOW,
-                datasets: [{ data: data.scans_by_weekday, backgroundColor: CHART_COLORS.amber + 'bb', hoverBackgroundColor: CHART_COLORS.amber, borderRadius: 4, borderSkipped: false }],
-              }}
-              options={{ ...BASE_CHART_OPTS, scales: { ...BASE_CHART_OPTS.scales, x: { ...BASE_CHART_OPTS.scales.x, ticks: { ...BASE_CHART_OPTS.scales.x.ticks, font: { size: 9 } } }, y: { ...BASE_CHART_OPTS.scales.y, ticks: { ...BASE_CHART_OPTS.scales.y.ticks, font: { size: 9 } } } } }}
-            />
+          <ChartCard title="Visites par jour de semaine" subtitle="30 derniers jours">
+            {hasWeekdayData ? (
+              <CanvasChart key={`dow-${ck}`} chartKey={ck} type="bar" height={160}
+                data={{
+                  labels: DOW,
+                  datasets: [{ data: data.scans_by_weekday, backgroundColor: CHART_COLORS.amber + 'bb', hoverBackgroundColor: CHART_COLORS.amber, borderRadius: 4, borderSkipped: false }],
+                }}
+                options={{ ...BASE_CHART_OPTS, scales: { ...BASE_CHART_OPTS.scales, x: { ...BASE_CHART_OPTS.scales.x, ticks: TICK_OPTS_SM }, y: { ...BASE_CHART_OPTS.scales.y, ticks: TICK_OPTS_SM } } }}
+              />
+            ) : (
+              <ChartEmpty icon="📅" msg="Pas encore de données" sub="Disponible après vos premiers scans" />
+            )}
           </ChartCard>
         </div>
       </div>
@@ -993,20 +1064,22 @@ function AnalyticsTab({ token, color }) {
       {/* ── Row 3: New clients/week + Points donut ───────────────────────────── */}
       <div className="grid md:grid-cols-2 gap-3 md:gap-4">
         <ChartCard title="Nouveaux clients par semaine" subtitle="8 dernières semaines">
-          <CanvasChart key={`wc-${ck}`} chartKey={ck} type="bar" height={160}
-            data={{
-              labels: weeklyNew.map(w => w.label),
-              datasets: [{ data: weeklyNew.map(w => w.count), backgroundColor: CHART_COLORS.emerald + 'bb', hoverBackgroundColor: CHART_COLORS.emerald, borderRadius: 4, borderSkipped: false }],
-            }}
-            options={{ ...BASE_CHART_OPTS, scales: { ...BASE_CHART_OPTS.scales, x: { ...BASE_CHART_OPTS.scales.x, ticks: { ...BASE_CHART_OPTS.scales.x.ticks, maxRotation: 30, maxTicksLimit: 8, font: { size: 9 } } }, y: { ...BASE_CHART_OPTS.scales.y, ticks: { ...BASE_CHART_OPTS.scales.y.ticks, font: { size: 9 } } } } }}
-          />
+          {hasWeeklyData ? (
+            <CanvasChart key={`wc-${ck}`} chartKey={ck} type="bar" height={160}
+              data={{
+                labels: weeklyNew.map(w => w.label),
+                datasets: [{ data: weeklyNew.map(w => w.count), backgroundColor: CHART_COLORS.emerald + 'bb', hoverBackgroundColor: CHART_COLORS.emerald, borderRadius: 4, borderSkipped: false }],
+              }}
+              options={{ ...BASE_CHART_OPTS, scales: { ...BASE_CHART_OPTS.scales, x: { ...BASE_CHART_OPTS.scales.x, ticks: { ...TICK_OPTS_SM, maxRotation: 30, maxTicksLimit: 8 } }, y: { ...BASE_CHART_OPTS.scales.y, ticks: TICK_OPTS_SM } } }}
+            />
+          ) : (
+            <ChartEmpty icon="👥" msg="Aucun nouveau client cette période" sub="Les inscriptions apparaîtront ici" />
+          )}
         </ChartCard>
 
         <ChartCard title="Points distribués vs échangés">
           {ptsDist === 0 ? (
-            <div className="flex items-center justify-center" style={{ height: 190 }}>
-              <p className="text-gray-600 text-sm">Aucun point distribué encore</p>
-            </div>
+            <ChartEmpty icon="⭐" msg="Aucun point distribué encore" sub="Scannez vos clients pour commencer" height={170} />
           ) : (
             <div className="flex flex-col sm:flex-row sm:items-center gap-4">
               <div className="flex-1 min-w-0" style={{ height: 170, position: 'relative' }}>
@@ -1036,7 +1109,7 @@ function AnalyticsTab({ token, color }) {
                 </div>
                 <div>
                   <p className="text-gray-600 text-[10px] uppercase tracking-wide">Taux</p>
-                  <p className="text-white font-bold text-base leading-none">{ptsDist > 0 ? Math.round((ptsRedeemed / ptsDist) * 100) : 0}%</p>
+                  <p className="text-white font-bold text-base leading-none">{Math.round((ptsRedeemed / ptsDist) * 100)}%</p>
                 </div>
               </div>
             </div>
@@ -1044,12 +1117,11 @@ function AnalyticsTab({ token, color }) {
         </ChartCard>
       </div>
 
-      {/* ── Row 4: Top clients table (full width) ────────────────────────────── */}
+      {/* ── Row 4: Top clients table ──────────────────────────────────────────── */}
       <TopClientsTable customers={data.top_customers} />
 
       {/* ── Row 5: Analysis summary cards ────────────────────────────────────── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {/* Active vs inactive */}
         <div className="bg-[#0e0e18] border border-white/5 rounded-2xl p-4">
           <p className="text-gray-500 text-[10px] uppercase tracking-wider mb-2">Clients actifs</p>
           <p className="text-emerald-400 text-2xl font-black leading-none">{activePct}%</p>
@@ -1058,22 +1130,16 @@ function AnalyticsTab({ token, color }) {
           </div>
           <p className="text-gray-600 text-[10px] mt-1.5">{data.active_customers} actifs / {totalCustomers} total</p>
         </div>
-
-        {/* Avg frequency */}
         <div className="bg-[#0e0e18] border border-white/5 rounded-2xl p-4">
           <p className="text-gray-500 text-[10px] uppercase tracking-wider mb-2">Fréquence moy.</p>
           <p className="text-white text-2xl font-black leading-none">{data.avg_visit_frequency}</p>
           <p className="text-gray-600 text-[10px] mt-1.5">visites / mois (30j)</p>
         </div>
-
-        {/* Retention rate */}
         <div className="bg-[#0e0e18] border border-white/5 rounded-2xl p-4">
           <p className="text-gray-500 text-[10px] uppercase tracking-wider mb-2">Rétention</p>
           <p className={`text-2xl font-black leading-none ${data.retention_rate >= 50 ? 'text-emerald-400' : 'text-amber-400'}`}>{data.retention_rate}%</p>
           <p className="text-gray-600 text-[10px] mt-1.5">clients revenus 2x+</p>
         </div>
-
-        {/* Lost customers */}
         <div className="bg-[#0e0e18] border border-white/5 rounded-2xl p-4">
           <p className="text-gray-500 text-[10px] uppercase tracking-wider mb-2">À relancer</p>
           <p className={`text-2xl font-black leading-none ${data.inactive_customers > 0 ? 'text-red-400' : 'text-emerald-400'}`}>{data.inactive_customers}</p>

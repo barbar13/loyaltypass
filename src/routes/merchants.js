@@ -164,7 +164,7 @@ router.get('/dashboard', auth, async (req, res) => {
     const [{ total_customers }, { total_points }, { scans_today }] = await Promise.all([
       db.one('SELECT COUNT(*) as total_customers FROM memberships WHERE merchant_id = $1', [merchantId]),
       db.one('SELECT COALESCE(SUM(points), 0) as total_points FROM transactions WHERE merchant_id = $1', [merchantId]),
-      db.one(`SELECT COUNT(*) as scans_today FROM transactions WHERE merchant_id = $1 AND ${db.todayExpr}`, [merchantId]),
+      db.one(`SELECT COUNT(*) as scans_today FROM transactions WHERE merchant_id = $1 AND points > 0 AND ${db.todayExpr}`, [merchantId]),
     ]);
 
     const [customers, rewards] = await Promise.all([
@@ -360,10 +360,34 @@ router.get('/scans', auth, async (req, res) => {
 router.get('/analytics', auth, async (req, res) => {
   const merchantId = req.merchant.id;
   try {
-    const now  = Date.now();
-    const d30  = new Date(now - 30 * 86400000).toISOString();
-    const d7   = new Date(now - 7  * 86400000).toISOString();
-    const d14  = new Date(now - 14 * 86400000).toISOString();
+    const now = Date.now();
+
+    // Timestamp boundaries (ms since epoch) — used for ALL JS comparisons
+    const ts30  = now - 30 * 86400000;
+    const ts7   = now - 7  * 86400000;
+    const ts14  = now - 14 * 86400000;
+    const nowDate = new Date();
+    const tsMonthStart     = new Date(nowDate.getFullYear(), nowDate.getMonth(),     1).getTime();
+    const tsLastMonthStart = new Date(nowDate.getFullYear(), nowDate.getMonth() - 1, 1).getTime();
+
+    // Convert any DB timestamp (Date object from pg, or "YYYY-MM-DD HH:MM:SS" string from SQLite)
+    // to milliseconds. All JS date comparisons use toTs() to stay DB-agnostic.
+    function toTs(val) {
+      if (!val) return null;
+      if (val instanceof Date) return val.getTime();
+      const s = String(val).trim();
+      // SQLite stores "YYYY-MM-DD HH:MM:SS" (UTC) — add T and Z so Date parses it as UTC
+      if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/.test(s))
+        return new Date(s.replace(' ', 'T') + 'Z').getTime();
+      return new Date(s).getTime();
+    }
+
+    // Extract "YYYY-MM-DD" from any DB timestamp value
+    function toDateStr(val) {
+      if (!val) return null;
+      if (val instanceof Date) return val.toISOString().slice(0, 10);
+      return String(val).slice(0, 10);
+    }
 
     const [memberships, allTxns] = await Promise.all([
       db.all(`
@@ -384,16 +408,17 @@ router.get('/analytics', auth, async (req, res) => {
       ),
     ]);
 
+    console.log(`[Analytics] merchant=${merchantId} memberships=${memberships.length} transactions=${allTxns.length}`);
+
     // ── Customer analysis ─────────────────────────────────────────────────
     const positiveTxns   = allTxns.filter(t => t.points > 0);
-    const positiveTxns30 = positiveTxns.filter(t => t.created_at >= d30);
+    const positiveTxns30 = positiveTxns.filter(t => toTs(t.created_at) >= ts30);
     const redemptions    = allTxns.filter(t => t.points < 0);
 
-    const activeCustomers   = memberships.filter(m => m.last_visit && m.last_visit >= d30);
-    const inactiveCustomers = memberships.filter(m => !m.last_visit || m.last_visit < d30);
+    const activeCustomers   = memberships.filter(m => { const ts = toTs(m.last_visit); return ts !== null && ts >= ts30; });
+    const inactiveCustomers = memberships.filter(m => { const ts = toTs(m.last_visit); return ts === null || ts < ts30; });
     const avgVisitFreq = activeCustomers.length > 0
-      ? Math.round((positiveTxns30.length / activeCustomers.length) * 10) / 10
-      : 0;
+      ? Math.round((positiveTxns30.length / activeCustomers.length) * 10) / 10 : 0;
 
     const topCustomers = memberships
       .map(m => ({ first_name: m.first_name, phone: m.phone, points: Number(m.points),
@@ -401,17 +426,17 @@ router.get('/analytics', auth, async (req, res) => {
       .sort((a, b) => b.points - a.points).slice(0, 50);
 
     const lostCustomers = inactiveCustomers
-      .sort((a, b) => (a.last_visit || '') < (b.last_visit || '') ? -1 : 1).slice(0, 20)
+      .sort((a, b) => (toTs(a.last_visit) || 0) - (toTs(b.last_visit) || 0)).slice(0, 20)
       .map(m => ({ first_name: m.first_name, phone: m.phone, points: Number(m.points), last_visit: m.last_visit }));
 
-    const newThisWeek = memberships.filter(m => m.joined_at >= d7).length;
-    const newLastWeek = memberships.filter(m => m.joined_at >= d14 && m.joined_at < d7).length;
+    const newThisWeek = memberships.filter(m => toTs(m.joined_at) >= ts7).length;
+    const newLastWeek = memberships.filter(m => { const ts = toTs(m.joined_at); return ts >= ts14 && ts < ts7; }).length;
 
     // ── Time analysis ─────────────────────────────────────────────────────
     const scansDayMap = {};
     positiveTxns30.forEach(t => {
-      const d = t.created_at.slice(0, 10);
-      scansDayMap[d] = (scansDayMap[d] || 0) + 1;
+      const d = toDateStr(t.created_at);
+      if (d) scansDayMap[d] = (scansDayMap[d] || 0) + 1;
     });
     const scansPerDay = [];
     for (let i = 29; i >= 0; i--) {
@@ -421,19 +446,20 @@ router.get('/analytics', auth, async (req, res) => {
 
     const scansByWeekday = Array(7).fill(0);
     positiveTxns30.forEach(t => {
-      scansByWeekday[(new Date(t.created_at).getDay() + 6) % 7]++;
+      const ts = toTs(t.created_at);
+      if (ts) scansByWeekday[(new Date(ts).getUTCDay() + 6) % 7]++;
     });
 
     const scansByHour = Array(24).fill(0);
-    positiveTxns30.forEach(t => { scansByHour[new Date(t.created_at).getHours()]++; });
+    positiveTxns30.forEach(t => {
+      const ts = toTs(t.created_at);
+      if (ts) scansByHour[new Date(ts).getUTCHours()]++;
+    });
 
-    const nowDate        = new Date();
-    const thisMonthStart = new Date(nowDate.getFullYear(), nowDate.getMonth(), 1).toISOString();
-    const lastMonthStart = new Date(nowDate.getFullYear(), nowDate.getMonth() - 1, 1).toISOString();
-    const thisMonthScans      = positiveTxns.filter(t => t.created_at >= thisMonthStart).length;
-    const lastMonthScans      = positiveTxns.filter(t => t.created_at >= lastMonthStart && t.created_at < thisMonthStart).length;
-    const thisMonthCustomers  = memberships.filter(m => m.joined_at >= thisMonthStart).length;
-    const lastMonthCustomers  = memberships.filter(m => m.joined_at >= lastMonthStart && m.joined_at < thisMonthStart).length;
+    const thisMonthScans     = positiveTxns.filter(t => toTs(t.created_at) >= tsMonthStart).length;
+    const lastMonthScans     = positiveTxns.filter(t => { const ts = toTs(t.created_at); return ts >= tsLastMonthStart && ts < tsMonthStart; }).length;
+    const thisMonthCustomers = memberships.filter(m => toTs(m.joined_at) >= tsMonthStart).length;
+    const lastMonthCustomers = memberships.filter(m => { const ts = toTs(m.joined_at); return ts >= tsLastMonthStart && ts < tsMonthStart; }).length;
 
     // ── Rewards analysis ──────────────────────────────────────────────────
     const totalPointsDistrib   = positiveTxns.reduce((s, t) => s + t.points, 0);
@@ -451,13 +477,14 @@ router.get('/analytics', auth, async (req, res) => {
 
     let avgPointsBeforeFirstRedemption = 0;
     if (redemptions.length > 0) {
-      const firstRedeemDate = {};
+      const firstRedeemTs = {};
       redemptions.forEach(r => {
-        if (!firstRedeemDate[r.customer_id] || r.created_at < firstRedeemDate[r.customer_id])
-          firstRedeemDate[r.customer_id] = r.created_at;
+        const ts = toTs(r.created_at);
+        if (ts && (!firstRedeemTs[r.customer_id] || ts < firstRedeemTs[r.customer_id]))
+          firstRedeemTs[r.customer_id] = ts;
       });
-      const vals = Object.entries(firstRedeemDate).map(([cid, date]) =>
-        allTxns.filter(t => String(t.customer_id) === cid && t.points > 0 && t.created_at < date)
+      const vals = Object.entries(firstRedeemTs).map(([cid, redeemTs]) =>
+        allTxns.filter(t => String(t.customer_id) === cid && t.points > 0 && toTs(t.created_at) < redeemTs)
                .reduce((s, t) => s + t.points, 0)
       );
       if (vals.length > 0)
@@ -471,9 +498,9 @@ router.get('/analytics', auth, async (req, res) => {
 
     const cumulativeCustomers = [];
     for (let i = 11; i >= 0; i--) {
-      const wEnd  = new Date(now - i * 7 * 86400000);
-      const label = wEnd.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
-      cumulativeCustomers.push({ label, count: memberships.filter(m => new Date(m.joined_at) <= wEnd).length });
+      const wEndTs = now - i * 7 * 86400000;
+      const label  = new Date(wEndTs).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+      cumulativeCustomers.push({ label, count: memberships.filter(m => { const ts = toTs(m.joined_at); return ts !== null && ts <= wEndTs; }).length });
     }
 
     const loyaltyScores = memberships.filter(m => Number(m.visit_count) > 0)
@@ -481,8 +508,10 @@ router.get('/analytics', auth, async (req, res) => {
     const avgLoyaltyScore = loyaltyScores.length > 0
       ? Math.round(loyaltyScores.reduce((a, b) => a + b, 0) / loyaltyScores.length) : 0;
 
-    const weeklyScans       = positiveTxns.filter(t => t.created_at >= d7).length;
-    const weeklyRedemptions = redemptions.filter(t => t.created_at >= d7).length;
+    const weeklyScans       = positiveTxns.filter(t => toTs(t.created_at) >= ts7).length;
+    const weeklyRedemptions = redemptions.filter(t => toTs(t.created_at) >= ts7).length;
+
+    console.log(`[Analytics] active=${activeCustomers.length} inactive=${inactiveCustomers.length} scans30=${positiveTxns30.length} thisMonth=${thisMonthScans}`);
 
     res.json({
       active_customers:    activeCustomers.length,
@@ -513,6 +542,7 @@ router.get('/analytics', auth, async (req, res) => {
       weekly_redemptions:   weeklyRedemptions,
     });
   } catch (err) {
+    console.error('[Analytics] Error:', err.message);
     res.status(500).json({ error: err.message });
   }
 });

@@ -894,37 +894,123 @@ function ChartEmpty({ icon = '📊', msg, sub, height = 160 }) {
   );
 }
 
+// ── DateRangePicker ───────────────────────────────────────────────────────────
+
+const DATE_PRESETS = [
+  { id: '7d',     label: '7 jours',    days: 7 },
+  { id: '30d',    label: '30 jours',   days: 30 },
+  { id: '3m',     label: '3 mois',     days: 90 },
+  { id: '6m',     label: '6 mois',     days: 180 },
+  { id: 'year',   label: 'Cette année', days: null },
+  { id: 'custom', label: 'Personnalisé', days: 'custom' },
+];
+
+function todayStr() { return new Date().toISOString().slice(0, 10); }
+
+function presetRange(preset) {
+  const today = new Date();
+  const to = today.toISOString().slice(0, 10);
+  if (preset.days === null) return { from: `${today.getFullYear()}-01-01`, to };
+  const from = new Date(Date.now() - preset.days * 86400000).toISOString().slice(0, 10);
+  return { from, to };
+}
+
+function DateRangePicker({ value, onChange }) {
+  const [customFrom, setCustomFrom] = useState(value.from);
+  const [customTo,   setCustomTo]   = useState(value.to);
+  const isCustom = value.presetId === 'custom';
+
+  function selectPreset(preset) {
+    if (preset.id === 'custom') {
+      onChange({ presetId: 'custom', from: value.from, to: value.to });
+      return;
+    }
+    const { from, to } = presetRange(preset);
+    onChange({ presetId: preset.id, from, to });
+  }
+
+  function applyCustom() {
+    if (!customFrom || !customTo || customFrom > customTo) return;
+    onChange({ presetId: 'custom', from: customFrom, to: customTo });
+  }
+
+  return (
+    <div className="bg-[#0e0e18] border border-white/5 rounded-2xl p-3 md:p-4">
+      {/* Preset pills */}
+      <div className="flex flex-wrap gap-1.5 mb-2">
+        {DATE_PRESETS.map(p => (
+          <button key={p.id} onClick={() => selectPreset(p)}
+            className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all active:scale-95 ${
+              value.presetId === p.id
+                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/25'
+                : 'bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700 border border-white/5'
+            }`}>
+            {p.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Custom date inputs */}
+      {isCustom && (
+        <div className="flex items-center gap-2 flex-wrap mt-2 pt-2 border-t border-white/5">
+          <input type="date" value={customFrom} max={customTo || todayStr()}
+            onChange={e => setCustomFrom(e.target.value)}
+            className="bg-gray-900 border border-white/8 rounded-xl px-3 py-2 text-gray-200 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 flex-1 min-w-[130px]" />
+          <span className="text-gray-600 text-xs shrink-0">→</span>
+          <input type="date" value={customTo} min={customFrom} max={todayStr()}
+            onChange={e => setCustomTo(e.target.value)}
+            className="bg-gray-900 border border-white/8 rounded-xl px-3 py-2 text-gray-200 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 flex-1 min-w-[130px]" />
+          <button onClick={applyCustom} disabled={!customFrom || !customTo || customFrom > customTo}
+            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 rounded-xl text-white text-xs font-semibold transition-all active:scale-95 shrink-0">
+            Appliquer
+          </button>
+        </div>
+      )}
+
+      {/* Period label */}
+      {!isCustom && (
+        <p className="text-gray-600 text-[10px] mt-1.5">
+          Du {new Date(value.from + 'T00:00:00Z').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
+          {' '}au {new Date(value.to + 'T00:00:00Z').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
+        </p>
+      )}
+    </div>
+  );
+}
+
 function AnalyticsTab({ token, color }) {
+  const defaultRange = () => {
+    const to   = todayStr();
+    const from = new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10);
+    return { presetId: '30d', from, to };
+  };
+
+  const [dateRange,  setDateRange]  = useState(defaultRange);
   const [data,       setData]       = useState(null);
   const [firstLoad,  setFirstLoad]  = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [lastUpdate, setLastUpdate] = useState(null);
   const [err,        setErr]        = useState('');
   const [loadKey,    setLoadKey]    = useState(0);
-  const loadingRef   = useRef(false);
-  const hasLoaded    = useRef(false);
+  const loadingRef    = useRef(false);
+  const dateRangeRef  = useRef(dateRange);
+  dateRangeRef.current = dateRange;
 
   async function load() {
     if (loadingRef.current) return;
     loadingRef.current = true;
-    if (!hasLoaded.current) setFirstLoad(true);
-    else setRefreshing(true);
+    const { from, to } = dateRangeRef.current;
+    if (!data) setFirstLoad(true); else setRefreshing(true);
     setErr('');
     try {
-      console.log('[Fidelyzio] Analytics: chargement…');
-      const d = await getAnalytics(token);
-      console.log('[Fidelyzio] Analytics: données reçues', {
-        scans_today: d.this_month_scans,
-        total_customers: d.active_customers + d.inactive_customers,
-        total_points: d.total_points_distributed,
-        scans_per_day_count: d.scans_per_day?.length,
-      });
+      console.log(`[Analytics] Chargement période ${from} → ${to}`);
+      const d = await getAnalytics(token, { dateFrom: from, dateTo: to });
+      console.log('[Analytics] Reçu:', { customers: d.active_customers + d.inactive_customers, scans: d.scans_per_day?.reduce((s, x) => s + x.count, 0), points: d.total_points_distributed });
       setData(d);
       setLoadKey(k => k + 1);
       setLastUpdate(new Date());
-      hasLoaded.current = true;
     } catch (e) {
-      console.error('[Fidelyzio] Analytics: erreur', e.message);
+      console.error('[Analytics] Erreur:', e.message);
       setErr(e.message);
     } finally {
       setFirstLoad(false);
@@ -933,16 +1019,23 @@ function AnalyticsTab({ token, color }) {
     }
   }
 
+  // Re-fetch immediately when date range changes; also auto-refresh every 30s
   useEffect(() => {
     load();
     const id = setInterval(load, 30000);
     return () => clearInterval(id);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [dateRange.from, dateRange.to]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  function handleRangeChange(range) {
+    setDateRange(range);
+  }
 
   const fmtTime = d => d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  const periodLabel = DATE_PRESETS.find(p => p.id === dateRange.presetId)?.label ?? `${dateRange.from} – ${dateRange.to}`;
 
-  if (firstLoad) return (
-    <div className="px-3 md:px-6 pt-5 pb-6 space-y-4">
+  const LoadingSkeleton = () => (
+    <div className="px-3 md:px-6 pt-4 pb-6 space-y-4">
+      <Skel h="h-24" rounded="rounded-2xl" />
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[1,2,3,4].map(i => <div key={i} className="bg-[#0e0e18] border border-white/5 rounded-2xl p-4 space-y-3"><Skel h="h-3" w="w-20" /><Skel h="h-8" w="w-16" /><Skel h="h-3" w="w-24" /></div>)}
       </div>
@@ -950,11 +1043,10 @@ function AnalyticsTab({ token, color }) {
         <div className="md:col-span-3 bg-[#0e0e18] border border-white/5 rounded-2xl p-5"><Skel h="h-3" w="w-32" /><div className="mt-4"><Skel h="h-40" /></div></div>
         <div className="md:col-span-2 bg-[#0e0e18] border border-white/5 rounded-2xl p-5"><Skel h="h-3" w="w-28" /><div className="mt-4"><Skel h="h-40" /></div></div>
       </div>
-      <div className="grid md:grid-cols-2 gap-3 md:gap-4">
-        {[1,2].map(i => <div key={i} className="bg-[#0e0e18] border border-white/5 rounded-2xl p-5"><Skel h="h-3" w="w-36" /><div className="mt-4"><Skel h="h-40" /></div></div>)}
-      </div>
     </div>
   );
+
+  if (firstLoad) return <LoadingSkeleton />;
 
   if (err && !data) return (
     <div className="px-5 py-16 text-center">
@@ -971,44 +1063,41 @@ function AnalyticsTab({ token, color }) {
 
   const totalCustomers = data.active_customers + data.inactive_customers;
   const activePct      = totalCustomers > 0 ? Math.round((data.active_customers / totalCustomers) * 100) : 0;
-
-  const monthScanTrend = data.last_month_scans > 0
-    ? Math.round(((data.this_month_scans - data.last_month_scans) / data.last_month_scans) * 100) : null;
-  const monthCustTrend = data.last_month_customers > 0
-    ? Math.round(((data.this_month_customers - data.last_month_customers) / data.last_month_customers) * 100) : null;
+  const periodScans    = data.scans_per_day.reduce((s, d) => s + d.count, 0);
+  const ptsDist        = data.total_points_distributed || 0;
+  const ptsRedeemed    = Math.min(data.total_points_redeemed || 0, ptsDist);
+  const ptsNet         = Math.max(0, ptsDist - ptsRedeemed);
 
   const weeklyNew = data.cumulative_customers.map((w, i, arr) => ({
     label: w.label,
     count: i === 0 ? w.count : Math.max(0, w.count - arr[i - 1].count),
   })).slice(-8);
 
-  const ptsDist     = data.total_points_distributed || 0;
-  const ptsRedeemed = Math.min(data.total_points_redeemed || 0, ptsDist);
-  const ptsNet      = Math.max(0, ptsDist - ptsRedeemed);
-
-  // Empty state detection
-  const hasScans        = data.scans_per_day.some(d => d.count > 0);
-  const hasWeekdayData  = data.scans_by_weekday.some(v => v > 0);
-  const hasWeeklyData   = weeklyNew.some(w => w.count > 0);
+  const hasScans       = periodScans > 0;
+  const hasWeekdayData = data.scans_by_weekday.some(v => v > 0);
+  const hasWeeklyData  = weeklyNew.some(w => w.count > 0);
 
   const ck = String(loadKey);
-
   const TICK_OPTS_SM = { font: { size: 9 }, color: '#6b7280' };
+  const noPeriodData = !hasScans && ptsDist === 0;
 
   return (
     <div className="px-3 md:px-6 pt-4 pb-8 space-y-4 w-full overflow-x-hidden">
 
-      {/* Header: refresh button + timestamp */}
+      {/* ── Date range picker ────────────────────────────────────────────────── */}
+      <DateRangePicker value={dateRange} onChange={handleRangeChange} />
+
+      {/* Header: timestamp + refresh */}
       <div className="flex items-center justify-between">
-        {lastUpdate
-          ? <p className="text-gray-600 text-xs">Mis à jour à {fmtTime(lastUpdate)}</p>
-          : <span />}
+        <p className="text-gray-600 text-xs">
+          {lastUpdate ? `Mis à jour à ${fmtTime(lastUpdate)}` : ''}
+        </p>
         <button onClick={load} disabled={refreshing}
           className="flex items-center gap-1.5 text-gray-500 hover:text-white text-xs px-3 py-1.5 rounded-xl hover:bg-white/5 transition-all active:scale-95 disabled:opacity-50">
           <svg className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"/>
           </svg>
-          {refreshing ? 'Actualisation…' : 'Actualiser'}
+          {refreshing ? 'Chargement…' : 'Actualiser'}
         </button>
       </div>
 
@@ -1019,18 +1108,27 @@ function AnalyticsTab({ token, color }) {
         </div>
       )}
 
+      {/* No data for period */}
+      {noPeriodData && (
+        <div className="bg-[#0e0e18] border border-white/5 rounded-2xl py-10 text-center">
+          <p className="text-3xl mb-3">📭</p>
+          <p className="text-gray-400 text-sm font-medium">Aucune donnée sur cette période</p>
+          <p className="text-gray-600 text-xs mt-1">Essayez une plage de dates plus large</p>
+        </div>
+      )}
+
       {/* ── Row 1: KPI cards ─────────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <KpiCard label="Total clients"     value={totalCustomers.toLocaleString('fr-FR')} trend={monthCustTrend} sub={monthCustTrend == null ? undefined : 'vs mois dernier'} borderColor={CHART_COLORS.indigo} />
-        <KpiCard label="Scans ce mois"     value={data.this_month_scans.toLocaleString('fr-FR')} trend={monthScanTrend} sub={monthScanTrend == null ? undefined : 'vs mois dernier'} borderColor={CHART_COLORS.amber} />
-        <KpiCard label="Points distribués" value={ptsDist.toLocaleString('fr-FR')} sub="total cumulé" borderColor={CHART_COLORS.emerald} />
-        <KpiCard label="Récompenses"       value={data.total_redeemed.toLocaleString('fr-FR')} sub="offertes" borderColor={CHART_COLORS.rose} />
+        <KpiCard label="Total clients"     value={totalCustomers.toLocaleString('fr-FR')} sub="inscrits" borderColor={CHART_COLORS.indigo} />
+        <KpiCard label="Scans"             value={periodScans.toLocaleString('fr-FR')} sub={periodLabel} borderColor={CHART_COLORS.amber} />
+        <KpiCard label="Points distribués" value={ptsDist.toLocaleString('fr-FR')} sub={periodLabel} borderColor={CHART_COLORS.emerald} />
+        <KpiCard label="Récompenses"       value={data.total_redeemed.toLocaleString('fr-FR')} sub={periodLabel} borderColor={CHART_COLORS.rose} />
       </div>
 
       {/* ── Row 2: Scans/day (3/5) + Weekday (2/5) ───────────────────────────── */}
       <div className="grid md:grid-cols-5 gap-3 md:gap-4">
         <div className="md:col-span-3 min-w-0">
-          <ChartCard title="Scans par jour" subtitle="30 derniers jours">
+          <ChartCard title="Scans par jour" subtitle={periodLabel}>
             {hasScans ? (
               <CanvasChart key={`sd-${ck}`} chartKey={ck} type="line" height={160}
                 data={{
@@ -1040,12 +1138,12 @@ function AnalyticsTab({ token, color }) {
                 options={{ ...BASE_CHART_OPTS, scales: { ...BASE_CHART_OPTS.scales, x: { ...BASE_CHART_OPTS.scales.x, ticks: { ...TICK_OPTS_SM, maxTicksLimit: 7 } }, y: { ...BASE_CHART_OPTS.scales.y, ticks: TICK_OPTS_SM } } }}
               />
             ) : (
-              <ChartEmpty icon="📈" msg="Aucun scan encore" sub="Commencez à scanner vos clients !" />
+              <ChartEmpty icon="📈" msg="Aucun scan sur cette période" sub="Essayez une plage de dates plus large" />
             )}
           </ChartCard>
         </div>
         <div className="md:col-span-2 min-w-0">
-          <ChartCard title="Visites par jour de semaine" subtitle="30 derniers jours">
+          <ChartCard title="Visites par jour" subtitle={periodLabel}>
             {hasWeekdayData ? (
               <CanvasChart key={`dow-${ck}`} chartKey={ck} type="bar" height={160}
                 data={{
@@ -1055,15 +1153,15 @@ function AnalyticsTab({ token, color }) {
                 options={{ ...BASE_CHART_OPTS, scales: { ...BASE_CHART_OPTS.scales, x: { ...BASE_CHART_OPTS.scales.x, ticks: TICK_OPTS_SM }, y: { ...BASE_CHART_OPTS.scales.y, ticks: TICK_OPTS_SM } } }}
               />
             ) : (
-              <ChartEmpty icon="📅" msg="Pas encore de données" sub="Disponible après vos premiers scans" />
+              <ChartEmpty icon="📅" msg="Aucune donnée sur cette période" />
             )}
           </ChartCard>
         </div>
       </div>
 
-      {/* ── Row 3: New clients/week + Points donut ───────────────────────────── */}
+      {/* ── Row 3: New clients + Points donut ────────────────────────────────── */}
       <div className="grid md:grid-cols-2 gap-3 md:gap-4">
-        <ChartCard title="Nouveaux clients par semaine" subtitle="8 dernières semaines">
+        <ChartCard title="Nouveaux clients" subtitle={periodLabel}>
           {hasWeeklyData ? (
             <CanvasChart key={`wc-${ck}`} chartKey={ck} type="bar" height={160}
               data={{
@@ -1073,13 +1171,13 @@ function AnalyticsTab({ token, color }) {
               options={{ ...BASE_CHART_OPTS, scales: { ...BASE_CHART_OPTS.scales, x: { ...BASE_CHART_OPTS.scales.x, ticks: { ...TICK_OPTS_SM, maxRotation: 30, maxTicksLimit: 8 } }, y: { ...BASE_CHART_OPTS.scales.y, ticks: TICK_OPTS_SM } } }}
             />
           ) : (
-            <ChartEmpty icon="👥" msg="Aucun nouveau client cette période" sub="Les inscriptions apparaîtront ici" />
+            <ChartEmpty icon="👥" msg="Aucun nouveau client sur cette période" />
           )}
         </ChartCard>
 
-        <ChartCard title="Points distribués vs échangés">
+        <ChartCard title="Points distribués vs échangés" subtitle={periodLabel}>
           {ptsDist === 0 ? (
-            <ChartEmpty icon="⭐" msg="Aucun point distribué encore" sub="Scannez vos clients pour commencer" height={170} />
+            <ChartEmpty icon="⭐" msg="Aucun point distribué sur cette période" height={170} />
           ) : (
             <div className="flex flex-col sm:flex-row sm:items-center gap-4">
               <div className="flex-1 min-w-0" style={{ height: 170, position: 'relative' }}>
@@ -1099,18 +1197,9 @@ function AnalyticsTab({ token, color }) {
                 />
               </div>
               <div className="shrink-0 flex flex-row sm:flex-col gap-4 sm:gap-3 justify-around sm:justify-start">
-                <div>
-                  <p className="text-gray-600 text-[10px] uppercase tracking-wide">Distribués</p>
-                  <p className="text-white font-bold text-base leading-none">{ptsDist.toLocaleString('fr-FR')}</p>
-                </div>
-                <div>
-                  <p className="text-gray-600 text-[10px] uppercase tracking-wide">Échangés</p>
-                  <p className="text-rose-400 font-bold text-base leading-none">{ptsRedeemed.toLocaleString('fr-FR')}</p>
-                </div>
-                <div>
-                  <p className="text-gray-600 text-[10px] uppercase tracking-wide">Taux</p>
-                  <p className="text-white font-bold text-base leading-none">{Math.round((ptsRedeemed / ptsDist) * 100)}%</p>
-                </div>
+                <div><p className="text-gray-600 text-[10px] uppercase tracking-wide">Distribués</p><p className="text-white font-bold text-base leading-none">{ptsDist.toLocaleString('fr-FR')}</p></div>
+                <div><p className="text-gray-600 text-[10px] uppercase tracking-wide">Échangés</p><p className="text-rose-400 font-bold text-base leading-none">{ptsRedeemed.toLocaleString('fr-FR')}</p></div>
+                <div><p className="text-gray-600 text-[10px] uppercase tracking-wide">Taux</p><p className="text-white font-bold text-base leading-none">{Math.round((ptsRedeemed / ptsDist) * 100)}%</p></div>
               </div>
             </div>
           )}
@@ -1123,27 +1212,25 @@ function AnalyticsTab({ token, color }) {
       {/* ── Row 5: Analysis summary cards ────────────────────────────────────── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <div className="bg-[#0e0e18] border border-white/5 rounded-2xl p-4">
-          <p className="text-gray-500 text-[10px] uppercase tracking-wider mb-2">Clients actifs</p>
+          <p className="text-gray-500 text-[10px] uppercase tracking-wider mb-2">Actifs (période)</p>
           <p className="text-emerald-400 text-2xl font-black leading-none">{activePct}%</p>
-          <div className="mt-2 h-1.5 bg-gray-800 rounded-full overflow-hidden">
-            <div className="h-full rounded-full bg-emerald-500" style={{ width: `${activePct}%` }} />
-          </div>
-          <p className="text-gray-600 text-[10px] mt-1.5">{data.active_customers} actifs / {totalCustomers} total</p>
+          <div className="mt-2 h-1.5 bg-gray-800 rounded-full overflow-hidden"><div className="h-full rounded-full bg-emerald-500" style={{ width: `${activePct}%` }} /></div>
+          <p className="text-gray-600 text-[10px] mt-1.5">{data.active_customers} / {totalCustomers}</p>
         </div>
         <div className="bg-[#0e0e18] border border-white/5 rounded-2xl p-4">
-          <p className="text-gray-500 text-[10px] uppercase tracking-wider mb-2">Fréquence moy.</p>
+          <p className="text-gray-500 text-[10px] uppercase tracking-wider mb-2">Fréq. moy.</p>
           <p className="text-white text-2xl font-black leading-none">{data.avg_visit_frequency}</p>
-          <p className="text-gray-600 text-[10px] mt-1.5">visites / mois (30j)</p>
+          <p className="text-gray-600 text-[10px] mt-1.5">visites / client actif</p>
         </div>
         <div className="bg-[#0e0e18] border border-white/5 rounded-2xl p-4">
           <p className="text-gray-500 text-[10px] uppercase tracking-wider mb-2">Rétention</p>
           <p className={`text-2xl font-black leading-none ${data.retention_rate >= 50 ? 'text-emerald-400' : 'text-amber-400'}`}>{data.retention_rate}%</p>
-          <p className="text-gray-600 text-[10px] mt-1.5">clients revenus 2x+</p>
+          <p className="text-gray-600 text-[10px] mt-1.5">revenus 2x+ (all time)</p>
         </div>
         <div className="bg-[#0e0e18] border border-white/5 rounded-2xl p-4">
-          <p className="text-gray-500 text-[10px] uppercase tracking-wider mb-2">À relancer</p>
+          <p className="text-gray-500 text-[10px] uppercase tracking-wider mb-2">Inactifs</p>
           <p className={`text-2xl font-black leading-none ${data.inactive_customers > 0 ? 'text-red-400' : 'text-emerald-400'}`}>{data.inactive_customers}</p>
-          <p className="text-gray-600 text-[10px] mt-1.5">sans visite &gt; 30j</p>
+          <p className="text-gray-600 text-[10px] mt-1.5">hors période</p>
         </div>
       </div>
 

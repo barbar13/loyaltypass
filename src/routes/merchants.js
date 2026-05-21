@@ -362,27 +362,31 @@ router.get('/analytics', auth, async (req, res) => {
   try {
     const now = Date.now();
 
-    // Timestamp boundaries (ms since epoch) — used for ALL JS comparisons
-    const ts30  = now - 30 * 86400000;
-    const ts7   = now - 7  * 86400000;
-    const ts14  = now - 14 * 86400000;
+    // ── Date range from query params (defaults: last 30 days) ─────────────
+    const tsFrom = req.query.date_from
+      ? new Date(req.query.date_from + 'T00:00:00Z').getTime()
+      : now - 30 * 86400000;
+    const tsTo = req.query.date_to
+      ? new Date(req.query.date_to   + 'T23:59:59Z').getTime()
+      : now;
+
+    // Always-relative boundaries (for weekly KPI cards, never changes)
+    const ts7  = now - 7  * 86400000;
+    const ts14 = now - 14 * 86400000;
     const nowDate = new Date();
     const tsMonthStart     = new Date(nowDate.getFullYear(), nowDate.getMonth(),     1).getTime();
     const tsLastMonthStart = new Date(nowDate.getFullYear(), nowDate.getMonth() - 1, 1).getTime();
 
     // Convert any DB timestamp (Date object from pg, or "YYYY-MM-DD HH:MM:SS" string from SQLite)
-    // to milliseconds. All JS date comparisons use toTs() to stay DB-agnostic.
+    // to milliseconds. All JS comparisons use toTs() to stay DB-agnostic.
     function toTs(val) {
       if (!val) return null;
       if (val instanceof Date) return val.getTime();
       const s = String(val).trim();
-      // SQLite stores "YYYY-MM-DD HH:MM:SS" (UTC) — add T and Z so Date parses it as UTC
       if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/.test(s))
         return new Date(s.replace(' ', 'T') + 'Z').getTime();
       return new Date(s).getTime();
     }
-
-    // Extract "YYYY-MM-DD" from any DB timestamp value
     function toDateStr(val) {
       if (!val) return null;
       if (val instanceof Date) return val.toISOString().slice(0, 10);
@@ -408,17 +412,22 @@ router.get('/analytics', auth, async (req, res) => {
       ),
     ]);
 
-    console.log(`[Analytics] merchant=${merchantId} memberships=${memberships.length} transactions=${allTxns.length}`);
+    console.log(`[Analytics] merchant=${merchantId} period=${new Date(tsFrom).toISOString().slice(0,10)}→${new Date(tsTo).toISOString().slice(0,10)} memberships=${memberships.length} txns=${allTxns.length}`);
 
-    // ── Customer analysis ─────────────────────────────────────────────────
-    const positiveTxns   = allTxns.filter(t => t.points > 0);
-    const positiveTxns30 = positiveTxns.filter(t => toTs(t.created_at) >= ts30);
-    const redemptions    = allTxns.filter(t => t.points < 0);
+    // ── Split transactions by period / all-time / positive / redemptions ──
+    const allPosTxns   = allTxns.filter(t => t.points > 0);
+    const allRedeems   = allTxns.filter(t => t.points < 0);
 
-    const activeCustomers   = memberships.filter(m => { const ts = toTs(m.last_visit); return ts !== null && ts >= ts30; });
-    const inactiveCustomers = memberships.filter(m => { const ts = toTs(m.last_visit); return ts === null || ts < ts30; });
+    // Transactions within the selected period
+    const periodTxns    = allTxns.filter(t => { const ts = toTs(t.created_at); return ts >= tsFrom && ts <= tsTo; });
+    const periodPosTxns = periodTxns.filter(t => t.points > 0);
+    const periodRedeems = periodTxns.filter(t => t.points < 0);
+
+    // ── Customer analysis (period-scoped) ─────────────────────────────────
+    const activeCustomers   = memberships.filter(m => { const ts = toTs(m.last_visit); return ts !== null && ts >= tsFrom && ts <= tsTo; });
+    const inactiveCustomers = memberships.filter(m => { const ts = toTs(m.last_visit); return ts === null || ts < tsFrom || ts > tsTo; });
     const avgVisitFreq = activeCustomers.length > 0
-      ? Math.round((positiveTxns30.length / activeCustomers.length) * 10) / 10 : 0;
+      ? Math.round((periodPosTxns.length / activeCustomers.length) * 10) / 10 : 0;
 
     const topCustomers = memberships
       .map(m => ({ first_name: m.first_name, phone: m.phone, points: Number(m.points),
@@ -429,56 +438,55 @@ router.get('/analytics', auth, async (req, res) => {
       .sort((a, b) => (toTs(a.last_visit) || 0) - (toTs(b.last_visit) || 0)).slice(0, 20)
       .map(m => ({ first_name: m.first_name, phone: m.phone, points: Number(m.points), last_visit: m.last_visit }));
 
+    // New customers in period and weekly (always last 7d)
+    const newInPeriod = memberships.filter(m => { const ts = toTs(m.joined_at); return ts >= tsFrom && ts <= tsTo; }).length;
     const newThisWeek = memberships.filter(m => toTs(m.joined_at) >= ts7).length;
     const newLastWeek = memberships.filter(m => { const ts = toTs(m.joined_at); return ts >= ts14 && ts < ts7; }).length;
 
-    // ── Time analysis ─────────────────────────────────────────────────────
+    // ── Scans per day (one slot per day in the selected period) ───────────
+    const periodDays  = Math.max(1, Math.ceil((tsTo - tsFrom) / 86400000));
     const scansDayMap = {};
-    positiveTxns30.forEach(t => {
+    periodPosTxns.forEach(t => {
       const d = toDateStr(t.created_at);
       if (d) scansDayMap[d] = (scansDayMap[d] || 0) + 1;
     });
     const scansPerDay = [];
-    for (let i = 29; i >= 0; i--) {
-      const day = new Date(now - i * 86400000).toISOString().slice(0, 10);
+    for (let i = 0; i < periodDays; i++) {
+      const day = new Date(tsFrom + i * 86400000).toISOString().slice(0, 10);
       scansPerDay.push({ day, count: scansDayMap[day] || 0 });
     }
 
+    // Weekday + hour distribution within period
     const scansByWeekday = Array(7).fill(0);
-    positiveTxns30.forEach(t => {
-      const ts = toTs(t.created_at);
-      if (ts) scansByWeekday[(new Date(ts).getUTCDay() + 6) % 7]++;
-    });
+    periodPosTxns.forEach(t => { const ts = toTs(t.created_at); if (ts) scansByWeekday[(new Date(ts).getUTCDay() + 6) % 7]++; });
 
     const scansByHour = Array(24).fill(0);
-    positiveTxns30.forEach(t => {
-      const ts = toTs(t.created_at);
-      if (ts) scansByHour[new Date(ts).getUTCHours()]++;
-    });
+    periodPosTxns.forEach(t => { const ts = toTs(t.created_at); if (ts) scansByHour[new Date(ts).getUTCHours()]++; });
 
-    const thisMonthScans     = positiveTxns.filter(t => toTs(t.created_at) >= tsMonthStart).length;
-    const lastMonthScans     = positiveTxns.filter(t => { const ts = toTs(t.created_at); return ts >= tsLastMonthStart && ts < tsMonthStart; }).length;
+    // ── Month comparisons (always calendar months, independent of range) ──
+    const thisMonthScans     = allPosTxns.filter(t => toTs(t.created_at) >= tsMonthStart).length;
+    const lastMonthScans     = allPosTxns.filter(t => { const ts = toTs(t.created_at); return ts >= tsLastMonthStart && ts < tsMonthStart; }).length;
     const thisMonthCustomers = memberships.filter(m => toTs(m.joined_at) >= tsMonthStart).length;
     const lastMonthCustomers = memberships.filter(m => { const ts = toTs(m.joined_at); return ts >= tsLastMonthStart && ts < tsMonthStart; }).length;
 
-    // ── Rewards analysis ──────────────────────────────────────────────────
-    const totalPointsDistrib   = positiveTxns.reduce((s, t) => s + t.points, 0);
-    const totalPointsRedeemed  = redemptions.reduce((s, t) => s + Math.abs(t.points), 0);
-    const customersWhoRedeemed = new Set(redemptions.map(r => r.customer_id));
-    const redemptionRate       = memberships.length > 0
+    // ── Rewards analysis (period-scoped) ─────────────────────────────────
+    const totalPointsDistrib  = periodPosTxns.reduce((s, t) => s + t.points, 0);
+    const totalPointsRedeemed = periodRedeems.reduce((s, t) => s + Math.abs(t.points), 0);
+    const customersWhoRedeemed = new Set(allRedeems.map(r => r.customer_id));
+    const redemptionRate = memberships.length > 0
       ? Math.round((customersWhoRedeemed.size / memberships.length) * 100) : 0;
 
     const rewardCounts = {};
-    redemptions.forEach(t => {
+    periodRedeems.forEach(t => {
       const k = (t.note || '').replace(/^Récompense\s*:\s*/i, '').trim() || 'Inconnu';
       rewardCounts[k] = (rewardCounts[k] || 0) + 1;
     });
     const mostPopularReward = Object.keys(rewardCounts).sort((a, b) => rewardCounts[b] - rewardCounts[a])[0] || null;
 
     let avgPointsBeforeFirstRedemption = 0;
-    if (redemptions.length > 0) {
+    if (allRedeems.length > 0) {
       const firstRedeemTs = {};
-      redemptions.forEach(r => {
+      allRedeems.forEach(r => {
         const ts = toTs(r.created_at);
         if (ts && (!firstRedeemTs[r.customer_id] || ts < firstRedeemTs[r.customer_id]))
           firstRedeemTs[r.customer_id] = ts;
@@ -496,9 +504,11 @@ router.get('/analytics', auth, async (req, res) => {
     const retentionRate   = memberships.length > 0
       ? Math.round((returnCustomers / memberships.length) * 100) : 0;
 
+    // Weekly new customers within period (up to 12 weeks, backwards from tsTo)
+    const numWeeks = Math.min(12, Math.max(1, Math.ceil(periodDays / 7)));
     const cumulativeCustomers = [];
-    for (let i = 11; i >= 0; i--) {
-      const wEndTs = now - i * 7 * 86400000;
+    for (let i = numWeeks; i >= 0; i--) {
+      const wEndTs = tsTo - i * 7 * 86400000;
       const label  = new Date(wEndTs).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
       cumulativeCustomers.push({ label, count: memberships.filter(m => { const ts = toTs(m.joined_at); return ts !== null && ts <= wEndTs; }).length });
     }
@@ -508,32 +518,43 @@ router.get('/analytics', auth, async (req, res) => {
     const avgLoyaltyScore = loyaltyScores.length > 0
       ? Math.round(loyaltyScores.reduce((a, b) => a + b, 0) / loyaltyScores.length) : 0;
 
-    const weeklyScans       = positiveTxns.filter(t => toTs(t.created_at) >= ts7).length;
-    const weeklyRedemptions = redemptions.filter(t => toTs(t.created_at) >= ts7).length;
+    const weeklyScans       = allPosTxns.filter(t => toTs(t.created_at) >= ts7).length;
+    const weeklyRedemptions = allRedeems.filter(t => toTs(t.created_at) >= ts7).length;
 
-    console.log(`[Analytics] active=${activeCustomers.length} inactive=${inactiveCustomers.length} scans30=${positiveTxns30.length} thisMonth=${thisMonthScans}`);
+    console.log(`[Analytics] active=${activeCustomers.length} inactive=${inactiveCustomers.length} periodScans=${periodPosTxns.length} thisMonth=${thisMonthScans}`);
 
     res.json({
+      // Period metadata so the frontend can display the label
+      date_from: new Date(tsFrom).toISOString().slice(0, 10),
+      date_to:   new Date(tsTo).toISOString().slice(0, 10),
+      period_days: periodDays,
+
+      // Period-scoped metrics
       active_customers:    activeCustomers.length,
       inactive_customers:  inactiveCustomers.length,
       avg_visit_frequency: avgVisitFreq,
+      new_customers_in_period: newInPeriod,
       top_customers:       topCustomers,
       lost_customers:      lostCustomers,
-      new_customers_this_week: newThisWeek,
-      new_customers_last_week: newLastWeek,
       scans_per_day:       scansPerDay,
       scans_by_weekday:    scansByWeekday,
       scans_by_hour:       scansByHour,
+      total_points_distributed: totalPointsDistrib,
+      total_points_redeemed:    totalPointsRedeemed,
+      total_redeemed:           periodRedeems.length,
+      redemption_rate:          redemptionRate,
+      most_popular_reward:      mostPopularReward,
+      avg_points_before_first_redemption: avgPointsBeforeFirstRedemption,
+
+      // Calendar-month comparisons (independent of date range)
+      new_customers_this_week: newThisWeek,
+      new_customers_last_week: newLastWeek,
       this_month_scans:    thisMonthScans,
       last_month_scans:    lastMonthScans,
       this_month_customers: thisMonthCustomers,
       last_month_customers: lastMonthCustomers,
-      total_points_distributed:           totalPointsDistrib,
-      total_points_redeemed:              totalPointsRedeemed,
-      total_redeemed:                     redemptions.length,
-      redemption_rate:                    redemptionRate,
-      most_popular_reward:                mostPopularReward,
-      avg_points_before_first_redemption: avgPointsBeforeFirstRedemption,
+
+      // All-time / snapshot metrics
       retention_rate:       retentionRate,
       cumulative_customers: cumulativeCustomers,
       avg_loyalty_score:    avgLoyaltyScore,

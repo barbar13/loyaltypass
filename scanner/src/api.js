@@ -87,8 +87,12 @@ export function deleteReward(id, token) {
   });
 }
 
-export function getAnalytics(token) {
-  return request('/merchants/analytics', {
+export function getAnalytics(token, { dateFrom, dateTo } = {}) {
+  const p = new URLSearchParams();
+  if (dateFrom) p.set('date_from', dateFrom);
+  if (dateTo)   p.set('date_to',   dateTo);
+  const qs = p.toString();
+  return request(`/merchants/analytics${qs ? '?' + qs : ''}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
 }

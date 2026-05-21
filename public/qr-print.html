@@ -7,11 +7,11 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    /* ── Screen ─────────────────────────────────────────────────────────────── */
+    /* ── Screen preview ─────────────────────────────────────────────────────── */
     body {
       background: #0a0a0f;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      color: #e5e7eb;
+      color: #111827;
       min-height: 100vh;
     }
 
@@ -23,7 +23,7 @@
       display: flex; align-items: center; justify-content: space-between; gap: 12px;
     }
     .screen-header a {
-      display: flex; align-items: center; gap-6px; gap: 6px;
+      display: flex; align-items: center; gap: 6px;
       color: #9ca3af; text-decoration: none; font-size: 13px; font-weight: 500;
       transition: color .15s;
     }
@@ -38,135 +38,133 @@
     }
     .btn-print:hover { background: #4f46e5; }
     .btn-print:active { transform: scale(.97); }
-    .btn-download {
-      display: flex; align-items: center; gap: 6px;
-      background: transparent; color: #9ca3af;
-      border: 1px solid rgba(255,255,255,.1); cursor: pointer; border-radius: 10px;
-      padding: 9px 16px; font-size: 13px; font-weight: 500;
-      transition: color .15s, border-color .15s;
-    }
-    .btn-download:hover { color: white; border-color: rgba(255,255,255,.25); }
 
     .preview-area {
       display: flex; align-items: flex-start; justify-content: center;
-      padding: 48px 24px 64px;
+      padding: 48px 24px 80px;
     }
 
-    /* ── Print card ─────────────────────────────────────────────────────────── */
-    .print-card {
+    /* ── A4 print sheet ─────────────────────────────────────────────────────── */
+    .sheet {
       background: white;
-      width: 420px;
-      border-radius: 20px;
+      width: 210mm;
+      min-height: 297mm;
+      border-radius: 4px;
       overflow: hidden;
       box-shadow: 0 30px 80px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.05);
-      display: flex; flex-direction: column; align-items: center;
+      display: flex; flex-direction: column;
     }
 
-    /* Color bar at top */
-    .color-bar {
-      width: 100%; height: 10px;
+    /* Top brand bar */
+    .brand-bar {
+      width: 100%; height: 8px;
       background: var(--brand, #6366f1);
     }
 
-    .card-body {
-      padding: 40px 40px 36px;
-      display: flex; flex-direction: column; align-items: center;
-      text-align: center; width: 100%;
+    /* Header */
+    .sheet-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 24px 32px 20px;
+      border-bottom: 1px solid #f3f4f6;
     }
-
-    /* Merchant avatar */
-    .merchant-avatar {
-      width: 88px; height: 88px; border-radius: 50%;
+    .logo-mark {
+      display: flex; align-items: center; gap: 10px;
+    }
+    .logo-icon {
+      width: 36px; height: 36px; border-radius: 10px;
       background: var(--brand, #6366f1);
       display: flex; align-items: center; justify-content: center;
-      font-size: 36px; font-weight: 900; color: white;
-      margin-bottom: 16px;
-      box-shadow: 0 12px 32px color-mix(in srgb, var(--brand, #6366f1) 35%, transparent);
+    }
+    .logo-name {
+      font-size: 18px; font-weight: 800; color: #111827; letter-spacing: -.3px;
+    }
+    .merchant-label {
+      font-size: 13px; color: #6b7280; font-weight: 500;
+      text-align: right;
+    }
+    .merchant-label strong {
+      display: block; font-size: 15px; color: #111827; font-weight: 700;
     }
 
-    .merchant-name {
-      font-size: 26px; font-weight: 800; color: #111827;
-      line-height: 1.2; margin-bottom: 4px;
+    /* QR section */
+    .qr-section {
+      flex: 1;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 32px 48px;
+      text-align: center;
     }
-    .merchant-subtitle {
-      font-size: 13px; color: #9ca3af; font-weight: 500; margin-bottom: 28px;
-    }
-
-    /* Divider */
-    .divider {
-      width: 100%; height: 1px; background: #f3f4f6; margin-bottom: 28px;
-    }
-
-    /* QR code */
-    .qr-wrapper {
-      background: white; padding: 12px; border-radius: 16px;
-      border: 2px solid #f3f4f6;
-      margin-bottom: 28px;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .qr-wrapper img { display: block; border-radius: 8px; }
-
-    .divider2 {
-      width: 100%; height: 1px; background: #f3f4f6; margin-bottom: 24px;
-    }
-
-    /* Tagline */
-    .tagline {
-      font-size: 19px; font-weight: 700; color: #111827;
+    .qr-headline {
+      font-size: 22px; font-weight: 800; color: #111827;
       line-height: 1.3; margin-bottom: 8px;
     }
-    .tagline-sub {
-      font-size: 12px; color: #9ca3af; margin-bottom: 24px; line-height: 1.5;
+    .qr-sub {
+      font-size: 13px; color: #9ca3af; margin-bottom: 32px; line-height: 1.5;
+    }
+    .qr-box {
+      background: white; padding: 16px; border-radius: 20px;
+      border: 2px solid #e5e7eb;
+      margin-bottom: 32px;
+      display: inline-flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,.07);
+    }
+    .qr-box img { display: block; border-radius: 8px; }
+
+    /* 3-step guide */
+    .steps {
+      display: flex; gap: 0; width: 100%; max-width: 480px;
+      margin-bottom: 32px;
+    }
+    .step {
+      flex: 1; display: flex; flex-direction: column; align-items: center;
+      text-align: center; gap: 10px; padding: 0 8px; position: relative;
+    }
+    .step:not(:last-child)::after {
+      content: '';
+      position: absolute; top: 20px; left: calc(50% + 24px);
+      width: calc(100% - 48px); height: 1px;
+      background: #e5e7eb;
+    }
+    .step-num {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: var(--brand, #6366f1);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .step-num svg { color: white; }
+    .step-label {
+      font-size: 11px; color: #374151; font-weight: 600; line-height: 1.4;
     }
 
     /* Footer */
-    .card-footer {
-      width: 100%; padding: 16px 40px;
+    .sheet-footer {
+      padding: 16px 32px;
       background: #f9fafb; border-top: 1px solid #f3f4f6;
       display: flex; align-items: center; justify-content: space-between;
-      gap: 8px;
     }
-    .footer-badges {
-      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    .footer-left {
+      font-size: 11px; color: #9ca3af;
     }
-    .footer-badge {
-      display: flex; align-items: center; gap: 4px;
-      font-size: 10px; color: #9ca3af; font-weight: 500;
+    .footer-left strong {
+      display: block; font-size: 13px; color: #374151; font-weight: 700; margin-bottom: 2px;
     }
-    .footer-logo {
-      font-size: 11px; font-weight: 700; color: #6366f1;
-      white-space: nowrap;
+    .footer-right {
+      font-size: 11px; color: #6366f1; font-weight: 700;
     }
 
-    /* ── Print media ─────────────────────────────────────────────────────────── */
+    /* ── Print media ────────────────────────────────────────────────────────── */
     @page {
-      size: A5;
-      margin: 0;
+      size: A4;
+      margin: 20mm;
     }
 
     @media print {
       body { background: white !important; }
-
       .no-print { display: none !important; }
-
-      .preview-area {
-        padding: 0; display: block;
+      .preview-area { padding: 0; display: block; }
+      .sheet {
+        width: 100%; min-height: auto;
+        border-radius: 0; box-shadow: none; margin: 0;
       }
-
-      .print-card {
-        width: 148mm; min-height: 210mm;
-        border-radius: 0; box-shadow: none;
-        margin: 0; padding: 0;
-      }
-
-      .card-body { padding: 14mm 14mm 10mm; }
-      .merchant-avatar { width: 72px; height: 72px; font-size: 28px; }
-      .merchant-name { font-size: 22px; }
-      .qr-wrapper { margin-bottom: 22px; }
-      .tagline { font-size: 17px; }
-      .card-footer { padding: 12px 14mm; }
-
-      /* Ensure colors print */
       * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
     }
   </style>
@@ -192,48 +190,75 @@
   </div>
 </header>
 
-<!-- Card preview -->
+<!-- A4 sheet preview -->
 <div class="preview-area">
-  <div class="print-card" id="print-card">
-    <div class="color-bar" id="color-bar"></div>
-    <div class="card-body">
+  <div class="sheet" id="sheet">
+    <div class="brand-bar" id="brand-bar"></div>
 
-      <!-- Merchant identity -->
-      <div class="merchant-avatar" id="merchant-avatar">?</div>
-      <h1 class="merchant-name" id="merchant-name">Chargement…</h1>
-      <p class="merchant-subtitle">Programme de fidélité</p>
+    <!-- Header: logo + merchant -->
+    <div class="sheet-header">
+      <div class="logo-mark">
+        <div class="logo-icon" id="logo-icon">
+          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="1.8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5Z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75ZM6.75 16.5h.75v.75h-.75V16.5ZM16.5 6.75h.75v.75h-.75v-.75ZM13.5 13.5h.75v.75h-.75v-.75ZM13.5 19.5h.75v.75h-.75v-.75ZM19.5 13.5h.75v.75h-.75v-.75ZM19.5 19.5h.75v.75h-.75v-.75ZM16.5 16.5h.75v.75h-.75v-.75Z" />
+          </svg>
+        </div>
+        <span class="logo-name">Fidelyzio</span>
+      </div>
+      <div class="merchant-label">
+        Programme de fidélité
+        <strong id="merchant-name-header">Chargement…</strong>
+      </div>
+    </div>
 
-      <div class="divider"></div>
+    <!-- QR section -->
+    <div class="qr-section">
+      <h1 class="qr-headline">Rejoignez notre programme<br>de fidélité</h1>
+      <p class="qr-sub">Scannez ce QR code avec l'appareil photo de votre téléphone<br>pour créer votre carte de fidélité gratuitement</p>
 
-      <!-- QR code -->
-      <div class="qr-wrapper">
-        <img id="qr-img" src="" alt="QR code d'inscription" width="260" height="260"
-             style="display:block;border-radius:8px">
+      <div class="qr-box">
+        <img id="qr-img" src="" alt="QR code d'inscription" width="300" height="300">
       </div>
 
-      <div class="divider2"></div>
-
-      <!-- Call to action -->
-      <p class="tagline">Scannez pour gagner<br>des points fidélité</p>
-      <p class="tagline-sub">
-        Gratuit · Sans application<br>Vos données sont protégées
-      </p>
+      <!-- 3-step guide -->
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3"/>
+            </svg>
+          </div>
+          <p class="step-label">Ouvrez l'appareil photo de votre téléphone</p>
+        </div>
+        <div class="step">
+          <div class="step-num">
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5Z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75ZM16.5 6.75h.75v.75h-.75v-.75ZM6.75 16.5h.75v.75h-.75V16.5Z"/>
+            </svg>
+          </div>
+          <p class="step-label">Scannez ce QR code</p>
+        </div>
+        <div class="step">
+          <div class="step-num">
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+            </svg>
+          </div>
+          <p class="step-label">Créez votre carte de fidélité en 30 secondes</p>
+        </div>
+      </div>
 
     </div>
 
     <!-- Footer -->
-    <div class="card-footer">
-      <div class="footer-badges">
-        <span class="footer-badge">
-          <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
-          Inscription gratuite
-        </span>
-        <span class="footer-badge">
-          <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3"/></svg>
-          Sans application
-        </span>
+    <div class="sheet-footer">
+      <div class="footer-left">
+        <strong id="merchant-name-footer">...</strong>
+        Programme de fidélité digital
       </div>
-      <span class="footer-logo">◆ Fidelyzio</span>
+      <div class="footer-right">Fidelyzio</div>
     </div>
   </div>
 </div>
@@ -241,34 +266,29 @@
 <script>
   (function () {
     let auth;
-    try {
-      auth = JSON.parse(localStorage.getItem('fidelyzio_auth'));
-    } catch (_) {}
+    try { auth = JSON.parse(localStorage.getItem('fidelyzio_auth')); } catch (_) {}
 
-    if (!auth || !auth.merchant) {
-      window.location.href = '/login';
-      return;
-    }
+    if (!auth || !auth.merchant) { window.location.href = '/login'; return; }
 
     const merchant = auth.merchant;
     const color    = merchant.color || '#6366f1';
 
-    // Apply branding
     document.documentElement.style.setProperty('--brand', color);
-    document.getElementById('color-bar').style.background = color;
-    document.getElementById('merchant-avatar').textContent     = merchant.name.charAt(0).toUpperCase();
-    document.getElementById('merchant-avatar').style.background = color;
-    document.getElementById('merchant-avatar').style.boxShadow  = `0 12px 32px ${color}55`;
-    document.getElementById('merchant-name').textContent         = merchant.name;
-    document.getElementById('header-merchant-name').textContent  = merchant.name;
-
-    // Set page title
+    document.getElementById('brand-bar').style.background    = color;
+    document.getElementById('logo-icon').style.background    = color;
+    document.getElementById('merchant-name-header').textContent = merchant.name;
+    document.getElementById('merchant-name-footer').textContent = merchant.name;
+    document.getElementById('header-merchant-name').textContent = merchant.name;
     document.title = `QR ${merchant.name} — Fidelyzio`;
 
-    // Load high-res QR for print quality
     const qr = document.getElementById('qr-img');
     qr.src = `/api/merchants/${merchant.id}/enroll-qr?size=600`;
     qr.onerror = () => { qr.style.opacity = '.4'; };
+
+    // Auto-trigger print dialog on load
+    window.addEventListener('load', () => {
+      setTimeout(() => window.print(), 600);
+    });
   })();
 </script>
 </body>

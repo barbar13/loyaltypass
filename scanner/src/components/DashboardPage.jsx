@@ -39,6 +39,18 @@ const IconSettings = () => (
   </svg>
 );
 
+// ── Supplemental icons (emoji-free) ──────────────────────────────────────────
+
+const IcoGift   = ({ s = 18 }) => <svg width={s} height={s} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z"/></svg>;
+const IcoStar   = ({ s = 18 }) => <svg width={s} height={s} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"/></svg>;
+const IcoScan   = ({ s = 18 }) => <svg width={s} height={s} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5Z M6.75 6.75h.75v.75h-.75v-.75ZM6.75 16.5h.75v.75h-.75V16.5ZM16.5 6.75h.75v.75h-.75v-.75ZM13.5 13.5h.75v.75h-.75v-.75ZM13.5 19.5h.75v.75h-.75v-.75ZM19.5 13.5h.75v.75h-.75v-.75ZM19.5 19.5h.75v.75h-.75v-.75ZM16.5 16.5h.75v.75h-.75v-.75Z"/></svg>;
+const IcoTrend  = ({ s = 20 }) => <svg width={s} height={s} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 0 1 5.814-5.518l2.74-1.22m0 0-5.94-2.281m5.94 2.28-2.28 5.941"/></svg>;
+const IcoCal    = ({ s = 20 }) => <svg width={s} height={s} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg>;
+const IcoWarn   = ({ s = 28 }) => <svg width={s} height={s} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"/></svg>;
+const IcoInbox  = ({ s = 24 }) => <svg width={s} height={s} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 13.5h3.86a2.25 2.25 0 0 1 2.012 1.244l.256.512a2.25 2.25 0 0 0 2.013 1.244h3.218a2.25 2.25 0 0 0 2.013-1.244l.256-.512a2.25 2.25 0 0 1 2.013-1.244h3.859m-19.5.338V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18v-4.162c0-.224-.034-.447-.1-.661L19.24 5.338a2.25 2.25 0 0 0-2.15-1.588H6.911a2.25 2.25 0 0 0-2.15 1.588L2.35 13.177a2.25 2.25 0 0 0-.1.661Z"/></svg>;
+const IcoPeople = ({ s = 24 }) => <svg width={s} height={s} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"/></svg>;
+const IcoMobile = ({ s = 20 }) => <svg width={s} height={s} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3"/></svg>;
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function fmtRelative(iso) {
@@ -169,13 +181,13 @@ function OnboardingChecklist({ merchant, stats, rewards }) {
               <p className={`text-sm font-medium ${s.done ? 'line-through text-gray-600' : 'text-white'}`}>{s.label}</p>
               {!s.done && <p className="text-gray-600 text-xs">{s.desc}</p>}
             </div>
-            {s.id === 'print' && !printed && <span className="text-indigo-400 text-xs shrink-0">Tap ✓</span>}
+            {s.id === 'print' && !printed && <span className="text-indigo-400 text-xs shrink-0">Marquer fait</span>}
           </div>
         ))}
       </div>
       {allDone && (
         <div className="mt-4 text-center">
-          <p className="text-emerald-400 text-sm font-semibold">🎉 Tout est prêt !</p>
+          <p className="text-emerald-400 text-sm font-semibold">Tout est prêt !</p>
           <button onClick={() => { localStorage.setItem(key, '1'); setDismissed(true); }} className="mt-2 text-gray-600 text-xs underline hover:text-gray-400 transition">Masquer</button>
         </div>
       )}
@@ -201,10 +213,10 @@ function HomeTab({ merchant, stats, rewards, token, onScanClick }) {
   }, [token]);
 
   const quickStats = [
-    { label: 'Clients', value: stats?.total_customers ?? '—', icon: '👥' },
-    { label: 'Scans auj.', value: stats?.scans_today ?? '—', icon: '📲' },
-    { label: 'Récompenses', value: activeRwds, icon: '🎁' },
-    { label: 'Points total', value: stats?.total_points != null ? Number(stats.total_points).toLocaleString('fr-FR') : '—', icon: '⭐' },
+    { label: 'Clients', value: stats?.total_customers ?? '—', icon: <IcoPeople s={20} /> },
+    { label: 'Scans auj.', value: stats?.scans_today ?? '—', icon: <IcoScan s={20} /> },
+    { label: 'Récompenses', value: activeRwds, icon: <IcoGift s={20} /> },
+    { label: 'Points total', value: stats?.total_points != null ? Number(stats.total_points).toLocaleString('fr-FR') : '—', icon: <IcoStar s={20} /> },
   ];
 
   return (
@@ -213,24 +225,24 @@ function HomeTab({ merchant, stats, rewards, token, onScanClick }) {
       {/* Welcome */}
       <div className="mb-5">
         <p className="text-gray-500 text-xs capitalize">{today}</p>
-        <h1 className="text-white font-bold text-xl mt-0.5">Bonjour, {merchant.name} 👋</h1>
+        <h1 className="text-white font-bold text-xl mt-0.5">Bonjour, {merchant.name}</h1>
       </div>
 
       {/* Quick stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         {quickStats.map(s => (
           <div key={s.label} className="bg-[#0e0e18] border border-white/5 rounded-2xl p-4">
-            <p className="text-xl mb-1">{s.icon}</p>
+            <div className="text-gray-500 mb-2">{s.icon}</div>
             <p className="text-2xl font-black text-white leading-none">{s.value}</p>
             <p className="text-gray-600 text-[10px] uppercase tracking-wider mt-1">{s.label}</p>
           </div>
         ))}
       </div>
 
-      {/* Scan button — hero element */}
+      {/* Scan button — mobile only */}
       <button
         onClick={onScanClick}
-        className="w-full py-6 rounded-3xl font-bold text-white text-lg flex items-center justify-center gap-3 active:scale-[0.98] transition-all"
+        className="md:hidden w-full py-6 rounded-3xl font-bold text-white text-lg flex items-center justify-center gap-3 active:scale-[0.98] transition-all"
         style={{ background: `linear-gradient(135deg, ${color}, ${color}cc)`, boxShadow: `0 20px 50px ${color}40` }}
       >
         <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -240,11 +252,17 @@ function HomeTab({ merchant, stats, rewards, token, onScanClick }) {
         Scanner un client
       </button>
 
-      {/* Enrollment QR — collapsible */}
+      {/* Desktop: info message instead of scan button */}
+      <div className="hidden md:flex items-center gap-3 bg-[#0e0e18] border border-white/5 rounded-2xl px-5 py-4">
+        <div className="text-gray-500 shrink-0"><IcoMobile s={22} /></div>
+        <p className="text-gray-400 text-sm">Utilisez l'application mobile pour scanner vos clients</p>
+      </div>
+
+      {/* Enrollment QR — always open on desktop, collapsible on mobile */}
       <div className="mt-4 bg-[#0e0e18] border border-white/5 rounded-2xl overflow-hidden">
         <button
           onClick={() => setShowQr(v => !v)}
-          className="w-full flex items-center justify-between px-5 py-4 hover:bg-white/[0.02] transition-colors"
+          className="md:hidden w-full flex items-center justify-between px-5 py-4 hover:bg-white/[0.02] transition-colors"
         >
           <div className="flex items-center gap-2.5 text-left">
             <svg className="w-4 h-4 text-gray-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -260,11 +278,23 @@ function HomeTab({ merchant, stats, rewards, token, onScanClick }) {
           </svg>
         </button>
 
-        {showQr && (
-          <div className="px-5 pb-5 border-t border-white/5">
+        {/* Desktop QR header (always visible) */}
+        <div className="hidden md:flex items-center gap-2.5 px-5 py-4 border-b border-white/5">
+          <svg className="w-4 h-4 text-gray-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5Z" />
+          </svg>
+          <div>
+            <p className="text-white text-sm font-semibold">QR d'inscription client</p>
+            <p className="text-gray-600 text-xs">Affichez ce code en caisse pour que vos clients s'inscrivent</p>
+          </div>
+        </div>
+
+        {/* QR content — hidden on mobile until expanded, always visible on desktop */}
+        {(showQr || true) && (
+          <div className={`${showQr ? '' : 'hidden'} md:block px-5 pb-5 border-t border-white/5 md:border-t-0`}>
             <div className="flex justify-center my-4">
-              <div className="bg-white p-3 rounded-2xl shadow-xl">
-                <img src={enrollQr} alt="QR inscription" className="w-44 h-44 rounded-lg block"
+              <div className="bg-white p-4 rounded-2xl shadow-xl md:p-5">
+                <img src={enrollQr} alt="QR inscription" className="w-44 h-44 md:w-56 md:h-56 rounded-lg block"
                   onError={e => { e.target.style.opacity = '0.3'; }} />
               </div>
             </div>
@@ -276,9 +306,9 @@ function HomeTab({ merchant, stats, rewards, token, onScanClick }) {
               </button>
             </div>
             <a href="/merchant/qr-print" target="_blank" rel="noopener"
-              className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-gray-800/60 hover:bg-gray-700 text-gray-400 hover:text-gray-200 text-xs font-medium transition-all border border-white/5 active:scale-95">
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0 0 21 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 0 0-1.913-.247M6.34 18H5.25A2.25 2.25 0 0 1 3 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.056 48.056 0 0 1 1.913-.247m10.5 0a48.536 48.536 0 0 0-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5Zm-3 0h.008v.008H15V10.5Z"/></svg>
-              Imprimer mon QR d'inscription
+              className="flex items-center justify-center gap-2 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold transition-all border border-white/5 active:scale-95 shadow-lg shadow-indigo-600/20">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0 0 21 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 0 0-1.913-.247M6.34 18H5.25A2.25 2.25 0 0 1 3 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.056 48.056 0 0 1 1.913-.247m10.5 0a48.536 48.536 0 0 0-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5Zm-3 0h.008v.008H15V10.5Z"/></svg>
+              Imprimer mon QR code
             </a>
           </div>
         )}
@@ -305,7 +335,7 @@ function HomeTab({ merchant, stats, rewards, token, onScanClick }) {
 
         {recentScans !== null && recentScans.length === 0 && (
           <div className="bg-[#0e0e18] border border-white/5 rounded-2xl py-10 text-center">
-            <p className="text-3xl mb-3">📲</p>
+            <div className="flex justify-center mb-3 text-gray-600"><IcoInbox s={32} /></div>
             <p className="text-gray-400 text-sm font-medium">Aucun scan encore</p>
             <p className="text-gray-600 text-xs mt-1">Affichez votre QR d'inscription en caisse pour commencer</p>
           </div>
@@ -317,15 +347,15 @@ function HomeTab({ merchant, stats, rewards, token, onScanClick }) {
               const isRedeem = s.points < 0;
               return (
                 <div key={s.id} className="bg-[#0e0e18] border border-white/5 rounded-xl px-4 py-3 flex items-center gap-3">
-                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm font-bold shrink-0 ${isRedeem ? 'bg-amber-500/15' : 'bg-emerald-500/10'}`}>
-                    {isRedeem ? '🎁' : s.first_name.charAt(0).toUpperCase()}
+                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold shrink-0 ${isRedeem ? 'bg-amber-500/15 text-amber-400' : 'bg-emerald-500/10 text-white'}`}>
+                    {isRedeem ? <IcoGift s={16} /> : s.first_name.charAt(0).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-white text-sm font-semibold truncate">{s.first_name}</p>
                     <p className="text-gray-600 text-xs">{fmtRelative(s.created_at)}</p>
                   </div>
                   <p className={`text-sm font-bold shrink-0 ${isRedeem ? 'text-amber-400' : 'text-emerald-400'}`}>
-                    {isRedeem ? '🎁 Récompense' : `+${s.points} pts`}
+                    {isRedeem ? 'Récompense' : `+${s.points} pts`}
                   </p>
                 </div>
               );
@@ -382,7 +412,7 @@ function ClientsTab({ customers, rewards, token, onRewardsChange }) {
 
       {customers.length === 0 && (
         <div className="text-center py-16 bg-[#0e0e18] border border-white/5 rounded-2xl">
-          <p className="text-4xl mb-3">👥</p>
+          <div className="flex justify-center mb-3 text-gray-600"><IcoPeople s={36} /></div>
           <p className="text-gray-400 text-sm font-medium">Aucun client encore inscrit</p>
           <p className="text-gray-600 text-xs mt-1">Affichez votre QR d'inscription en caisse</p>
         </div>
@@ -402,7 +432,7 @@ function ClientsTab({ customers, rewards, token, onRewardsChange }) {
               onClick={() => hasRewards && openOffer(c)}>
               {hasRewards && (
                 <div className="bg-amber-500/10 border-b border-amber-400/15 px-4 py-2 flex items-center gap-2">
-                  <span className="text-base shrink-0">🎁</span>
+                  <span className="text-amber-400 shrink-0"><IcoGift s={16} /></span>
                   <p className="text-amber-300 text-xs font-semibold flex-1">{available.length === 1 ? '1 récompense disponible' : `${available.length} récompenses disponibles`}</p>
                   <span className="text-amber-400/60 text-[10px]">Appuyer →</span>
                 </div>
@@ -444,7 +474,7 @@ function ClientsTab({ customers, rewards, token, onRewardsChange }) {
               <div className="space-y-3">
                 {offerTarget.available.map(r => (
                   <div key={r.id} className="flex items-center gap-3 bg-gray-800 rounded-2xl px-4 py-3">
-                    <span className="text-xl shrink-0">🎁</span>
+                    <span className="text-amber-400 shrink-0"><IcoGift s={20} /></span>
                     <div className="flex-1 min-w-0">
                       <p className="text-white font-semibold text-sm truncate">{r.description}</p>
                       <p className="text-amber-400/80 text-xs">{r.points_required} pts requis</p>
@@ -491,7 +521,7 @@ function RewardsTab({ rewards, token, onRewardsChange }) {
         <p className="text-gray-500 text-xs font-semibold uppercase tracking-widest mb-3">Récompenses actives {active.length > 0 ? `(${active.length})` : ''}</p>
         {active.length === 0 && (
           <div className="text-center py-10 bg-[#0e0e18] border border-white/5 rounded-2xl">
-            <p className="text-3xl mb-2">🎁</p>
+            <div className="flex justify-center mb-2 text-gray-600"><IcoGift s={32} /></div>
             <p className="text-gray-500 text-sm">Aucune récompense configurée</p>
             <p className="text-gray-600 text-xs mt-1">Ajoutez-en une pour motiver vos clients</p>
           </div>
@@ -581,7 +611,7 @@ function HistoryTab({ token }) {
               const isRedeem = s.points < 0;
               return (
                 <div key={s.id} className="bg-[#0e0e18] border border-white/5 rounded-xl px-4 py-3 flex items-center gap-3">
-                  <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-sm shrink-0 ${isRedeem ? 'bg-red-500/15 text-red-400' : 'bg-emerald-500/15 text-emerald-400'}`}>{isRedeem ? '🎁' : '+'}</div>
+                  <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-sm shrink-0 ${isRedeem ? 'bg-red-500/15 text-red-400' : 'bg-emerald-500/15 text-emerald-400'}`}>{isRedeem ? <IcoGift s={14} /> : '+'}</div>
                   <div className="flex-1 min-w-0">
                     <p className="text-white text-sm font-semibold truncate">{s.first_name}</p>
                     <p className="text-gray-600 text-xs truncate">{s.note || s.phone || '—'}</p>
@@ -818,7 +848,7 @@ function TopClientsTable({ customers }) {
       {/* Table */}
       {customers.length === 0 ? (
         <div className="py-14 text-center">
-          <p className="text-3xl mb-3">👥</p>
+          <div className="flex justify-center mb-3 text-gray-600"><IcoPeople s={36} /></div>
           <p className="text-gray-500 text-sm">Aucun client encore</p>
           <p className="text-gray-600 text-xs mt-1">Scannez vos premiers clients pour voir les statistiques</p>
         </div>
@@ -885,10 +915,12 @@ function TopClientsTable({ customers }) {
 
 // ── AnalyticsTab ──────────────────────────────────────────────────────────────
 
-function ChartEmpty({ icon = '📊', msg, sub, height = 160 }) {
+function ChartEmpty({ icon, msg, sub, height = 160 }) {
   return (
     <div className="flex flex-col items-center justify-center gap-2 text-center" style={{ height }}>
-      <span style={{ fontSize: 28 }}>{icon}</span>
+      <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center mx-auto mb-1 text-gray-500">
+        {icon}
+      </div>
       <p className="text-gray-500 text-sm font-medium">{msg}</p>
       {sub && <p className="text-gray-600 text-xs">{sub}</p>}
     </div>
@@ -1051,7 +1083,7 @@ function AnalyticsTab({ token, color }) {
 
   if (err && !data) return (
     <div className="px-5 py-16 text-center">
-      <p className="text-4xl mb-3">⚠️</p>
+      <div className="flex justify-center mb-3 text-red-400"><IcoWarn s={36} /></div>
       <p className="text-red-400 text-sm mb-1">Impossible de charger les statistiques</p>
       <p className="text-gray-600 text-xs mb-5">{err}</p>
       <button onClick={load} className="px-4 py-2 bg-gray-800 rounded-xl text-white text-sm hover:bg-gray-700 transition">Réessayer</button>
@@ -1112,7 +1144,7 @@ function AnalyticsTab({ token, color }) {
       {/* No data for period */}
       {noPeriodData && (
         <div className="bg-[#0e0e18] border border-white/5 rounded-2xl py-10 text-center">
-          <p className="text-3xl mb-3">📭</p>
+          <div className="flex justify-center mb-3 text-gray-600"><IcoInbox s={36} /></div>
           <p className="text-gray-400 text-sm font-medium">Aucune donnée sur cette période</p>
           <p className="text-gray-600 text-xs mt-1">Essayez une plage de dates plus large</p>
         </div>
@@ -1139,7 +1171,7 @@ function AnalyticsTab({ token, color }) {
                 options={{ ...BASE_CHART_OPTS, scales: { ...BASE_CHART_OPTS.scales, x: { ...BASE_CHART_OPTS.scales.x, ticks: { ...TICK_OPTS_SM, maxTicksLimit: 7 } }, y: { ...BASE_CHART_OPTS.scales.y, ticks: TICK_OPTS_SM } } }}
               />
             ) : (
-              <ChartEmpty icon="📈" msg="Aucun scan sur cette période" sub="Essayez une plage de dates plus large" />
+              <ChartEmpty icon={<IcoTrend s={22} />} msg="Aucun scan sur cette période" sub="Essayez une plage de dates plus large" />
             )}
           </ChartCard>
         </div>
@@ -1154,7 +1186,7 @@ function AnalyticsTab({ token, color }) {
                 options={{ ...BASE_CHART_OPTS, scales: { ...BASE_CHART_OPTS.scales, x: { ...BASE_CHART_OPTS.scales.x, ticks: TICK_OPTS_SM }, y: { ...BASE_CHART_OPTS.scales.y, ticks: TICK_OPTS_SM } } }}
               />
             ) : (
-              <ChartEmpty icon="📅" msg="Aucune donnée sur cette période" />
+              <ChartEmpty icon={<IcoCal s={22} />} msg="Aucune donnée sur cette période" />
             )}
           </ChartCard>
         </div>
@@ -1172,13 +1204,13 @@ function AnalyticsTab({ token, color }) {
               options={{ ...BASE_CHART_OPTS, scales: { ...BASE_CHART_OPTS.scales, x: { ...BASE_CHART_OPTS.scales.x, ticks: { ...TICK_OPTS_SM, maxRotation: 30, maxTicksLimit: 8 } }, y: { ...BASE_CHART_OPTS.scales.y, ticks: TICK_OPTS_SM } } }}
             />
           ) : (
-            <ChartEmpty icon="👥" msg="Aucun nouveau client sur cette période" />
+            <ChartEmpty icon={<IcoPeople s={22} />} msg="Aucun nouveau client sur cette période" />
           )}
         </ChartCard>
 
         <ChartCard title="Points distribués vs échangés" subtitle={periodLabel}>
           {ptsDist === 0 ? (
-            <ChartEmpty icon="⭐" msg="Aucun point distribué sur cette période" height={170} />
+            <ChartEmpty icon={<IcoStar s={22} />} msg="Aucun point distribué sur cette période" height={170} />
           ) : (
             <div className="flex flex-col sm:flex-row sm:items-center gap-4">
               <div className="flex-1 min-w-0" style={{ height: 170, position: 'relative' }}>

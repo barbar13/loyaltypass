@@ -4,6 +4,12 @@ import { lookupCustomer, scanCustomer, redeemReward } from '../api.js';
 
 const PRESETS = [5, 10, 25, 50];
 
+const IcoGift = ({ s = 24 }) => (
+  <svg width={s} height={s} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
+  </svg>
+);
+
 // phase: 'scanning' | 'loading' | 'preview' | 'confirming'
 //        | 'success'   (no reward, auto-closes 2.5s)
 //        | 'reward'    (reward available, persistent — merchant must act)
@@ -110,7 +116,7 @@ export default function ScanModal({ token, onClose, onSuccess }) {
 
             {/* Customer + points summary */}
             <div className="text-center pb-5 border-b border-white/5 mb-5">
-              <div className="text-5xl mb-3">🎁</div>
+              <div className="flex justify-center mb-3 text-amber-400"><IcoGift s={48} /></div>
               <h2 className="text-white font-black text-2xl leading-tight">Récompense disponible !</h2>
               <p className="text-gray-400 text-sm mt-2">
                 {result.customer.first_name}
@@ -140,8 +146,8 @@ export default function ScanModal({ token, onClose, onSuccess }) {
                 <div key={r.id}
                   className="bg-gray-900 border border-amber-400/25 rounded-2xl overflow-hidden">
                   <div className="px-4 pt-4 pb-3 flex items-center gap-3">
-                    <div className="w-11 h-11 rounded-xl bg-amber-500/15 border border-amber-400/25 flex items-center justify-center text-2xl shrink-0">
-                      🎁
+                    <div className="w-11 h-11 rounded-xl bg-amber-500/15 border border-amber-400/25 flex items-center justify-center text-amber-400 shrink-0">
+                      <IcoGift s={22} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-white font-bold text-base leading-tight">{r.description}</p>
@@ -184,8 +190,8 @@ export default function ScanModal({ token, onClose, onSuccess }) {
       {/* ── REDEEMED ─────────────────────────────────────────────────────────── */}
       {phase === 'redeemed' && redeemResult && (
         <div className="flex-1 flex flex-col items-center justify-center px-5 animate-scale-in gap-5">
-          <div className="w-24 h-24 rounded-full bg-amber-500/15 flex items-center justify-center text-5xl">
-            🎁
+          <div className="w-24 h-24 rounded-full bg-amber-500/15 flex items-center justify-center text-amber-400">
+            <IcoGift s={52} />
           </div>
           <div className="text-center">
             <p className="text-white font-black text-2xl">Récompense offerte !</p>
@@ -304,7 +310,7 @@ export default function ScanModal({ token, onClose, onSuccess }) {
                       : null}
                   </p>
                   {previewData.is_new_customer && (
-                    <p className="text-brand-500 text-xs font-medium">Nouveau client 🎉</p>
+                    <p className="text-brand-500 text-xs font-medium">Nouveau client</p>
                   )}
                 </div>
                 <div className="text-right shrink-0">

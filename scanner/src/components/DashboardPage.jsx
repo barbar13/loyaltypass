@@ -682,12 +682,13 @@ const BASE_CHART_OPTS = {
     legend: { display: false },
     tooltip: {
       backgroundColor: '#1c1c28', titleColor: '#9ca3af', bodyColor: '#f9fafb',
-      borderColor: '#2d2d3a', borderWidth: 1, padding: 10, displayColors: false,
+      borderColor: '#2d2d3a', borderWidth: 1, padding: 12, displayColors: false,
+      titleFont: { size: 13 }, bodyFont: { size: 14 },
     },
   },
   scales: {
-    x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#6b7280', font: { size: 10 }, maxRotation: 0 }, border: { display: false } },
-    y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#6b7280', font: { size: 10 }, precision: 0 }, border: { display: false }, beginAtZero: true },
+    x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#6b7280', font: { size: 13 }, maxRotation: 0 }, border: { display: false } },
+    y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#6b7280', font: { size: 13 }, precision: 0, stepSize: 1 }, border: { display: false }, beginAtZero: true, min: 0 },
   },
 };
 
@@ -1078,7 +1079,7 @@ function AnalyticsTab({ token, color }) {
   const hasWeeklyData  = weeklyNew.some(w => w.count > 0);
 
   const ck = String(loadKey);
-  const TICK_OPTS_SM = { font: { size: 9 }, color: '#6b7280' };
+  const TICK_OPTS_SM = { font: { size: 13 }, color: '#6b7280', precision: 0, stepSize: 1 };
   const noPeriodData = !hasScans && ptsDist === 0;
 
   return (
@@ -1189,8 +1190,8 @@ function AnalyticsTab({ token, color }) {
                   options={{
                     responsive: true, maintainAspectRatio: false,
                     plugins: {
-                      legend: { display: true, position: 'bottom', labels: { color: '#6b7280', font: { size: 10 }, padding: 10, boxWidth: 8, usePointStyle: true } },
-                      tooltip: { backgroundColor: '#1c1c28', titleColor: '#9ca3af', bodyColor: '#f9fafb', borderColor: '#2d2d3a', borderWidth: 1, padding: 8 },
+                      legend: { display: true, position: 'bottom', labels: { color: '#6b7280', font: { size: 13 }, padding: 12, boxWidth: 10, usePointStyle: true } },
+                      tooltip: { backgroundColor: '#1c1c28', titleColor: '#9ca3af', bodyColor: '#f9fafb', borderColor: '#2d2d3a', borderWidth: 1, padding: 12, titleFont: { size: 13 }, bodyFont: { size: 14 } },
                     },
                     cutout: '68%',
                   }}

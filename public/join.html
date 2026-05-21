@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0d1420">
+  <title>Trouver ma carte — Fidelyzio</title>
+  <script>
+    try {
+      const url = localStorage.getItem('fidelyzio_card_url');
+      if (url) window.location.replace(url);
+    } catch (_) {}
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { min-height: 100%; background: #0d1420; color: #e2d9c8;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    .pt-safe { padding-top: max(1.5rem, env(safe-area-inset-top)); }
+    .pb-safe { padding-bottom: max(1.5rem, env(safe-area-inset-bottom)); }
+    input { font-size: 16px !important; }
+
+    @keyframes fade-up { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+    .au  { animation: fade-up .45s cubic-bezier(.16,1,.3,1) both; }
+    .d1  { animation-delay:.06s; }
+    .d2  { animation-delay:.12s; }
+    .d3  { animation-delay:.18s; }
+
+    .field {
+      width: 100%; background: #1a2640; border: 1px solid rgba(240,180,41,.15);
+      border-radius: 14px; padding: 14px 16px; color: white; outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .field::placeholder { color: rgba(138,154,176,.5); }
+    .field:focus { border-color: #f0b429; box-shadow: 0 0 0 3px rgba(240,180,41,.12); }
+
+    .btn-gold {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%; background: linear-gradient(135deg, #f0b429, #d4920e);
+      color: #0d1420; font-weight: 800; border-radius: 14px;
+      padding: 16px; font-size: 15px; border: none; cursor: pointer;
+      transition: opacity .15s, transform .1s;
+      box-shadow: 0 10px 30px rgba(240,180,41,.25);
+    }
+    .btn-gold:hover:not(:disabled) { opacity: .9; transform: translateY(-1px); }
+    .btn-gold:disabled { opacity: .5; cursor: not-allowed; }
+
+    .step { display: none; }
+    .step.active { display: block; }
+  </style>
+</head>
+<body>
+
+<div class="min-h-dvh flex flex-col items-center justify-center px-5 pt-safe pb-safe">
+
+  <!-- Brand -->
+  <div class="mb-8 text-center au">
+    <a href="/home" style="text-decoration:none;display:inline-flex;flex-direction:column;align-items:center;gap:12px">
+      <div style="width:68px;height:68px;border-radius:22px;background:linear-gradient(135deg,#f0b429,#d4920e);display:flex;align-items:center;justify-content:center;box-shadow:0 16px 40px rgba(240,180,41,.3)">
+        <svg style="width:34px;height:34px;color:#0d1420" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z"/>
+        </svg>
+      </div>
+      <div>
+        <p style="color:white;font-weight:900;font-size:20px;letter-spacing:-.03em">Fidelyzio</p>
+        <p style="color:rgba(138,154,176,.6);font-size:13px;margin-top:2px">Trouver ma carte de fidélité</p>
+      </div>
+    </a>
+  </div>
+
+  <!-- Card container -->
+  <div class="w-full max-w-sm au d1">
+    <div style="background:#141f30;border:1px solid rgba(240,180,41,.12);border-radius:24px;padding:28px">
+
+      <!-- ── STEP 1: Phone lookup ─────────────────────────────────────────── -->
+      <div id="step-phone" class="step active">
+        <h1 style="color:white;font-weight:800;font-size:18px;margin-bottom:6px">Entrez votre numéro</h1>
+        <p style="color:rgba(138,154,176,.7);font-size:13px;line-height:1.6;margin-bottom:22px">
+          Nous allons retrouver votre carte ou en créer une nouvelle.
+        </p>
+
+        <label style="display:block;color:rgba(138,154,176,.8);font-size:13px;font-weight:600;margin-bottom:8px">Numéro de téléphone</label>
+        <input id="inp-phone" type="tel" autocomplete="tel" inputmode="tel"
+               placeholder="06 12 34 56 78" class="field" style="margin-bottom:16px"
+               onkeydown="if(event.key==='Enter')lookupPhone()">
+
+        <div id="phone-error" style="display:none;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:12px;padding:12px 14px;color:rgb(248,113,113);font-size:13px;margin-bottom:14px"></div>
+
+        <button id="btn-lookup" class="btn-gold" onclick="lookupPhone()">
+          Trouver ma carte →
+        </button>
+      </div>
+
+      <!-- ── STEP 2: Not found — create account ────────────────────────────── -->
+      <div id="step-create" class="step">
+        <div style="margin-bottom:20px">
+          <button onclick="goBack()" style="display:flex;align-items:center;gap:6px;background:none;border:none;color:rgba(138,154,176,.6);font-size:13px;cursor:pointer;padding:0;margin-bottom:14px">
+            <svg style="width:14px;height:14px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/>
+            </svg>
+            Modifier le numéro
+          </button>
+          <h1 style="color:white;font-weight:800;font-size:18px;margin-bottom:6px">Créer ma carte</h1>
+          <p style="color:rgba(138,154,176,.7);font-size:13px;line-height:1.6">
+            Aucune carte trouvée pour ce numéro. Entrez votre prénom pour en créer une gratuite.
+          </p>
+        </div>
+
+        <div style="background:rgba(240,180,41,.06);border:1px solid rgba(240,180,41,.15);border-radius:12px;padding:12px 14px;margin-bottom:20px">
+          <p style="color:rgba(240,180,41,.7);font-size:12px;font-weight:700;margin-bottom:2px">Numéro</p>
+          <p id="display-phone" style="color:white;font-size:14px;font-weight:600"></p>
+        </div>
+
+        <label style="display:block;color:rgba(138,154,176,.8);font-size:13px;font-weight:600;margin-bottom:8px">Votre prénom</label>
+        <input id="inp-name" type="text" autocomplete="given-name"
+               placeholder="ex : Marie" class="field" style="margin-bottom:16px"
+               onkeydown="if(event.key==='Enter')createCard()">
+
+        <div id="create-error" style="display:none;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:12px;padding:12px 14px;color:rgb(248,113,113);font-size:13px;margin-bottom:14px"></div>
+
+        <button id="btn-create" class="btn-gold" onclick="createCard()">
+          Créer ma carte gratuite →
+        </button>
+      </div>
+
+      <!-- ── STEP 3: Loading ────────────────────────────────────────────────── -->
+      <div id="step-loading" class="step" style="text-align:center;padding:32px 0">
+        <div style="width:48px;height:48px;border:3px solid rgba(240,180,41,.2);border-top-color:#f0b429;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px"></div>
+        <p id="loading-msg" style="color:rgba(138,154,176,.7);font-size:14px">Recherche en cours…</p>
+      </div>
+
+      <!-- ── STEP 4: Success ────────────────────────────────────────────────── -->
+      <div id="step-success" class="step" style="text-align:center;padding:24px 0">
+        <div style="width:60px;height:60px;border-radius:50%;background:rgba(240,180,41,.12);border:2px solid rgba(240,180,41,.3);display:flex;align-items:center;justify-content:center;margin:0 auto 18px">
+          <svg style="width:28px;height:28px;color:#f0b429" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
+          </svg>
+        </div>
+        <h2 id="success-title" style="color:white;font-weight:800;font-size:18px;margin-bottom:8px">Carte trouvée !</h2>
+        <p id="success-msg" style="color:rgba(138,154,176,.7);font-size:14px;line-height:1.6;margin-bottom:24px"></p>
+        <p style="color:rgba(138,154,176,.4);font-size:12px">Redirection automatique…</p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Footer link -->
+  <p class="au d2" style="margin-top:24px;color:rgba(138,154,176,.4);font-size:13px">
+    Commerçant ? <a href="/login" style="color:rgba(240,180,41,.7);text-decoration:none">Se connecter →</a>
+  </p>
+
+</div>
+
+<style>
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+
+<script>
+  let phone = '';
+
+  function showStep(id) {
+    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+    document.getElementById('step-' + id).classList.add('active');
+  }
+
+  function showPhoneError(msg) {
+    const el = document.getElementById('phone-error');
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+  function hidePhoneError() { document.getElementById('phone-error').style.display = 'none'; }
+
+  function showCreateError(msg) {
+    const el = document.getElementById('create-error');
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+  function hideCreateError() { document.getElementById('create-error').style.display = 'none'; }
+
+  function goBack() {
+    document.getElementById('inp-phone').value = phone;
+    showStep('phone');
+  }
+
+  function normalizePhone(raw) {
+    return raw.replace(/[\s\-\.\(\)]/g, '').trim();
+  }
+
+  async function lookupPhone() {
+    hidePhoneError();
+    const raw = document.getElementById('inp-phone').value;
+    phone = normalizePhone(raw);
+    if (!phone || phone.length < 8) {
+      showPhoneError('Veuillez entrer un numéro valide.');
+      return;
+    }
+
+    document.getElementById('loading-msg').textContent = 'Recherche en cours…';
+    showStep('loading');
+
+    try {
+      const r = await fetch(`/api/customers/lookup?phone=${encodeURIComponent(phone)}`);
+      const data = await r.json();
+
+      if (r.ok && data.qr_code) {
+        // Found → redirect to card
+        const cardUrl = `/card/${data.qr_code}`;
+        try { localStorage.setItem('fidelyzio_card_url', cardUrl); } catch (_) {}
+        document.getElementById('success-title').textContent = 'Carte trouvée !';
+        document.getElementById('success-msg').textContent =
+          `Bonjour ${data.first_name} 👋 Redirection vers votre carte…`;
+        showStep('success');
+        setTimeout(() => window.location.replace(cardUrl), 1400);
+      } else if (r.status === 404) {
+        // Not found → create
+        document.getElementById('display-phone').textContent = raw;
+        showStep('create');
+      } else {
+        showStep('phone');
+        showPhoneError(data.error || 'Une erreur est survenue. Réessayez.');
+      }
+    } catch (_) {
+      showStep('phone');
+      showPhoneError('Impossible de contacter le serveur. Vérifiez votre connexion.');
+    }
+  }
+
+  async function createCard() {
+    hideCreateError();
+    const name = document.getElementById('inp-name').value.trim();
+    if (!name) { showCreateError('Veuillez entrer votre prénom.'); return; }
+
+    const btn = document.getElementById('btn-create');
+    btn.disabled = true;
+    document.getElementById('loading-msg').textContent = 'Création de votre carte…';
+    showStep('loading');
+
+    try {
+      const r = await fetch('/api/customers/join', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ first_name: name, phone }),
+      });
+      const data = await r.json();
+
+      if (r.ok && data.customer?.qr_code) {
+        const cardUrl = `/card/${data.customer.qr_code}`;
+        try { localStorage.setItem('fidelyzio_card_url', cardUrl); } catch (_) {}
+        document.getElementById('success-title').textContent = 'Carte créée !';
+        document.getElementById('success-msg').textContent =
+          `Bienvenue ${data.customer.first_name} ! Votre carte Fidelyzio est prête. Scannez un QR en caisse pour commencer à accumuler des points.`;
+        showStep('success');
+        setTimeout(() => window.location.replace(cardUrl), 2200);
+      } else {
+        showStep('create');
+        btn.disabled = false;
+        showCreateError(data.error || 'Une erreur est survenue. Réessayez.');
+      }
+    } catch (_) {
+      showStep('create');
+      btn.disabled = false;
+      showCreateError('Impossible de contacter le serveur. Vérifiez votre connexion.');
+    }
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "PowerShell(Get-ChildItem C:\\\\Users\\\\titou\\\\loyaltypass -Recurse -Exclude node_modules | Where-Object { $_.FullName -notmatch 'node_modules' } | Select-Object FullName)",
+      "PowerShell(Get-Content *)",
+      "Bash(Get-Process node *)",
+      "Bash(Select-Object Id, ProcessName, StartTime)",
+      "Read(//mnt/c/Users/titou/**)",
+      "Bash(node src/index.js)",
+      "Bash(curl -s http://localhost:3000/health)",
+      "PowerShell(Start-Process -NoNewWindow -FilePath \"node\" -ArgumentList \"src/index.js\" -WorkingDirectory \"C:\\\\Users\\\\titou\\\\loyaltypass\" -RedirectStandardOutput \"C:\\\\Users\\\\titou\\\\loyaltypass\\\\server.log\" -RedirectStandardError \"C:\\\\Users\\\\titou\\\\loyaltypass\\\\server-err.log\")",
+      "PowerShell(Invoke-RestMethod -Uri \"http://localhost:3000/health\" -ErrorAction SilentlyContinue)",
+      "PowerShell(Stop-Process *)",
+      "Bash(gh auth *)",
+      "PowerShell(gh auth *)",
+      "Bash(grep -E \"package.json$\")",
+      "Bash(npm run)",
+      "Bash(node -e ' *)",
+      "Bash(kill %1)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(taskkill /F /IM node.exe /T)",
+      "Bash(npm run *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/my-card)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/admin)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/login)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/merchant/qr-print)",
+      "Bash(git commit *)",
+      "Bash(grep -rn \"redirect.*'/'\\\\\\\\|location.*'/'\\\\\\\\|'/'\\\\|dashboardUrl.*baseUrl\" ./src ./public)",
+      "Bash(sed -i \"s|window\\\\.location\\\\.replace\\('/'\\)|window.location.replace\\('/scanner'\\)|g\" public/login.html)",
+      "Bash(sed -i \"s|window\\\\.location\\\\.href = '/'|window.location.href = '/scanner'|g\" public/register.html)",
+      "Bash(sed -i \"s|href=\\\\\"/\\\\\" class=\\\\\"text-gray-600 text-sm hover:text-gray-400 transition\\\\\">← Retour au tableau de bord|href=\\\\\"/scanner\\\\\" class=\\\\\"text-gray-600 text-sm hover:text-gray-400 transition\\\\\">← Retour au tableau de bord|g\" public/subscribe.html)",
+      "Bash(sed -i 's|<a href=\"/\">\\\\n|<a href=\"/scanner\">|g' public/qr-print.html)",
+      "Bash(sed -i 's|<a href=\"/\"\\\\n.*class=\"px-6|<a href=\"/home\"\\\\n     class=\"px-6|g' public/my-card.html)",
+      "Bash(dir *)"
+    ]
+  }
+}

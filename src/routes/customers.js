@@ -78,6 +78,42 @@ router.post('/enroll', async (req, res) => {
   }
 });
 
+// GET /api/customers/lookup?phone=...
+router.get('/lookup', async (req, res) => {
+  const { phone } = req.query;
+  if (!phone) return res.status(400).json({ error: 'phone est requis' });
+  try {
+    const customer = await db.one(
+      'SELECT id, first_name, qr_code FROM customers WHERE phone = $1',
+      [phone.trim()]
+    );
+    if (!customer) return res.status(404).json({ error: 'Aucune carte trouvée pour ce numéro' });
+    res.json({ first_name: customer.first_name, qr_code: customer.qr_code });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/customers/join — create standalone customer card (no merchant required)
+router.post('/join', async (req, res) => {
+  const { first_name, phone } = req.body;
+  if (!first_name || !phone) return res.status(400).json({ error: 'first_name et phone sont requis' });
+  const { v4: uuidv4 } = require('uuid');
+  try {
+    let customer = await db.one('SELECT * FROM customers WHERE phone = $1', [phone.trim()]);
+    if (!customer) {
+      const id = await db.insert(
+        'INSERT INTO customers (first_name, phone, qr_code) VALUES ($1, $2, $3)',
+        [first_name.trim(), phone.trim(), uuidv4()]
+      );
+      customer = await db.one('SELECT id, first_name, phone, qr_code FROM customers WHERE id = $1', [id]);
+    }
+    res.json({ customer: { id: customer.id, first_name: customer.first_name, phone: customer.phone, qr_code: customer.qr_code } });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // GET /api/customers/:qr_code
 // Customer views their universal loyalty card — all merchants + points + rewards
 router.get('/:qr_code', async (req, res) => {

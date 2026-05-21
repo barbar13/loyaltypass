@@ -112,8 +112,8 @@ function TrialBanner({ merchant, token }) {
 // ── Onboarding checklist ──────────────────────────────────────────────────────
 
 function OnboardingChecklist({ merchant, stats, rewards }) {
-  const key         = `fidevo_ob_${merchant.id}`;
-  const printKey    = `fidevo_ob_print_${merchant.id}`;
+  const key         = `fidelyzio_ob_${merchant.id}`;
+  const printKey    = `fidelyzio_ob_print_${merchant.id}`;
   const [dismissed, setDismissed]   = useState(() => !!localStorage.getItem(key));
   const [printed,   setPrinted]     = useState(() => !!localStorage.getItem(printKey));
 
@@ -273,7 +273,7 @@ function exportCSV(customers) {
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
   a.href = url;
-  a.download = `clients-fidevo-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.download = `clients-fidelyzio-${new Date().toISOString().slice(0, 10)}.csv`;
   a.click();
   URL.revokeObjectURL(url);
 }

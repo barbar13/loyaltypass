@@ -3,7 +3,7 @@ import LoginPage     from './components/LoginPage.jsx';
 import DashboardPage from './components/DashboardPage.jsx';
 import { getDashboard } from './api.js';
 
-const STORAGE_KEY = 'loyaltypass_auth';
+const STORAGE_KEY = 'fidelyzio_auth';
 
 export default function App() {
   const [auth, setAuth] = useState(() => {

@@ -53,6 +53,7 @@ app.get('/home',                (_req, res) => res.sendFile(path.join(PUBLIC, 'h
 app.get('/cgu',                 (_req, res) => res.sendFile(path.join(PUBLIC, 'cgu.html')));
 app.get('/privacy',             (_req, res) => res.sendFile(path.join(PUBLIC, 'privacy.html')));
 app.get('/subscribe',           (_req, res) => res.sendFile(path.join(PUBLIC, 'subscribe.html')));
+app.get('/join',                (_req, res) => res.sendFile(path.join(PUBLIC, 'join.html')));
 
 // Service worker (must be at root scope)
 app.get('/sw.js', (_req, res) => {

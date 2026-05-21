@@ -10,7 +10,7 @@ const email    = require('../email');
 const router      = express.Router();
 const SALT_ROUNDS = 12;
 const JWT_SECRET  = () => process.env.JWT_SECRET  || 'fidelyzio_dev_secret_change_in_prod';
-const JWT_EXPIRES = () => process.env.JWT_EXPIRES_IN || '7d';
+const JWT_EXPIRES = () => process.env.JWT_EXPIRES_IN || '30d';
 
 // ─── Public: enrollment branding ─────────────────────────────────────────────
 

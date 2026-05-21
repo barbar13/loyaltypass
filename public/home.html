@@ -74,12 +74,15 @@
     /* ── Divider ─────────────────────────────────────────────────────────────── */
     .section-alt { background: rgba(255,255,255,.018); border-top: 1px solid rgba(255,255,255,.05); border-bottom: 1px solid rgba(255,255,255,.05); }
 
-    /* ── Testimonial card ────────────────────────────────────────────────────── */
-    .testi-card {
-      background: var(--navy2); border: 1px solid rgba(240,180,41,.1);
-      border-radius: 20px; padding: 28px;
+    /* ── Business type card ──────────────────────────────────────────────────── */
+    .biz-card {
+      background: var(--navy2); border: 1px solid rgba(240,180,41,.08);
+      border-radius: 16px; padding: 24px 16px; text-align: center;
+      transition: border-color .2s, background .2s;
     }
-    .stars { color: #f0b429; font-size: 14px; letter-spacing: 2px; margin-bottom: 14px; }
+    .biz-card:hover { border-color: rgba(240,180,41,.22); background: rgba(240,180,41,.04); }
+    .biz-icon { font-size: 32px; display: block; margin-bottom: 10px; }
+    .biz-label { color: var(--text); font-size: 14px; font-weight: 700; }
 
     /* ── Feature check ───────────────────────────────────────────────────────── */
     .check { color: #f0b429; flex-shrink: 0; }
@@ -249,49 +252,37 @@
   </div>
 </section>
 
-<!-- ── TESTIMONIALS ───────────────────────────────────────────────────────────── -->
+<!-- ── FOR ALL BUSINESSES ─────────────────────────────────────────────────────── -->
 <section class="section-alt">
-  <div class="container">
-    <div style="text-align:center;margin-bottom:56px">
-      <h2 style="font-size:clamp(1.6rem,4vw,2.3rem);font-weight:900;color:white;margin-bottom:12px">Ce que disent les commerçants</h2>
-      <p style="color:var(--muted);font-size:15px">Ils ont adopté Fidelyzio pour fidéliser leurs clients</p>
+  <div class="container" style="max-width:900px">
+    <div style="text-align:center;margin-bottom:48px">
+      <h2 style="font-size:clamp(1.6rem,4vw,2.3rem);font-weight:900;color:white;margin-bottom:12px">Fait pour tous les commerces de proximité</h2>
+      <p style="color:var(--muted);font-size:15px">Si vous avez des clients réguliers, Fidelyzio est fait pour vous</p>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:22px">
-      <!-- Testi 1 -->
-      <div class="testi-card">
-        <div class="stars">★★★★★</div>
-        <p style="color:var(--text);font-size:14.5px;line-height:1.7;margin-bottom:20px">"En moins d'une semaine j'avais 40 clients inscrits. Mes habitués reviennent plus souvent et mes nouvelles têtes restent. Je ne pensais pas que c'était aussi simple."</p>
-        <div style="display:flex;align-items:center;gap:12px">
-          <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#f0b429,#d4920e);display:flex;align-items:center;justify-content:center;font-weight:900;color:#0d1420;font-size:16px">M</div>
-          <div>
-            <p style="color:white;font-weight:700;font-size:13px">Marie C.</p>
-            <p style="color:var(--muted);font-size:12px">La Boulangerie du Coin, Lyon</p>
-          </div>
-        </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+      <div class="biz-card">
+        <span class="biz-icon">🥐</span>
+        <p class="biz-label">Boulangerie</p>
       </div>
-      <!-- Testi 2 -->
-      <div class="testi-card">
-        <div class="stars">★★★★★</div>
-        <p style="color:var(--text);font-size:14.5px;line-height:1.7;margin-bottom:20px">"J'utilisais un tamponneur cartonné avant — la moitié de mes clients perdaient leur carte. Là tout est digital, zéro perte. Et mes clients kiffent voir leurs points accumuler."</p>
-        <div style="display:flex;align-items:center;gap:12px">
-          <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#4a90d9,#2b6cb0);display:flex;align-items:center;justify-content:center;font-weight:900;color:white;font-size:16px">T</div>
-          <div>
-            <p style="color:white;font-weight:700;font-size:13px">Thomas R.</p>
-            <p style="color:var(--muted);font-size:12px">Bar le Central, Bordeaux</p>
-          </div>
-        </div>
+      <div class="biz-card">
+        <span class="biz-icon">☕</span>
+        <p class="biz-label">Café</p>
       </div>
-      <!-- Testi 3 -->
-      <div class="testi-card">
-        <div class="stars">★★★★★</div>
-        <p style="color:var(--text);font-size:14.5px;line-height:1.7;margin-bottom:20px">"La configuration m'a pris 3 minutes. Le tableau de bord est clair, je vois exactement qui vient, quand, combien de points. C'est ce dont j'avais besoin depuis le début."</p>
-        <div style="display:flex;align-items:center;gap:12px">
-          <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#48bb78,#276749);display:flex;align-items:center;justify-content:center;font-weight:900;color:white;font-size:16px">S</div>
-          <div>
-            <p style="color:white;font-weight:700;font-size:13px">Sophie M.</p>
-            <p style="color:var(--muted);font-size:12px">Café des Artistes, Paris</p>
-          </div>
-        </div>
+      <div class="biz-card">
+        <span class="biz-icon">🍽️</span>
+        <p class="biz-label">Restaurant</p>
+      </div>
+      <div class="biz-card">
+        <span class="biz-icon">✂️</span>
+        <p class="biz-label">Coiffeur</p>
+      </div>
+      <div class="biz-card">
+        <span class="biz-icon">🎶</span>
+        <p class="biz-label">Boîte de nuit</p>
+      </div>
+      <div class="biz-card">
+        <span class="biz-icon">🛒</span>
+        <p class="biz-label">Épicerie</p>
       </div>
     </div>
   </div>

@@ -31,7 +31,7 @@ export default function LoginPage({ onLogin }) {
             <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75ZM6.75 16.5h.75v.75h-.75V16.5ZM16.5 6.75h.75v.75h-.75v-.75ZM13.5 13.5h.75v.75h-.75v-.75ZM13.5 19.5h.75v.75h-.75v-.75ZM19.5 13.5h.75v.75h-.75v-.75ZM19.5 19.5h.75v.75h-.75v-.75ZM16.5 16.5h.75v.75h-.75v-.75Z" />
           </svg>
         </div>
-        <h1 className="text-2xl font-bold text-white tracking-tight">LoyaltyPass</h1>
+        <h1 className="text-2xl font-bold text-white tracking-tight">Fidelyzio</h1>
         <p className="text-gray-400 text-sm mt-1">Espace marchand</p>
       </div>
 

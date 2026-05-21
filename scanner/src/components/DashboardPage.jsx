@@ -5,7 +5,7 @@ import { addReward, deleteReward, redeemReward, updateProfile, getScans, createC
 
 Chart.register(...registerables);
 
-// ── Tab icons ─────────────────────────────────────────────────────────────────
+// ── Icons ─────────────────────────────────────────────────────────────────────
 
 const IconHome = () => (
   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -22,7 +22,6 @@ const IconGift = () => (
     <path strokeLinecap="round" strokeLinejoin="round" d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
   </svg>
 );
-
 const IconHistory = () => (
   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
@@ -55,28 +54,50 @@ function fmtRelative(iso) {
   return new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
 }
 
-// ── Sub-pages ─────────────────────────────────────────────────────────────────
+function fmtDate(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
+}
 
-// ── Trial banner ──────────────────────────────────────────────────────────────
+function exportCSV(customers) {
+  const headers = ['Prénom', 'Téléphone', 'Points', 'Visites', 'Dernière visite'];
+  const rows = customers.map(c => [
+    c.first_name, c.phone || '', c.points, c.visit_count || '',
+    c.last_visit ? new Date(c.last_visit).toLocaleDateString('fr-FR') : '',
+  ]);
+  const csv = [headers, ...rows]
+    .map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(','))
+    .join('\n');
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `clients-fidelyzio-${new Date().toISOString().slice(0, 10)}.csv`; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ── Skeleton ──────────────────────────────────────────────────────────────────
+
+function Skel({ h = 'h-4', w = 'w-full', rounded = 'rounded-lg' }) {
+  return <div className={`${h} ${w} ${rounded} bg-white/[0.06] animate-pulse`} />;
+}
+
+// ── TrialBanner ───────────────────────────────────────────────────────────────
 
 function TrialBanner({ merchant, token }) {
   const [loading, setLoading] = useState(false);
-  const status   = merchant.subscription_status;
-  const days     = merchant.trial_days_left;
-
-  if (status === 'active') return null; // no banner for paying subscribers
+  const status = merchant.subscription_status;
+  const days   = merchant.trial_days_left;
+  if (status === 'active') return null;
 
   async function handleSubscribe() {
     setLoading(true);
-    try {
-      const { url } = await createCheckout(token);
-      if (url) window.location.href = url;
-    } catch (_) { setLoading(false); }
+    try { const { url } = await createCheckout(token); if (url) window.location.href = url; }
+    catch (_) { setLoading(false); }
   }
 
   if (status === 'suspended' || status === 'canceled') {
     return (
-      <div className="mx-5 mt-4 mb-1 rounded-2xl bg-red-500/10 border border-red-500/25 px-4 py-4">
+      <div className="mx-5 mt-4 mb-0 rounded-2xl bg-red-500/10 border border-red-500/25 px-4 py-4">
         <p className="text-red-400 font-bold text-sm mb-1">Compte suspendu</p>
         <p className="text-red-300/70 text-xs mb-3">Votre abonnement est inactif. Les scans sont bloqués.</p>
         <button onClick={handleSubscribe} disabled={loading}
@@ -87,17 +108,12 @@ function TrialBanner({ merchant, token }) {
     );
   }
 
-  // Trial
   const urgency = days <= 1 ? 'red' : days <= 3 ? 'amber' : 'indigo';
-  const colors  = {
-    red:    'bg-red-500/10 border-red-500/25 text-red-400',
-    amber:  'bg-amber-500/10 border-amber-500/25 text-amber-400',
-    indigo: 'bg-indigo-500/10 border-indigo-500/25 text-indigo-400',
-  };
-  const label = days === 0 ? 'Essai expiré aujourd\'hui' : `Essai : encore ${days} jour${days > 1 ? 's' : ''}`;
+  const colors  = { red: 'bg-red-500/10 border-red-500/25 text-red-400', amber: 'bg-amber-500/10 border-amber-500/25 text-amber-400', indigo: 'bg-indigo-500/10 border-indigo-500/25 text-indigo-400' };
+  const label   = days === 0 ? 'Essai expiré aujourd\'hui' : `Essai : encore ${days} jour${days > 1 ? 's' : ''}`;
 
   return (
-    <div className={`mx-5 mt-4 mb-1 rounded-2xl border px-4 py-3 ${colors[urgency]}`}>
+    <div className={`mx-5 mt-4 mb-0 rounded-2xl border px-4 py-3 ${colors[urgency]}`}>
       <div className="flex items-center justify-between gap-3">
         <p className="text-sm font-semibold">{label}</p>
         <button onClick={handleSubscribe} disabled={loading}
@@ -109,280 +125,293 @@ function TrialBanner({ merchant, token }) {
   );
 }
 
-// ── Onboarding checklist ──────────────────────────────────────────────────────
+// ── OnboardingChecklist ───────────────────────────────────────────────────────
 
 function OnboardingChecklist({ merchant, stats, rewards }) {
-  const key         = `fidelyzio_ob_${merchant.id}`;
-  const printKey    = `fidelyzio_ob_print_${merchant.id}`;
-  const [dismissed, setDismissed]   = useState(() => !!localStorage.getItem(key));
-  const [printed,   setPrinted]     = useState(() => !!localStorage.getItem(printKey));
-
+  const key      = `fidelyzio_ob_${merchant.id}`;
+  const printKey = `fidelyzio_ob_print_${merchant.id}`;
+  const [dismissed, setDismissed] = useState(() => !!localStorage.getItem(key));
+  const [printed,   setPrinted]   = useState(() => !!localStorage.getItem(printKey));
   if (dismissed) return null;
 
-  const hasScanned  = Number(stats?.total_points) > 0;
-  const hasRewards  = (rewards || []).filter(r => r.active).length > 0;
-
+  const hasScanned = Number(stats?.total_points) > 0;
+  const hasRewards = (rewards || []).filter(r => r.active).length > 0;
   const steps = [
-    { id: 'account', done: true,      label: 'Compte créé', desc: 'Vous êtes prêt(e) !' },
-    { id: 'print',   done: printed,   label: 'Afficher votre QR en caisse', desc: 'Imprimez votre QR d\'inscription.' },
-    { id: 'scan',    done: hasScanned, label: 'Premier scan client', desc: 'Scannez la carte d\'un client.' },
-    { id: 'reward',  done: hasRewards, label: 'Créer une récompense', desc: 'Ajoutez votre première récompense fidélité.' },
+    { id: 'account', done: true,       label: 'Compte créé',                  desc: 'Vous êtes prêt(e) !' },
+    { id: 'print',   done: printed,    label: 'Afficher votre QR en caisse',  desc: 'Imprimez votre QR d\'inscription.' },
+    { id: 'scan',    done: hasScanned, label: 'Premier scan client',           desc: 'Scannez la carte d\'un client.' },
+    { id: 'reward',  done: hasRewards, label: 'Créer une récompense',          desc: 'Ajoutez votre première récompense.' },
   ];
-
   const doneCount = steps.filter(s => s.done).length;
   const allDone   = doneCount === steps.length;
 
-  function markPrinted() { localStorage.setItem(printKey, '1'); setPrinted(true); }
-  function dismiss()     { localStorage.setItem(key, '1'); setDismissed(true); }
-
   return (
-    <div className="mx-5 mt-4 mb-1 bg-gray-900 border border-white/5 rounded-2xl p-4">
+    <div className="mx-5 mt-4 bg-[#0e0e18] border border-white/5 rounded-2xl p-4">
       <div className="flex items-center justify-between mb-3">
         <div>
           <p className="text-white font-bold text-sm">Premiers pas avec Fidelyzio</p>
           <p className="text-gray-600 text-xs">{doneCount}/{steps.length} étapes complétées</p>
         </div>
-        {allDone && (
-          <button onClick={dismiss} className="text-gray-600 hover:text-gray-400 text-xs underline transition">Masquer</button>
-        )}
+        {allDone && <button onClick={() => { localStorage.setItem(key, '1'); setDismissed(true); }} className="text-gray-600 hover:text-gray-400 text-xs underline transition">Masquer</button>}
       </div>
-      {/* Progress bar */}
       <div className="h-1.5 bg-gray-800 rounded-full mb-4 overflow-hidden">
-        <div className="h-full rounded-full bg-indigo-500 transition-all"
-          style={{ width: `${(doneCount / steps.length) * 100}%` }} />
+        <div className="h-full rounded-full bg-indigo-500 transition-all" style={{ width: `${(doneCount / steps.length) * 100}%` }} />
       </div>
       <div className="space-y-2.5">
         {steps.map(s => (
           <div key={s.id} className="flex items-center gap-3"
-               onClick={s.id === 'print' && !printed ? markPrinted : undefined}
-               style={{ cursor: s.id === 'print' && !printed ? 'pointer' : 'default' }}>
-            <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${
-              s.done ? 'bg-emerald-500 text-white' : 'bg-gray-800 border border-gray-700'
-            }`}>
-              {s.done && <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
-              </svg>}
+            onClick={s.id === 'print' && !printed ? () => { localStorage.setItem(printKey, '1'); setPrinted(true); } : undefined}
+            style={{ cursor: s.id === 'print' && !printed ? 'pointer' : 'default' }}>
+            <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${s.done ? 'bg-emerald-500 text-white' : 'bg-gray-800 border border-gray-700'}`}>
+              {s.done && <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>}
             </div>
             <div className="flex-1 min-w-0">
-              <p className={`text-sm font-medium ${s.done ? 'line-through text-gray-600' : 'text-white'}`}>
-                {s.label}
-              </p>
+              <p className={`text-sm font-medium ${s.done ? 'line-through text-gray-600' : 'text-white'}`}>{s.label}</p>
               {!s.done && <p className="text-gray-600 text-xs">{s.desc}</p>}
             </div>
-            {s.id === 'print' && !printed && (
-              <span className="text-indigo-400 text-xs shrink-0">Tap pour marquer ✓</span>
-            )}
+            {s.id === 'print' && !printed && <span className="text-indigo-400 text-xs shrink-0">Tap ✓</span>}
           </div>
         ))}
       </div>
       {allDone && (
         <div className="mt-4 text-center">
-          <p className="text-emerald-400 text-sm font-semibold">🎉 Bravo, vous êtes prêt(e) !</p>
-          <button onClick={dismiss} className="mt-2 text-gray-600 text-xs underline hover:text-gray-400 transition">Masquer ce guide</button>
+          <p className="text-emerald-400 text-sm font-semibold">🎉 Tout est prêt !</p>
+          <button onClick={() => { localStorage.setItem(key, '1'); setDismissed(true); }} className="mt-2 text-gray-600 text-xs underline hover:text-gray-400 transition">Masquer</button>
         </div>
       )}
     </div>
   );
 }
 
-function HomeTab({ merchant, stats, onScanClick }) {
-  const color   = merchant.color || '#6366f1';
-  const enrollQr = `/api/merchants/${merchant.id}/enroll-qr`;
-  const enrollUrl = `${window.location.origin}/enroll/${merchant.id}`;
+// ── HomeTab ───────────────────────────────────────────────────────────────────
+
+function HomeTab({ merchant, stats, rewards, token, onScanClick }) {
+  const [recentScans, setRecentScans] = useState(null);
+  const [showQr, setShowQr] = useState(false);
+  const color       = merchant.color || '#6366f1';
+  const enrollQr    = `/api/merchants/${merchant.id}/enroll-qr`;
+  const enrollUrl   = `${window.location.origin}/enroll/${merchant.id}`;
+  const activeRwds  = (rewards || []).filter(r => r.active).length;
+  const today       = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+
+  useEffect(() => {
+    getScans(token, {})
+      .then(d => setRecentScans((d.scans || []).slice(0, 5)))
+      .catch(() => setRecentScans([]));
+  }, [token]);
+
+  const quickStats = [
+    { label: 'Clients', value: stats?.total_customers ?? '—', icon: '👥' },
+    { label: 'Scans auj.', value: stats?.scans_today ?? '—', icon: '📲' },
+    { label: 'Récompenses', value: activeRwds, icon: '🎁' },
+    { label: 'Points total', value: stats?.total_points != null ? Number(stats.total_points).toLocaleString('fr-FR') : '—', icon: '⭐' },
+  ];
 
   return (
-    <div className="px-5 md:px-6 pt-2 pb-6">
-      {/* Stats row */}
-      <div className="grid grid-cols-3 gap-3 mb-5">
-        {[
-          { label: 'Clients',    value: stats?.total_customers ?? '—' },
-          { label: 'Pts total',  value: stats?.total_points    ?? '—' },
-          { label: 'Auj.',       value: stats?.scans_today     ?? '—' },
-        ].map(s => (
-          <div key={s.label} className="bg-gray-900 border border-white/5 rounded-2xl p-4 text-center">
+    <div className="px-5 md:px-6 pt-5 pb-8 max-w-2xl">
+
+      {/* Welcome */}
+      <div className="mb-5">
+        <p className="text-gray-500 text-xs capitalize">{today}</p>
+        <h1 className="text-white font-bold text-xl mt-0.5">Bonjour, {merchant.name} 👋</h1>
+      </div>
+
+      {/* Quick stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+        {quickStats.map(s => (
+          <div key={s.label} className="bg-[#0e0e18] border border-white/5 rounded-2xl p-4">
+            <p className="text-xl mb-1">{s.icon}</p>
             <p className="text-2xl font-black text-white leading-none">{s.value}</p>
             <p className="text-gray-600 text-[10px] uppercase tracking-wider mt-1">{s.label}</p>
           </div>
         ))}
       </div>
 
-      {/* Desktop: 2-col layout for scan + QR */}
-      <div className="md:grid md:grid-cols-2 md:gap-6 space-y-5 md:space-y-0">
-        {/* Left: scan button */}
-        <div className="flex flex-col gap-5">
-          <button
-            onClick={onScanClick}
-            className="w-full py-5 rounded-3xl font-bold text-white text-base flex items-center justify-center gap-3 active:scale-[0.98] transition-all shadow-2xl"
-            style={{ background: color, boxShadow: `0 20px 50px ${color}40` }}
-          >
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5Z" />
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75ZM6.75 16.5h.75v.75h-.75V16.5ZM16.5 6.75h.75v.75h-.75v-.75ZM13.5 13.5h.75v.75h-.75v-.75ZM13.5 19.5h.75v.75h-.75v-.75ZM19.5 13.5h.75v.75h-.75v-.75ZM19.5 19.5h.75v.75h-.75v-.75ZM16.5 16.5h.75v.75h-.75v-.75Z" />
-            </svg>
-            Scanner un client
-          </button>
-        </div>
+      {/* Scan button — hero element */}
+      <button
+        onClick={onScanClick}
+        className="w-full py-6 rounded-3xl font-bold text-white text-lg flex items-center justify-center gap-3 active:scale-[0.98] transition-all"
+        style={{ background: `linear-gradient(135deg, ${color}, ${color}cc)`, boxShadow: `0 20px 50px ${color}40` }}
+      >
+        <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5Z" />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75ZM6.75 16.5h.75v.75h-.75V16.5ZM16.5 6.75h.75v.75h-.75v-.75ZM13.5 13.5h.75v.75h-.75v-.75ZM13.5 19.5h.75v.75h-.75v-.75ZM19.5 13.5h.75v.75h-.75v-.75ZM19.5 19.5h.75v.75h-.75v-.75ZM16.5 16.5h.75v.75h-.75v-.75Z" />
+        </svg>
+        Scanner un client
+      </button>
 
-        {/* Right (desktop) / stacked (mobile): Enrollment QR */}
-        <div className="bg-gray-900 border border-white/5 rounded-3xl p-5">
-        <p className="text-gray-500 text-xs font-semibold uppercase tracking-widest mb-1">QR d'inscription</p>
-        <p className="text-gray-600 text-xs mb-4">Affichez ce code en caisse — vos clients s'inscrivent eux-mêmes</p>
-        <div className="flex justify-center mb-4">
-          <div className="bg-white p-3 rounded-2xl shadow-xl">
-            <img src={enrollQr} alt="QR inscription" className="w-44 h-44 rounded-lg block"
-              onError={e => { e.target.style.opacity = '0.3'; }} />
-          </div>
-        </div>
-        <div className="bg-gray-800 rounded-2xl px-4 py-2.5 flex items-center gap-2">
-          <p className="text-gray-400 text-xs font-mono flex-1 truncate">{enrollUrl}</p>
-          <button onClick={() => navigator.clipboard?.writeText(enrollUrl).catch(() => {})}
-            title="Copier le lien"
-            className="text-gray-600 hover:text-gray-300 active:scale-90 transition p-1 rounded-lg hover:bg-white/10 shrink-0">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" />
+      {/* Enrollment QR — collapsible */}
+      <div className="mt-4 bg-[#0e0e18] border border-white/5 rounded-2xl overflow-hidden">
+        <button
+          onClick={() => setShowQr(v => !v)}
+          className="w-full flex items-center justify-between px-5 py-4 hover:bg-white/[0.02] transition-colors"
+        >
+          <div className="flex items-center gap-2.5 text-left">
+            <svg className="w-4 h-4 text-gray-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5Z" />
             </svg>
-          </button>
-        </div>
-        {/* Print QR button */}
-        <a href="/merchant/qr-print" target="_blank" rel="noopener"
-           className="flex items-center justify-center gap-2 mt-3 py-2.5 rounded-2xl bg-gray-800/60 hover:bg-gray-700 active:scale-95 text-gray-500 hover:text-gray-200 text-xs font-medium transition-all border border-white/5">
-          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0 0 21 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 0 0-1.913-.247M6.34 18H5.25A2.25 2.25 0 0 1 3 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.056 48.056 0 0 1 1.913-.247m10.5 0a48.536 48.536 0 0 0-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5Zm-3 0h.008v.008H15V10.5Z" />
+            <div>
+              <p className="text-white text-sm font-semibold">QR d'inscription</p>
+              <p className="text-gray-600 text-xs">Affichez ce code en caisse</p>
+            </div>
+          </div>
+          <svg className={`w-4 h-4 text-gray-600 transition-transform ${showQr ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
           </svg>
-          Imprimer mon QR d'inscription
-        </a>
-        </div>
+        </button>
+
+        {showQr && (
+          <div className="px-5 pb-5 border-t border-white/5">
+            <div className="flex justify-center my-4">
+              <div className="bg-white p-3 rounded-2xl shadow-xl">
+                <img src={enrollQr} alt="QR inscription" className="w-44 h-44 rounded-lg block"
+                  onError={e => { e.target.style.opacity = '0.3'; }} />
+              </div>
+            </div>
+            <div className="bg-[#080810] rounded-xl px-4 py-2.5 flex items-center gap-2 mb-3">
+              <p className="text-gray-500 text-xs font-mono flex-1 truncate">{enrollUrl}</p>
+              <button onClick={() => navigator.clipboard?.writeText(enrollUrl).catch(() => {})}
+                className="text-gray-600 hover:text-gray-300 active:scale-90 transition p-1 rounded shrink-0">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75"/></svg>
+              </button>
+            </div>
+            <a href="/merchant/qr-print" target="_blank" rel="noopener"
+              className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-gray-800/60 hover:bg-gray-700 text-gray-400 hover:text-gray-200 text-xs font-medium transition-all border border-white/5 active:scale-95">
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0 0 21 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 0 0-1.913-.247M6.34 18H5.25A2.25 2.25 0 0 1 3 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.056 48.056 0 0 1 1.913-.247m10.5 0a48.536 48.536 0 0 0-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5Zm-3 0h.008v.008H15V10.5Z"/></svg>
+              Imprimer mon QR d'inscription
+            </a>
+          </div>
+        )}
+      </div>
+
+      {/* Recent activity */}
+      <div className="mt-5">
+        <p className="text-gray-500 text-xs font-semibold uppercase tracking-widest mb-3">Activité récente</p>
+
+        {recentScans === null && (
+          <div className="space-y-2.5">
+            {[1,2,3].map(i => (
+              <div key={i} className="bg-[#0e0e18] border border-white/5 rounded-xl px-4 py-3 flex items-center gap-3">
+                <Skel h="h-9" w="w-9" rounded="rounded-xl" />
+                <div className="flex-1 space-y-1.5">
+                  <Skel h="h-3.5" w="w-28" />
+                  <Skel h="h-2.5" w="w-20" />
+                </div>
+                <Skel h="h-4" w="w-14" />
+              </div>
+            ))}
+          </div>
+        )}
+
+        {recentScans !== null && recentScans.length === 0 && (
+          <div className="bg-[#0e0e18] border border-white/5 rounded-2xl py-10 text-center">
+            <p className="text-3xl mb-3">📲</p>
+            <p className="text-gray-400 text-sm font-medium">Aucun scan encore</p>
+            <p className="text-gray-600 text-xs mt-1">Affichez votre QR d'inscription en caisse pour commencer</p>
+          </div>
+        )}
+
+        {recentScans !== null && recentScans.length > 0 && (
+          <div className="space-y-2">
+            {recentScans.map(s => {
+              const isRedeem = s.points < 0;
+              return (
+                <div key={s.id} className="bg-[#0e0e18] border border-white/5 rounded-xl px-4 py-3 flex items-center gap-3">
+                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm font-bold shrink-0 ${isRedeem ? 'bg-amber-500/15' : 'bg-emerald-500/10'}`}>
+                    {isRedeem ? '🎁' : s.first_name.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white text-sm font-semibold truncate">{s.first_name}</p>
+                    <p className="text-gray-600 text-xs">{fmtRelative(s.created_at)}</p>
+                  </div>
+                  <p className={`text-sm font-bold shrink-0 ${isRedeem ? 'text-amber-400' : 'text-emerald-400'}`}>
+                    {isRedeem ? '🎁 Récompense' : `+${s.points} pts`}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
-function exportCSV(customers) {
-  const headers = ['Prénom', 'Téléphone', 'Points', 'Dernière visite', 'Inscrit le'];
-  const rows = customers.map(c => [
-    c.first_name,
-    c.phone || '',
-    c.points,
-    c.last_visit ? new Date(c.last_visit).toLocaleDateString('fr-FR') : '',
-    c.joined_at  ? new Date(c.joined_at).toLocaleDateString('fr-FR')  : '',
-  ]);
-  const csv = [headers, ...rows]
-    .map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(','))
-    .join('\n');
-  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href = url;
-  a.download = `clients-fidelyzio-${new Date().toISOString().slice(0, 10)}.csv`;
-  a.click();
-  URL.revokeObjectURL(url);
-}
+// ── ClientsTab ────────────────────────────────────────────────────────────────
 
 function ClientsTab({ customers, rewards, token, onRewardsChange }) {
   const [search, setSearch]           = useState('');
-  const [offerTarget, setOfferTarget] = useState(null); // { customer, available }
+  const [offerTarget, setOfferTarget] = useState(null);
   const [offering, setOffering]       = useState(false);
   const [offerErr, setOfferErr]       = useState('');
-
   const activeRewards = (rewards || []).filter(r => r.active);
-
   const filtered = search.trim()
-    ? customers.filter(c =>
-        c.first_name.toLowerCase().includes(search.toLowerCase()) ||
-        (c.phone || '').includes(search)
-      )
+    ? customers.filter(c => c.first_name.toLowerCase().includes(search.toLowerCase()) || (c.phone || '').includes(search))
     : customers;
 
   function openOffer(c) {
     const available = activeRewards.filter(r => c.points >= r.points_required);
     if (!available.length) return;
-    setOfferTarget({ customer: c, available });
-    setOfferErr('');
+    setOfferTarget({ customer: c, available }); setOfferErr('');
   }
 
   async function handleOffer(reward) {
-    setOffering(true);
-    setOfferErr('');
-    try {
-      await redeemReward(offerTarget.customer.membership_id, reward.id, token);
-      setOfferTarget(null);
-      onRewardsChange();
-    } catch (err) {
-      setOfferErr(err.message);
-    } finally {
-      setOffering(false);
-    }
+    setOffering(true); setOfferErr('');
+    try { await redeemReward(offerTarget.customer.membership_id, reward.id, token); setOfferTarget(null); onRewardsChange(); }
+    catch (err) { setOfferErr(err.message); }
+    finally { setOffering(false); }
   }
 
   return (
     <div className="px-5 md:px-6 pt-2 pb-6">
-      {/* Search + CSV export */}
       <div className="flex gap-2 mb-4">
         <div className="relative flex-1">
-          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600 pointer-events-none"
-            fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
           </svg>
-          <input type="search" placeholder="Rechercher…"
-            value={search} onChange={e => setSearch(e.target.value)}
-            className="w-full bg-gray-900 border border-white/5 rounded-2xl pl-9 pr-4 py-3 text-white placeholder-gray-600 text-sm focus:outline-none focus:ring-1 focus:ring-brand-500 focus:border-brand-500 transition" />
+          <input type="search" placeholder="Rechercher…" value={search} onChange={e => setSearch(e.target.value)}
+            className="w-full bg-gray-900 border border-white/5 rounded-2xl pl-9 pr-4 py-3 text-white placeholder-gray-600 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 transition" />
         </div>
         {customers.length > 0 && (
           <button onClick={() => exportCSV(filtered)} title="Exporter CSV"
             className="px-3 py-3 bg-gray-900 border border-white/5 rounded-2xl text-gray-500 hover:text-white hover:bg-gray-800 active:scale-95 transition-all shrink-0">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
-            </svg>
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
           </button>
         )}
       </div>
 
       {customers.length === 0 && (
-        <div className="text-center py-16">
-          <div className="w-14 h-14 rounded-2xl bg-gray-900 flex items-center justify-center mx-auto mb-3">
-            <svg className="w-7 h-7 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
-            </svg>
-          </div>
-          <p className="text-gray-600 text-sm">Aucun client encore inscrit.</p>
-          <p className="text-gray-700 text-xs mt-1">Affichez votre QR d'inscription en caisse.</p>
+        <div className="text-center py-16 bg-[#0e0e18] border border-white/5 rounded-2xl">
+          <p className="text-4xl mb-3">👥</p>
+          <p className="text-gray-400 text-sm font-medium">Aucun client encore inscrit</p>
+          <p className="text-gray-600 text-xs mt-1">Affichez votre QR d'inscription en caisse</p>
         </div>
       )}
-
       {filtered.length === 0 && customers.length > 0 && (
         <p className="text-center text-gray-600 text-sm py-8">Aucun résultat pour « {search} »</p>
       )}
 
       <div className="space-y-3">
         {filtered.map(c => {
-          const lastVisit  = c.last_visit ? fmtRelative(c.last_visit) : null;
-          const available  = activeRewards.filter(r => c.points >= r.points_required);
+          const available = activeRewards.filter(r => c.points >= r.points_required);
           const hasRewards = available.length > 0;
+          const lastVisit  = c.last_visit ? fmtRelative(c.last_visit) : null;
           return (
             <div key={c.id}
-              className={`bg-gray-900 rounded-2xl overflow-hidden border ${
-                hasRewards ? 'border-amber-400/25 cursor-pointer active:scale-[0.99] transition-transform' : 'border-white/5'
-              }`}
+              className={`bg-gray-900 rounded-2xl overflow-hidden border ${hasRewards ? 'border-amber-400/25 cursor-pointer active:scale-[0.99] transition-transform' : 'border-white/5'}`}
               onClick={() => hasRewards && openOffer(c)}>
-              {/* Reward banner */}
               {hasRewards && (
                 <div className="bg-amber-500/10 border-b border-amber-400/15 px-4 py-2 flex items-center gap-2">
                   <span className="text-base shrink-0">🎁</span>
-                  <p className="text-amber-300 text-xs font-semibold flex-1">
-                    {available.length === 1 ? '1 récompense disponible' : `${available.length} récompenses disponibles`}
-                  </p>
-                  <span className="text-amber-400/60 text-[10px]">Appuyer pour offrir →</span>
+                  <p className="text-amber-300 text-xs font-semibold flex-1">{available.length === 1 ? '1 récompense disponible' : `${available.length} récompenses disponibles`}</p>
+                  <span className="text-amber-400/60 text-[10px]">Appuyer →</span>
                 </div>
               )}
               <div className="px-4 py-4 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gray-800 flex items-center justify-center text-white font-bold text-sm shrink-0">
-                  {c.first_name.charAt(0).toUpperCase()}
-                </div>
+                <div className="w-10 h-10 rounded-xl bg-gray-800 flex items-center justify-center text-white font-bold text-sm shrink-0">{c.first_name.charAt(0).toUpperCase()}</div>
                 <div className="flex-1 min-w-0">
                   <p className="text-white font-semibold text-sm truncate">{c.first_name}</p>
-                  <p className="text-gray-600 text-xs truncate">
-                    {c.phone || '—'}{lastVisit ? ` · ${lastVisit}` : ''}
-                  </p>
+                  <p className="text-gray-600 text-xs truncate">{c.phone || '—'}{lastVisit ? ` · ${lastVisit}` : ''}</p>
                 </div>
                 <div className="text-right shrink-0">
                   <p className="text-white font-black text-lg leading-none">{c.points}</p>
@@ -394,48 +423,27 @@ function ClientsTab({ customers, rewards, token, onRewardsChange }) {
         })}
       </div>
 
-      {/* ── Offer reward bottom sheet ─────────────────────────────────────── */}
       {offerTarget && (
         <>
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40" onClick={() => setOfferTarget(null)} />
           <div className="fixed inset-x-0 bottom-0 z-50 animate-slide-up">
             <div className="bg-gray-900 rounded-t-3xl px-5 pb-safe-bottom pb-8 pt-5 shadow-2xl">
               <div className="w-10 h-1 bg-gray-700 rounded-full mx-auto mb-5" />
-
-              {/* Customer header */}
               <div className="flex items-center gap-3 mb-5">
-                <div className="w-11 h-11 rounded-2xl bg-gray-800 flex items-center justify-center text-white font-bold text-base shrink-0">
-                  {offerTarget.customer.first_name.charAt(0).toUpperCase()}
-                </div>
+                <div className="w-11 h-11 rounded-2xl bg-gray-800 flex items-center justify-center text-white font-bold text-base shrink-0">{offerTarget.customer.first_name.charAt(0).toUpperCase()}</div>
                 <div className="flex-1 min-w-0">
                   <p className="text-white font-bold">{offerTarget.customer.first_name}</p>
-                  <p className="text-gray-500 text-xs">
-                    {offerTarget.customer.points} pts
-                    {offerTarget.customer.phone ? ` · ${offerTarget.customer.phone}` : ''}
-                  </p>
+                  <p className="text-gray-500 text-xs">{offerTarget.customer.points} pts{offerTarget.customer.phone ? ` · ${offerTarget.customer.phone}` : ''}</p>
                 </div>
-                <button onClick={() => setOfferTarget(null)}
-                  className="w-8 h-8 rounded-xl bg-gray-800 hover:bg-gray-700 active:scale-90 flex items-center justify-center text-gray-500 hover:text-white transition-all shrink-0">
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
-                  </svg>
+                <button onClick={() => setOfferTarget(null)} className="w-8 h-8 rounded-xl bg-gray-800 hover:bg-gray-700 active:scale-90 flex items-center justify-center text-gray-500 hover:text-white transition-all shrink-0">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
                 </button>
               </div>
-
-              <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-3">
-                Récompenses disponibles
-              </p>
-
-              {offerErr && (
-                <div className="bg-red-500/10 border border-red-500/25 rounded-xl px-4 py-2.5 mb-3 text-red-400 text-sm">
-                  {offerErr}
-                </div>
-              )}
-
+              <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-3">Récompenses disponibles</p>
+              {offerErr && <div className="bg-red-500/10 border border-red-500/25 rounded-xl px-4 py-2.5 mb-3 text-red-400 text-sm">{offerErr}</div>}
               <div className="space-y-3">
                 {offerTarget.available.map(r => (
-                  <div key={r.id}
-                    className="flex items-center gap-3 bg-gray-800 rounded-2xl px-4 py-3">
+                  <div key={r.id} className="flex items-center gap-3 bg-gray-800 rounded-2xl px-4 py-3">
                     <span className="text-xl shrink-0">🎁</span>
                     <div className="flex-1 min-w-0">
                       <p className="text-white font-semibold text-sm truncate">{r.description}</p>
@@ -456,39 +464,22 @@ function ClientsTab({ customers, rewards, token, onRewardsChange }) {
   );
 }
 
+// ── RewardsTab ────────────────────────────────────────────────────────────────
+
 function RewardsTab({ rewards, token, onRewardsChange }) {
-  const [desc, setDesc]         = useState('');
-  const [pts, setPts]           = useState('');
-  const [saving, setSaving]     = useState(false);
-  const [err, setErr]           = useState('');
+  const [desc, setDesc]     = useState('');
+  const [pts, setPts]       = useState('');
+  const [saving, setSaving] = useState(false);
+  const [err, setErr]       = useState('');
 
   async function handleAdd(e) {
     e.preventDefault();
     const p = parseInt(pts, 10);
-    if (!desc.trim() || isNaN(p) || p <= 0) {
-      setErr('Veuillez remplir tous les champs correctement.');
-      return;
-    }
-    setSaving(true);
-    setErr('');
-    try {
-      await addReward(desc.trim(), p, token);
-      setDesc(''); setPts('');
-      onRewardsChange();
-    } catch (e) {
-      setErr(e.message);
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  async function handleDelete(id) {
-    try {
-      await deleteReward(id, token);
-      onRewardsChange();
-    } catch (e) {
-      setErr(e.message);
-    }
+    if (!desc.trim() || isNaN(p) || p <= 0) { setErr('Veuillez remplir tous les champs.'); return; }
+    setSaving(true); setErr('');
+    try { await addReward(desc.trim(), p, token); setDesc(''); setPts(''); onRewardsChange(); }
+    catch (e) { setErr(e.message); }
+    finally { setSaving(false); }
   }
 
   const active   = rewards.filter(r => r.active);
@@ -496,73 +487,51 @@ function RewardsTab({ rewards, token, onRewardsChange }) {
 
   return (
     <div className="px-5 md:px-6 pt-2 pb-6 md:grid md:grid-cols-2 md:gap-6 md:items-start">
-      {/* Active rewards */}
       <div>
-        <p className="text-gray-500 text-xs font-semibold uppercase tracking-widest mb-3">
-          Récompenses actives {active.length > 0 ? `(${active.length})` : ''}
-        </p>
-
+        <p className="text-gray-500 text-xs font-semibold uppercase tracking-widest mb-3">Récompenses actives {active.length > 0 ? `(${active.length})` : ''}</p>
         {active.length === 0 && (
-          <div className="text-center py-8 bg-gray-900 border border-white/5 rounded-2xl">
-            <p className="text-gray-600 text-sm">Aucune récompense configurée.</p>
-            <p className="text-gray-700 text-xs mt-1">Ajoutez-en une ci-dessous pour motiver vos clients.</p>
+          <div className="text-center py-10 bg-[#0e0e18] border border-white/5 rounded-2xl">
+            <p className="text-3xl mb-2">🎁</p>
+            <p className="text-gray-500 text-sm">Aucune récompense configurée</p>
+            <p className="text-gray-600 text-xs mt-1">Ajoutez-en une pour motiver vos clients</p>
           </div>
         )}
-
         <div className="space-y-3">
           {active.map(r => (
-            <div key={r.id} className="bg-gray-900 border border-white/5 rounded-2xl px-4 py-4 flex items-center gap-3">
+            <div key={r.id} className="bg-[#0e0e18] border border-white/5 rounded-2xl px-4 py-4 flex items-center gap-3">
               <div className="w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-500/25 flex items-center justify-center shrink-0">
-                <svg className="w-4 h-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
-                </svg>
+                <svg className="w-4 h-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z"/></svg>
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-white font-semibold text-sm truncate">{r.description}</p>
                 <p className="text-amber-400/80 text-xs">{r.points_required} points requis</p>
               </div>
-              <button onClick={() => handleDelete(r.id)}
+              <button onClick={() => deleteReward(r.id, token).then(onRewardsChange).catch(() => {})}
                 className="w-8 h-8 rounded-xl bg-gray-800 hover:bg-red-500/20 hover:text-red-400 flex items-center justify-center text-gray-600 transition-all active:scale-90 shrink-0">
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
-                </svg>
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
               </button>
             </div>
           ))}
         </div>
+        {inactive.length > 0 && <p className="text-gray-700 text-xs mt-3">{inactive.length} récompense{inactive.length > 1 ? 's' : ''} désactivée{inactive.length > 1 ? 's' : ''}</p>}
       </div>
 
-      {/* Add reward form */}
-      <div className="bg-gray-900 border border-white/5 rounded-3xl p-5">
+      <div className="mt-4 md:mt-0 bg-[#0e0e18] border border-white/5 rounded-3xl p-5">
         <p className="text-gray-400 text-sm font-semibold mb-4">Ajouter une récompense</p>
         <form onSubmit={handleAdd} className="space-y-3">
           <div>
             <label className="block text-xs text-gray-500 mb-1.5">Description</label>
-            <input
-              type="text"
-              placeholder="ex : 1 café gratuit"
-              value={desc}
-              onChange={e => setDesc(e.target.value)}
-              className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-600 text-sm focus:outline-none focus:ring-1 focus:ring-brand-500 focus:border-brand-500 transition"
-            />
+            <input type="text" placeholder="ex : 1 café gratuit" value={desc} onChange={e => setDesc(e.target.value)}
+              className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-600 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 transition" />
           </div>
           <div>
             <label className="block text-xs text-gray-500 mb-1.5">Points requis</label>
-            <input
-              type="number"
-              inputMode="numeric"
-              min="1"
-              placeholder="ex : 100"
-              value={pts}
-              onChange={e => setPts(e.target.value)}
-              className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-600 text-sm focus:outline-none focus:ring-1 focus:ring-brand-500 focus:border-brand-500 transition"
-            />
+            <input type="number" inputMode="numeric" min="1" placeholder="ex : 100" value={pts} onChange={e => setPts(e.target.value)}
+              className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-600 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 transition" />
           </div>
-          {err && (
-            <p className="text-red-400 text-xs">{err}</p>
-          )}
+          {err && <p className="text-red-400 text-xs">{err}</p>}
           <button type="submit" disabled={saving}
-            className="w-full py-3.5 rounded-xl bg-brand-600 hover:bg-brand-700 active:scale-[0.98] disabled:opacity-60 text-white font-semibold text-sm transition-all">
+            className="w-full py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:scale-[0.98] disabled:opacity-60 text-white font-semibold text-sm transition-all">
             {saving ? 'Ajout…' : '+ Ajouter la récompense'}
           </button>
         </form>
@@ -571,57 +540,39 @@ function RewardsTab({ rewards, token, onRewardsChange }) {
   );
 }
 
-// ── History tab ───────────────────────────────────────────────────────────────
+// ── HistoryTab ────────────────────────────────────────────────────────────────
 
 function HistoryTab({ token }) {
-  const [scans, setScans]         = useState(null);
-  const [dateFrom, setDateFrom]   = useState('');
-  const [dateTo,   setDateTo]     = useState('');
-  const [loading,  setLoading]    = useState(false);
+  const [scans, setScans]       = useState(null);
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo,   setDateTo]   = useState('');
+  const [loading,  setLoading]  = useState(false);
 
   async function load() {
     setLoading(true);
-    try {
-      const data = await getScans(token, { dateFrom, dateTo });
-      setScans(data.scans);
-    } catch (_) {}
-    finally { setLoading(false); }
+    try { const data = await getScans(token, { dateFrom, dateTo }); setScans(data.scans); }
+    catch (_) {} finally { setLoading(false); }
   }
-
-  // Load on first mount
   useEffect(() => { load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  function fmtDT(iso) {
-    if (!iso) return '—';
-    return new Date(iso).toLocaleString('fr-FR', {
-      day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit',
-    });
-  }
 
   return (
     <div className="px-5 md:px-6 pt-2 pb-6 md:max-w-3xl">
-      {/* Filters */}
       <div className="flex gap-2 mb-4 flex-wrap">
         <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)}
-          className="bg-gray-900 border border-white/5 rounded-xl px-3 py-2 text-gray-300 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500 flex-1 min-w-0" />
+          className="bg-gray-900 border border-white/5 rounded-xl px-3 py-2 text-gray-300 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 flex-1 min-w-0" />
         <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)}
-          className="bg-gray-900 border border-white/5 rounded-xl px-3 py-2 text-gray-300 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500 flex-1 min-w-0" />
+          className="bg-gray-900 border border-white/5 rounded-xl px-3 py-2 text-gray-300 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 flex-1 min-w-0" />
         <button onClick={load} disabled={loading}
-          className="px-4 py-2 bg-brand-600 hover:bg-brand-700 active:scale-95 rounded-xl text-white text-xs font-semibold disabled:opacity-60 transition-all shrink-0">
+          className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 active:scale-95 rounded-xl text-white text-xs font-semibold disabled:opacity-60 transition-all shrink-0">
           {loading ? '…' : 'Filtrer'}
         </button>
       </div>
-
       {scans === null && (
-        <div className="flex justify-center py-12">
-          <div className="w-6 h-6 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
+        <div className="space-y-2">
+          {[1,2,3,4,5].map(i => <div key={i} className="bg-[#0e0e18] border border-white/5 rounded-xl px-4 py-3 flex gap-3"><Skel h="h-8" w="w-8" rounded="rounded-xl" /><div className="flex-1 space-y-2"><Skel h="h-3" w="w-32" /><Skel h="h-2.5" w="w-24" /></div><Skel h="h-4" w="w-16" /></div>)}
         </div>
       )}
-
-      {scans !== null && scans.length === 0 && (
-        <div className="text-center py-12 text-gray-600 text-sm">Aucun scan sur cette période.</div>
-      )}
-
+      {scans !== null && scans.length === 0 && <div className="text-center py-12 text-gray-600 text-sm">Aucun scan sur cette période.</div>}
       {scans !== null && scans.length > 0 && (
         <>
           <p className="text-gray-600 text-xs mb-3">{scans.length} transaction{scans.length > 1 ? 's' : ''}</p>
@@ -629,21 +580,15 @@ function HistoryTab({ token }) {
             {scans.map(s => {
               const isRedeem = s.points < 0;
               return (
-                <div key={s.id} className="bg-gray-900 border border-white/5 rounded-xl px-4 py-3 flex items-center gap-3">
-                  <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-sm shrink-0 ${
-                    isRedeem ? 'bg-red-500/15 text-red-400' : 'bg-emerald-500/15 text-emerald-400'
-                  }`}>
-                    {isRedeem ? '🎁' : '+'}
-                  </div>
+                <div key={s.id} className="bg-[#0e0e18] border border-white/5 rounded-xl px-4 py-3 flex items-center gap-3">
+                  <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-sm shrink-0 ${isRedeem ? 'bg-red-500/15 text-red-400' : 'bg-emerald-500/15 text-emerald-400'}`}>{isRedeem ? '🎁' : '+'}</div>
                   <div className="flex-1 min-w-0">
                     <p className="text-white text-sm font-semibold truncate">{s.first_name}</p>
                     <p className="text-gray-600 text-xs truncate">{s.note || s.phone || '—'}</p>
                   </div>
                   <div className="text-right shrink-0">
-                    <p className={`text-sm font-bold ${isRedeem ? 'text-red-400' : 'text-emerald-400'}`}>
-                      {isRedeem ? '' : '+'}{s.points} pts
-                    </p>
-                    <p className="text-gray-600 text-[10px]">{fmtDT(s.created_at)}</p>
+                    <p className={`text-sm font-bold ${isRedeem ? 'text-red-400' : 'text-emerald-400'}`}>{isRedeem ? '' : '+'}{s.points} pts</p>
+                    <p className="text-gray-600 text-[10px]">{fmtRelative(s.created_at)}</p>
                   </div>
                 </div>
               );
@@ -655,16 +600,16 @@ function HistoryTab({ token }) {
   );
 }
 
-// ── Settings tab ──────────────────────────────────────────────────────────────
+// ── SettingsTab ───────────────────────────────────────────────────────────────
 
 function SettingsTab({ merchant, token, onRefresh }) {
-  const [name,    setName]    = useState(merchant.name);
-  const [color,   setColor]   = useState(merchant.color || '#6366f1');
-  const [pwd,     setPwd]     = useState('');
-  const [pwd2,    setPwd2]    = useState('');
-  const [saving,  setSaving]  = useState(false);
-  const [msg,     setMsg]     = useState('');
-  const [err,     setErr]     = useState('');
+  const [name,   setName]   = useState(merchant.name);
+  const [color,  setColor]  = useState(merchant.color || '#6366f1');
+  const [pwd,    setPwd]    = useState('');
+  const [pwd2,   setPwd2]   = useState('');
+  const [saving, setSaving] = useState(false);
+  const [msg,    setMsg]    = useState('');
+  const [err,    setErr]    = useState('');
 
   async function handleSave(e) {
     e.preventDefault();
@@ -675,66 +620,48 @@ function SettingsTab({ merchant, token, onRefresh }) {
       const payload = { name: name.trim(), color };
       if (pwd) payload.password = pwd;
       await updateProfile(payload, token);
-      setPwd(''); setPwd2('');
-      setMsg('Profil mis à jour !');
-      onRefresh();
-    } catch (e) {
-      setErr(e.message);
-    } finally {
-      setSaving(false);
-    }
+      setPwd(''); setPwd2(''); setMsg('Profil mis à jour !'); onRefresh();
+    } catch (e) { setErr(e.message); }
+    finally { setSaving(false); }
   }
 
   return (
     <div className="px-5 md:px-6 pt-2 pb-6 md:max-w-lg">
       <form onSubmit={handleSave} className="space-y-5">
-
-        <div className="bg-gray-900 border border-white/5 rounded-2xl p-5 space-y-4">
+        <div className="bg-[#0e0e18] border border-white/5 rounded-2xl p-5 space-y-4">
           <p className="text-gray-400 text-sm font-semibold">Informations de l'établissement</p>
-
           <div>
             <label className="block text-xs text-gray-500 mb-1.5">Nom de l'établissement</label>
             <input value={name} onChange={e => setName(e.target.value)} required
-              className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:ring-1 focus:ring-brand-500 focus:border-brand-500 transition" />
+              className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 transition" />
           </div>
-
           <div>
             <label className="block text-xs text-gray-500 mb-1.5">Couleur de marque</label>
             <div className="flex items-center gap-3">
-              <input type="color" value={color} onChange={e => setColor(e.target.value)}
-                className="w-12 h-12 rounded-xl cursor-pointer border-0 bg-transparent" />
-              <div className="flex-1 bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white text-sm font-mono">
-                {color}
-              </div>
+              <input type="color" value={color} onChange={e => setColor(e.target.value)} className="w-12 h-12 rounded-xl cursor-pointer border-0 bg-transparent" />
+              <div className="flex-1 bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white text-sm font-mono">{color}</div>
             </div>
           </div>
         </div>
-
-        <div className="bg-gray-900 border border-white/5 rounded-2xl p-5 space-y-4">
+        <div className="bg-[#0e0e18] border border-white/5 rounded-2xl p-5 space-y-4">
           <p className="text-gray-400 text-sm font-semibold">Changer le mot de passe</p>
-
           <div>
             <label className="block text-xs text-gray-500 mb-1.5">Nouveau mot de passe</label>
-            <input type="password" value={pwd} onChange={e => setPwd(e.target.value)}
-              placeholder="Laisser vide pour ne pas changer"
-              className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-600 text-sm focus:outline-none focus:ring-1 focus:ring-brand-500 focus:border-brand-500 transition" />
+            <input type="password" value={pwd} onChange={e => setPwd(e.target.value)} placeholder="Laisser vide pour ne pas changer"
+              className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-600 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 transition" />
           </div>
-
           {pwd && (
             <div>
               <label className="block text-xs text-gray-500 mb-1.5">Confirmer</label>
-              <input type="password" value={pwd2} onChange={e => setPwd2(e.target.value)}
-                placeholder="••••••••"
-                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-600 text-sm focus:outline-none focus:ring-1 focus:ring-brand-500 focus:border-brand-500 transition" />
+              <input type="password" value={pwd2} onChange={e => setPwd2(e.target.value)} placeholder="••••••••"
+                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-600 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 transition" />
             </div>
           )}
         </div>
-
         {err && <p className="text-red-400 text-sm">{err}</p>}
         {msg && <p className="text-emerald-400 text-sm">{msg}</p>}
-
         <button type="submit" disabled={saving}
-          className="w-full py-4 rounded-2xl bg-brand-600 hover:bg-brand-700 active:scale-[.98] disabled:opacity-60 text-white font-semibold text-base transition-all">
+          className="w-full py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-500 active:scale-[.98] disabled:opacity-60 text-white font-semibold text-base transition-all">
           {saving ? 'Enregistrement…' : 'Enregistrer les modifications'}
         </button>
       </form>
@@ -742,9 +669,14 @@ function SettingsTab({ merchant, token, onRefresh }) {
   );
 }
 
-// ── Analytics tab ─────────────────────────────────────────────────────────────
+// ── Analytics: building blocks ────────────────────────────────────────────────
 
-const CHART_OPTS = {
+const CHART_COLORS = {
+  indigo: '#6366f1', amber: '#f59e0b', emerald: '#10b981', rose: '#f43f5e',
+  blue: '#3b82f6', violet: '#8b5cf6',
+};
+
+const BASE_CHART_OPTS = {
   responsive: true, maintainAspectRatio: false,
   plugins: {
     legend: { display: false },
@@ -759,321 +691,396 @@ const CHART_OPTS = {
   },
 };
 
-function CanvasChart({ type, data, options, height = 160 }) {
+function CanvasChart({ type, data, options, height = 180, chartKey }) {
   const ref = useRef(null);
   useEffect(() => {
     if (!ref.current) return;
     const c = new Chart(ref.current, { type, data, options });
     return () => c.destroy();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [chartKey]); // eslint-disable-line react-hooks/exhaustive-deps
   return <div style={{ height }}><canvas ref={ref} /></div>;
 }
 
-function ACard({ title, subtitle, children }) {
+function KpiCard({ label, value, sub, trend, borderColor }) {
+  const up = trend > 0;
   return (
-    <div className="bg-gray-900 border border-white/5 rounded-2xl p-4">
-      <div className="flex items-baseline justify-between mb-4">
-        <p className="text-white text-sm font-semibold">{title}</p>
-        {subtitle && <span className="text-gray-600 text-xs">{subtitle}</span>}
+    <div className="bg-[#0e0e18] border border-white/5 rounded-2xl p-5 relative overflow-hidden">
+      <div className="absolute left-0 top-3 bottom-3 w-0.5 rounded-r" style={{ background: borderColor }} />
+      <p className="text-gray-500 text-xs font-medium uppercase tracking-wider mb-3 leading-tight">{label}</p>
+      <p className="text-3xl font-black text-white leading-none mb-2">{value}</p>
+      <div className="flex items-center gap-2">
+        {trend != null && (
+          <span className={`inline-flex items-center gap-0.5 text-xs font-bold px-1.5 py-0.5 rounded ${up ? 'bg-emerald-500/15 text-emerald-400' : 'text-red-400 bg-red-500/15'}`}>
+            {up ? '▲' : '▼'} {Math.abs(trend)}%
+          </span>
+        )}
+        {sub && <span className="text-gray-600 text-xs">{sub}</span>}
+      </div>
+    </div>
+  );
+}
+
+function ChartCard({ title, subtitle, children, action }) {
+  return (
+    <div className="bg-[#0e0e18] border border-white/5 rounded-2xl p-5">
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <p className="text-white text-sm font-semibold">{title}</p>
+          {subtitle && <p className="text-gray-600 text-xs mt-0.5">{subtitle}</p>}
+        </div>
+        {action}
       </div>
       {children}
     </div>
   );
 }
 
-function KpiRow({ items }) {
+// ── TopClientsTable ───────────────────────────────────────────────────────────
+
+function TopClientsTable({ customers }) {
+  const [search,  setSearch]  = useState('');
+  const [sortCol, setSortCol] = useState('points');
+  const [sortDir, setSortDir] = useState('desc');
+  const [page,    setPage]    = useState(0);
+  const PAGE = 10;
+
+  const d30 = new Date(Date.now() - 30 * 86400000).toISOString();
+  const maxPts = customers.length > 0 ? Math.max(...customers.map(c => c.points), 1) : 1;
+
+  function status(c) {
+    const isActive = c.last_visit && c.last_visit > d30;
+    const isVip    = c.points >= maxPts * 0.5 && c.visit_count >= 4;
+    return isVip ? 'vip' : isActive ? 'actif' : 'inactif';
+  }
+
+  const statusCfg = {
+    vip:    { label: 'VIP',    cls: 'bg-amber-500/15 text-amber-400 border border-amber-500/25' },
+    actif:  { label: 'Actif',  cls: 'bg-emerald-500/15 text-emerald-400' },
+    inactif:{ label: 'Inactif',cls: 'bg-gray-700/50 text-gray-500' },
+  };
+
+  const filtered = customers.filter(c =>
+    c.first_name.toLowerCase().includes(search.toLowerCase()) ||
+    (c.phone || '').includes(search)
+  );
+
+  const sorted = [...filtered].sort((a, b) => {
+    let av = a[sortCol], bv = b[sortCol];
+    if (sortCol === 'last_visit') { av = av || ''; bv = bv || ''; }
+    const cmp = av < bv ? -1 : av > bv ? 1 : 0;
+    return sortDir === 'asc' ? cmp : -cmp;
+  });
+
+  const totalPages = Math.max(1, Math.ceil(sorted.length / PAGE));
+  const paged = sorted.slice(page * PAGE, (page + 1) * PAGE);
+
+  function sort(col) {
+    if (col === sortCol) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    else { setSortCol(col); setSortDir('desc'); }
+    setPage(0);
+  }
+
+  function ThCol({ col, children }) {
+    const active = sortCol === col;
+    return (
+      <th className="text-left px-4 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:text-gray-300 transition select-none"
+        onClick={() => sort(col)}>
+        <span className="flex items-center gap-1">
+          {children}
+          <span className={`text-[10px] ${active ? 'text-indigo-400' : 'opacity-0'}`}>{sortDir === 'asc' ? '↑' : '↓'}</span>
+        </span>
+      </th>
+    );
+  }
+
   return (
-    <div className={`grid gap-3 grid-cols-${items.length}`}>
-      {items.map(({ label, value, sub, up }) => (
-        <div key={label} className="bg-gray-900 border border-white/5 rounded-2xl p-3.5 text-center">
-          <p className="text-2xl font-black text-white leading-none">{value}</p>
-          {sub !== undefined && (
-            <p className={`text-xs font-semibold mt-0.5 ${up === true ? 'text-emerald-400' : up === false ? 'text-red-400' : 'text-gray-600'}`}>
-              {sub}
-            </p>
-          )}
-          <p className="text-gray-600 text-[10px] uppercase tracking-wider mt-1 leading-tight">{label}</p>
+    <div className="bg-[#0e0e18] border border-white/5 rounded-2xl overflow-hidden">
+      {/* Header */}
+      <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between gap-3 flex-wrap">
+        <div>
+          <p className="text-white text-sm font-semibold">Top clients</p>
+          <p className="text-gray-600 text-xs mt-0.5">{filtered.length} client{filtered.length > 1 ? 's' : ''}</p>
         </div>
-      ))}
+        <div className="flex items-center gap-2">
+          <div className="relative">
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-600 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
+            <input type="search" placeholder="Rechercher…" value={search} onChange={e => { setSearch(e.target.value); setPage(0); }}
+              className="bg-gray-900 border border-white/5 rounded-xl pl-8 pr-4 py-2 text-gray-200 placeholder-gray-600 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 transition w-44" />
+          </div>
+          <button onClick={() => exportCSV(customers)} title="CSV"
+            className="p-2 bg-gray-900 border border-white/5 rounded-xl text-gray-500 hover:text-white transition">
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+          </button>
+        </div>
+      </div>
+
+      {/* Table */}
+      {customers.length === 0 ? (
+        <div className="py-14 text-center">
+          <p className="text-3xl mb-3">👥</p>
+          <p className="text-gray-500 text-sm">Aucun client encore</p>
+          <p className="text-gray-600 text-xs mt-1">Scannez vos premiers clients pour voir les statistiques</p>
+        </div>
+      ) : paged.length === 0 ? (
+        <div className="py-10 text-center text-gray-600 text-sm">Aucun résultat pour « {search} »</div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-white/5">
+                <ThCol col="first_name">Nom</ThCol>
+                <th className="text-left px-4 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Téléphone</th>
+                <ThCol col="points">Points</ThCol>
+                <ThCol col="visit_count">Visites</ThCol>
+                <ThCol col="last_visit">Dernière visite</ThCol>
+                <th className="text-left px-4 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Statut</th>
+              </tr>
+            </thead>
+            <tbody>
+              {paged.map((c, i) => {
+                const s = status(c);
+                const sc = statusCfg[s];
+                return (
+                  <tr key={i} className="border-b border-white/[0.04] last:border-0 hover:bg-white/[0.02] transition-colors">
+                    <td className="px-4 py-3.5">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-lg bg-gray-800 flex items-center justify-center text-white text-xs font-bold shrink-0">{c.first_name.charAt(0).toUpperCase()}</div>
+                        <p className="text-white text-sm font-medium">{c.first_name}</p>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3.5 text-gray-500 text-xs">{c.phone || '—'}</td>
+                    <td className="px-4 py-3.5">
+                      <span className="text-white font-bold text-sm">{Number(c.points).toLocaleString('fr-FR')}</span>
+                      <span className="text-gray-600 text-xs"> pts</span>
+                    </td>
+                    <td className="px-4 py-3.5 text-gray-300 text-sm">{c.visit_count ?? '—'}</td>
+                    <td className="px-4 py-3.5 text-gray-500 text-xs">{fmtDate(c.last_visit)}</td>
+                    <td className="px-4 py-3.5">
+                      <span className={`inline-flex px-2 py-0.5 rounded-md text-[10px] font-bold leading-4 ${sc.cls}`}>{sc.label}</span>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="px-5 py-3.5 border-t border-white/5 flex items-center justify-between">
+          <p className="text-gray-600 text-xs">Page {page + 1} / {totalPages}</p>
+          <div className="flex gap-2">
+            <button onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0}
+              className="px-3 py-1.5 rounded-lg bg-gray-800 text-gray-400 hover:text-white text-xs disabled:opacity-40 transition">← Préc.</button>
+            <button onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))} disabled={page >= totalPages - 1}
+              className="px-3 py-1.5 rounded-lg bg-gray-800 text-gray-400 hover:text-white text-xs disabled:opacity-40 transition">Suiv. →</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-function SectionLabel({ children }) {
-  return <p className="text-gray-500 text-xs font-semibold uppercase tracking-widest mt-5 mb-3">{children}</p>;
-}
-
-function TrendChip({ value }) {
-  if (value === null || value === undefined) return null;
-  const up = value >= 0;
-  return (
-    <span className={`inline-flex items-center gap-0.5 text-xs font-semibold px-2 py-0.5 rounded-full ${up ? 'bg-emerald-500/15 text-emerald-400' : 'bg-red-500/15 text-red-400'}`}>
-      {up ? '▲' : '▼'} {Math.abs(value)}%
-    </span>
-  );
-}
+// ── AnalyticsTab ──────────────────────────────────────────────────────────────
 
 function AnalyticsTab({ token, color }) {
   const [data,    setData]    = useState(null);
   const [loading, setLoading] = useState(true);
   const [err,     setErr]     = useState('');
+  const [loadKey, setLoadKey] = useState(0);
 
   async function load() {
     setLoading(true); setErr('');
-    try { setData(await getAnalytics(token)); }
+    try { const d = await getAnalytics(token); setData(d); setLoadKey(k => k + 1); }
     catch (e) { setErr(e.message); }
     finally { setLoading(false); }
   }
   useEffect(() => { load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (loading) return (
-    <div className="flex justify-center py-20">
-      <div className="w-7 h-7 rounded-full border-2 border-white/10 border-t-white/60 animate-spin" />
+    <div className="px-5 md:px-6 pt-5 pb-6 space-y-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {[1,2,3,4].map(i => <div key={i} className="bg-[#0e0e18] border border-white/5 rounded-2xl p-5 space-y-3"><Skel h="h-3" w="w-20" /><Skel h="h-8" w="w-16" /><Skel h="h-3" w="w-24" /></div>)}
+      </div>
+      <div className="grid md:grid-cols-5 gap-4">
+        <div className="md:col-span-3 bg-[#0e0e18] border border-white/5 rounded-2xl p-5"><Skel h="h-3" w="w-32" /><div className="mt-4"><Skel h="h-44" /></div></div>
+        <div className="md:col-span-2 bg-[#0e0e18] border border-white/5 rounded-2xl p-5"><Skel h="h-3" w="w-28" /><div className="mt-4"><Skel h="h-44" /></div></div>
+      </div>
+      <div className="grid md:grid-cols-2 gap-4">
+        {[1,2].map(i => <div key={i} className="bg-[#0e0e18] border border-white/5 rounded-2xl p-5"><Skel h="h-3" w="w-36" /><div className="mt-4"><Skel h="h-44" /></div></div>)}
+      </div>
     </div>
   );
+
   if (err) return (
-    <div className="px-5 py-12 text-center">
+    <div className="px-5 py-16 text-center">
       <p className="text-red-400 text-sm mb-4">{err}</p>
       <button onClick={load} className="px-4 py-2 bg-gray-800 rounded-xl text-white text-sm hover:bg-gray-700 transition">Réessayer</button>
     </div>
   );
   if (!data) return null;
 
-  const brand = color || '#6366f1';
+  const brand = color || CHART_COLORS.indigo;
   const DOW   = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
-
-  const weekTrend = data.new_customers_last_week > 0
-    ? Math.round(((data.new_customers_this_week - data.new_customers_last_week) / data.new_customers_last_week) * 100)
-    : data.new_customers_this_week > 0 ? 100 : 0;
-  const monthScanTrend = data.last_month_scans > 0
-    ? Math.round(((data.this_month_scans - data.last_month_scans) / data.last_month_scans) * 100)
-    : null;
 
   const totalCustomers = data.active_customers + data.inactive_customers;
   const activePct = totalCustomers > 0 ? Math.round((data.active_customers / totalCustomers) * 100) : 0;
 
+  const monthScanTrend = data.last_month_scans > 0
+    ? Math.round(((data.this_month_scans - data.last_month_scans) / data.last_month_scans) * 100) : null;
+  const monthCustTrend = data.last_month_customers > 0
+    ? Math.round(((data.this_month_customers - data.last_month_customers) / data.last_month_customers) * 100) : null;
+
+  // Weekly new customers derived from cumulative
+  const weeklyNew = data.cumulative_customers.map((w, i, arr) => ({
+    label: w.label,
+    count: i === 0 ? w.count : Math.max(0, w.count - arr[i - 1].count),
+  })).slice(-8);
+
+  // Points donut
+  const ptsDist    = data.total_points_distributed || 0;
+  const ptsRedeemed = Math.min(data.total_points_redeemed || 0, ptsDist);
+  const ptsNet     = Math.max(0, ptsDist - ptsRedeemed);
+
+  const ck = String(loadKey); // chart remount key
+
   return (
-    <div className="px-5 md:px-6 pt-2 pb-6 space-y-1">
+    <div className="px-5 md:px-6 pt-5 pb-8 space-y-4">
 
       {/* Refresh */}
-      <div className="flex justify-end pt-2 pb-1">
+      <div className="flex justify-end">
         <button onClick={load} className="flex items-center gap-1.5 text-gray-500 hover:text-white text-xs px-3 py-1.5 rounded-xl hover:bg-white/5 transition-all active:scale-95">
-          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
-          </svg>
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
           Actualiser
         </button>
       </div>
 
-      {/* ── Weekly summary ─────────────────────────────────────────────────── */}
-      <SectionLabel>Cette semaine</SectionLabel>
-      <KpiRow items={[
-        { label: 'Nouveaux clients', value: data.weekly_new_customers, sub: `${weekTrend >= 0 ? '+' : ''}${weekTrend}% vs S-1`, up: weekTrend >= 0 },
-        { label: 'Scans', value: data.weekly_scans },
-        { label: 'Récompenses', value: data.weekly_redemptions },
-      ]} />
+      {/* ── Row 1: KPI cards ─────────────────────────────────────────────────── */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <KpiCard label="Total clients"      value={totalCustomers.toLocaleString('fr-FR')} trend={monthCustTrend} sub={monthCustTrend == null ? undefined : 'vs mois dernier'} borderColor={CHART_COLORS.indigo} />
+        <KpiCard label="Scans ce mois"      value={data.this_month_scans.toLocaleString('fr-FR')} trend={monthScanTrend} sub={monthScanTrend == null ? undefined : 'vs mois dernier'} borderColor={CHART_COLORS.amber} />
+        <KpiCard label="Points distribués"  value={ptsDist.toLocaleString('fr-FR')} sub="total cumulé" borderColor={CHART_COLORS.emerald} />
+        <KpiCard label="Récompenses"        value={data.total_redeemed.toLocaleString('fr-FR')} sub="offertes" borderColor={CHART_COLORS.rose} />
+      </div>
 
-      {/* ── Customer analysis ──────────────────────────────────────────────── */}
-      <SectionLabel>Analyse clients</SectionLabel>
-
-      {/* Active vs inactive */}
-      <div className="bg-gray-900 border border-white/5 rounded-2xl p-4">
-        <div className="flex items-center justify-between mb-3">
-          <p className="text-white text-sm font-semibold">Clients actifs vs inactifs</p>
-          <span className="text-gray-500 text-xs">30 derniers jours</span>
+      {/* ── Row 2: Scans/day (3/5) + Weekday (2/5) ───────────────────────────── */}
+      <div className="grid md:grid-cols-5 gap-4">
+        <div className="md:col-span-3">
+          <ChartCard title="Scans par jour" subtitle="30 derniers jours">
+            <CanvasChart key={`sd-${ck}`} chartKey={ck} type="line" height={190}
+              data={{
+                labels: data.scans_per_day.map(d => d.day.slice(5)),
+                datasets: [{ data: data.scans_per_day.map(d => d.count), borderColor: brand, backgroundColor: brand + '18', fill: true, tension: 0.4, pointRadius: 0, pointHoverRadius: 4, borderWidth: 2 }],
+              }}
+              options={{ ...BASE_CHART_OPTS, scales: { ...BASE_CHART_OPTS.scales, x: { ...BASE_CHART_OPTS.scales.x, ticks: { ...BASE_CHART_OPTS.scales.x.ticks, maxTicksLimit: 8 } } } }}
+            />
+          </ChartCard>
         </div>
-        <div className="flex gap-4 mb-3">
-          <div>
-            <p className="text-2xl font-black text-emerald-400 leading-none">{data.active_customers}</p>
-            <p className="text-gray-600 text-[10px] uppercase tracking-wide mt-0.5">Actifs</p>
-          </div>
-          <div>
-            <p className="text-2xl font-black text-gray-500 leading-none">{data.inactive_customers}</p>
-            <p className="text-gray-600 text-[10px] uppercase tracking-wide mt-0.5">Inactifs</p>
-          </div>
-          <div className="ml-auto text-right">
-            <p className="text-xl font-black text-white leading-none">{activePct}%</p>
-            <p className="text-gray-600 text-[10px] uppercase tracking-wide mt-0.5">Actifs</p>
-          </div>
-        </div>
-        <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
-          <div className="h-full rounded-full bg-emerald-500 transition-all" style={{ width: `${activePct}%` }} />
+        <div className="md:col-span-2">
+          <ChartCard title="Visites par jour" subtitle="30 derniers jours">
+            <CanvasChart key={`dow-${ck}`} chartKey={ck} type="bar" height={190}
+              data={{
+                labels: DOW,
+                datasets: [{ data: data.scans_by_weekday, backgroundColor: CHART_COLORS.amber + 'bb', hoverBackgroundColor: CHART_COLORS.amber, borderRadius: 5, borderSkipped: false }],
+              }}
+              options={BASE_CHART_OPTS}
+            />
+          </ChartCard>
         </div>
       </div>
 
-      {/* KPIs */}
-      <KpiRow items={[
-        { label: 'Fréquence moy.', value: `${data.avg_visit_frequency}`, sub: 'visites / mois' },
-        { label: 'Nouveaux S-1', value: data.new_customers_this_week, sub: <TrendChip value={weekTrend} /> },
-        { label: 'Taux rétention', value: `${data.retention_rate}%` },
-      ]} />
+      {/* ── Row 3: New clients/week + Points donut ───────────────────────────── */}
+      <div className="grid md:grid-cols-2 gap-4">
+        <ChartCard title="Nouveaux clients par semaine" subtitle="8 dernières semaines">
+          <CanvasChart key={`wc-${ck}`} chartKey={ck} type="bar" height={190}
+            data={{
+              labels: weeklyNew.map(w => w.label),
+              datasets: [{ data: weeklyNew.map(w => w.count), backgroundColor: CHART_COLORS.emerald + 'bb', hoverBackgroundColor: CHART_COLORS.emerald, borderRadius: 5, borderSkipped: false }],
+            }}
+            options={{ ...BASE_CHART_OPTS, scales: { ...BASE_CHART_OPTS.scales, x: { ...BASE_CHART_OPTS.scales.x, ticks: { ...BASE_CHART_OPTS.scales.x.ticks, maxRotation: 30, maxTicksLimit: 8 } } } }}
+          />
+        </ChartCard>
 
-      {/* Top 10 customers */}
-      <ACard title="Top 10 clients" subtitle="par points cumulés">
-        {data.top_customers.length === 0
-          ? <p className="text-gray-600 text-sm text-center py-4">Aucun client encore.</p>
-          : <div className="space-y-2.5">
-              {data.top_customers.map((c, i) => {
-                const maxPts = data.top_customers[0].points || 1;
-                const pct    = Math.round((c.points / maxPts) * 100);
-                return (
-                  <div key={i} className="flex items-center gap-2.5">
-                    <span className="text-gray-600 text-xs w-4 text-right shrink-0 font-semibold">{i + 1}</span>
-                    <div className="w-7 h-7 rounded-lg bg-gray-800 flex items-center justify-center text-white text-xs font-bold shrink-0">
-                      {c.first_name.charAt(0).toUpperCase()}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-white text-xs font-medium truncate mr-2">{c.first_name}</span>
-                        <span className="text-gray-500 text-[10px] shrink-0">{c.points} pts · {c.visit_count} visites</span>
-                      </div>
-                      <div className="h-1.5 bg-gray-800 rounded-full overflow-hidden">
-                        <div className="h-full rounded-full" style={{ width: `${pct}%`, background: brand }} />
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+        <ChartCard title="Points distribués vs échangés">
+          {ptsDist === 0 ? (
+            <div className="flex items-center justify-center" style={{ height: 190 }}>
+              <p className="text-gray-600 text-sm">Aucun point distribué encore</p>
             </div>
-        }
-      </ACard>
-
-      {/* Lost customers */}
-      {data.lost_customers.length > 0 && (
-        <ACard title="Clients à relancer" subtitle="+30j sans visite">
-          <div className="space-y-2">
-            {data.lost_customers.slice(0, 8).map((c, i) => (
-              <div key={i} className="flex items-center gap-3 bg-gray-800/50 rounded-xl px-3 py-2.5">
-                <div className="w-7 h-7 rounded-lg bg-gray-700 flex items-center justify-center text-white text-xs font-bold shrink-0">
-                  {c.first_name.charAt(0).toUpperCase()}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-white text-sm font-medium">{c.first_name}</p>
-                  <p className="text-gray-600 text-xs">{c.last_visit ? fmtRelative(c.last_visit) : 'Jamais'} · {c.points} pts</p>
-                </div>
-                <button className="px-2.5 py-1 rounded-lg bg-indigo-600/20 text-indigo-400 text-xs font-semibold border border-indigo-500/20 opacity-60 cursor-not-allowed" disabled>
-                  Relancer
-                </button>
+          ) : (
+            <div className="flex items-center gap-6" style={{ height: 190 }}>
+              <div className="flex-1" style={{ height: 180 }}>
+                <CanvasChart key={`donut-${ck}`} chartKey={ck} type="doughnut" height={180}
+                  data={{
+                    labels: ['Points actifs', 'Points échangés'],
+                    datasets: [{ data: [ptsNet, ptsRedeemed], backgroundColor: [CHART_COLORS.indigo, CHART_COLORS.rose], borderColor: '#0e0e18', borderWidth: 3, hoverOffset: 4 }],
+                  }}
+                  options={{
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: {
+                      legend: { display: true, position: 'bottom', labels: { color: '#6b7280', font: { size: 11 }, padding: 12, boxWidth: 10, usePointStyle: true } },
+                      tooltip: { backgroundColor: '#1c1c28', titleColor: '#9ca3af', bodyColor: '#f9fafb', borderColor: '#2d2d3a', borderWidth: 1, padding: 10 },
+                    },
+                    cutout: '68%',
+                  }}
+                />
               </div>
-            ))}
-          </div>
-          {data.lost_customers.length > 8 && (
-            <p className="text-gray-600 text-xs text-center mt-3">+{data.lost_customers.length - 8} autres clients inactifs</p>
+              <div className="shrink-0 space-y-3">
+                <div>
+                  <p className="text-gray-600 text-[10px] uppercase tracking-wide">Distribués</p>
+                  <p className="text-white font-bold text-lg leading-none">{ptsDist.toLocaleString('fr-FR')}</p>
+                </div>
+                <div>
+                  <p className="text-gray-600 text-[10px] uppercase tracking-wide">Échangés</p>
+                  <p className="text-rose-400 font-bold text-lg leading-none">{ptsRedeemed.toLocaleString('fr-FR')}</p>
+                </div>
+                <div>
+                  <p className="text-gray-600 text-[10px] uppercase tracking-wide">Taux</p>
+                  <p className="text-white font-bold text-lg leading-none">{ptsDist > 0 ? Math.round((ptsRedeemed / ptsDist) * 100) : 0}%</p>
+                </div>
+              </div>
+            </div>
           )}
-        </ACard>
-      )}
-
-      {/* ── Time analysis ──────────────────────────────────────────────────── */}
-      <SectionLabel>Activité dans le temps</SectionLabel>
-
-      {/* Scans per day — full width */}
-      <ACard title="Scans par jour" subtitle="30 derniers jours">
-        <CanvasChart key="scan-day" type="line" height={160}
-          data={{
-            labels: data.scans_per_day.map(d => d.day.slice(5)),
-            datasets: [{ data: data.scans_per_day.map(d => d.count), borderColor: brand, backgroundColor: brand + '18', fill: true, tension: 0.4, pointRadius: 0, pointHoverRadius: 4, borderWidth: 2 }],
-          }}
-          options={{ ...CHART_OPTS, scales: { ...CHART_OPTS.scales, x: { ...CHART_OPTS.scales.x, ticks: { ...CHART_OPTS.scales.x.ticks, maxTicksLimit: 7 } } } }}
-        />
-      </ACard>
-
-      {/* Weekday + hour side-by-side on desktop */}
-      <div className="md:grid md:grid-cols-2 md:gap-4 space-y-1 md:space-y-0">
-        <ACard title="Scans par jour de semaine" subtitle="30 derniers jours">
-          <CanvasChart key="scan-dow" type="bar" height={140}
-            data={{
-              labels: DOW,
-              datasets: [{ data: data.scans_by_weekday, backgroundColor: brand + 'aa', hoverBackgroundColor: brand, borderRadius: 4, borderSkipped: false }],
-            }}
-            options={CHART_OPTS}
-          />
-        </ACard>
-
-        <ACard title="Scans par heure" subtitle="30 derniers jours">
-          <CanvasChart key="scan-hour" type="bar" height={140}
-            data={{
-              labels: Array.from({ length: 24 }, (_, i) => i + 'h'),
-              datasets: [{ data: data.scans_by_hour, backgroundColor: '#22c55e99', hoverBackgroundColor: '#22c55e', borderRadius: 3, borderSkipped: false }],
-            }}
-            options={{ ...CHART_OPTS, scales: { ...CHART_OPTS.scales, x: { ...CHART_OPTS.scales.x, ticks: { ...CHART_OPTS.scales.x.ticks, maxTicksLimit: 8 } } } }}
-          />
-        </ACard>
+        </ChartCard>
       </div>
 
-      {/* Monthly comparison */}
-      <div className="bg-gray-900 border border-white/5 rounded-2xl p-4">
-        <p className="text-white text-sm font-semibold mb-3">Comparaison mensuelle</p>
-        <div className="grid grid-cols-2 gap-3">
-          {[
-            { label: 'Scans ce mois', value: data.this_month_scans, prev: data.last_month_scans, trend: monthScanTrend },
-            { label: 'Nouveaux clients', value: data.this_month_customers, prev: data.last_month_customers,
-              trend: data.last_month_customers > 0 ? Math.round(((data.this_month_customers - data.last_month_customers) / data.last_month_customers) * 100) : null },
-          ].map(item => (
-            <div key={item.label} className="bg-gray-800/60 rounded-xl p-3">
-              <p className="text-gray-500 text-[10px] uppercase tracking-wide mb-1">{item.label}</p>
-              <p className="text-white text-2xl font-black leading-none">{item.value}</p>
-              <div className="flex items-center gap-1.5 mt-1">
-                <TrendChip value={item.trend} />
-                <span className="text-gray-600 text-[10px]">vs mois dernier ({item.prev})</span>
-              </div>
-            </div>
-          ))}
+      {/* ── Row 4: Top clients table (full width) ────────────────────────────── */}
+      <TopClientsTable customers={data.top_customers} />
+
+      {/* ── Row 5: Analysis summary cards ────────────────────────────────────── */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {/* Active vs inactive */}
+        <div className="bg-[#0e0e18] border border-white/5 rounded-2xl p-4">
+          <p className="text-gray-500 text-[10px] uppercase tracking-wider mb-2">Clients actifs</p>
+          <p className="text-emerald-400 text-2xl font-black leading-none">{activePct}%</p>
+          <div className="mt-2 h-1.5 bg-gray-800 rounded-full overflow-hidden">
+            <div className="h-full rounded-full bg-emerald-500" style={{ width: `${activePct}%` }} />
+          </div>
+          <p className="text-gray-600 text-[10px] mt-1.5">{data.active_customers} actifs / {totalCustomers} total</p>
+        </div>
+
+        {/* Avg frequency */}
+        <div className="bg-[#0e0e18] border border-white/5 rounded-2xl p-4">
+          <p className="text-gray-500 text-[10px] uppercase tracking-wider mb-2">Fréquence moy.</p>
+          <p className="text-white text-2xl font-black leading-none">{data.avg_visit_frequency}</p>
+          <p className="text-gray-600 text-[10px] mt-1.5">visites / mois (30j)</p>
+        </div>
+
+        {/* Retention rate */}
+        <div className="bg-[#0e0e18] border border-white/5 rounded-2xl p-4">
+          <p className="text-gray-500 text-[10px] uppercase tracking-wider mb-2">Rétention</p>
+          <p className={`text-2xl font-black leading-none ${data.retention_rate >= 50 ? 'text-emerald-400' : 'text-amber-400'}`}>{data.retention_rate}%</p>
+          <p className="text-gray-600 text-[10px] mt-1.5">clients revenus 2x+</p>
+        </div>
+
+        {/* Lost customers */}
+        <div className="bg-[#0e0e18] border border-white/5 rounded-2xl p-4">
+          <p className="text-gray-500 text-[10px] uppercase tracking-wider mb-2">À relancer</p>
+          <p className={`text-2xl font-black leading-none ${data.inactive_customers > 0 ? 'text-red-400' : 'text-emerald-400'}`}>{data.inactive_customers}</p>
+          <p className="text-gray-600 text-[10px] mt-1.5">sans visite &gt; 30j</p>
         </div>
       </div>
 
-      {/* ── Rewards analysis ───────────────────────────────────────────────── */}
-      <SectionLabel>Récompenses</SectionLabel>
-
-      <div className="bg-gray-900 border border-white/5 rounded-2xl p-4 space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-gray-500 text-[10px] uppercase tracking-wide">Taux de rachat</p>
-            <p className="text-white text-3xl font-black">{data.redemption_rate}%</p>
-            <p className="text-gray-600 text-xs mt-0.5">des clients ont racheté une récompense</p>
-          </div>
-          <div className="text-right">
-            <p className="text-gray-500 text-[10px] uppercase tracking-wide">Rachats</p>
-            <p className="text-white text-2xl font-black">{data.total_redeemed}</p>
-            <p className="text-gray-600 text-xs mt-0.5">{data.total_points_distributed.toLocaleString('fr-FR')} pts distribués</p>
-          </div>
-        </div>
-        {data.most_popular_reward && (
-          <div className="bg-amber-500/8 border border-amber-500/18 rounded-xl px-3 py-2.5">
-            <p className="text-amber-300/60 text-[10px] uppercase tracking-wide mb-0.5">Récompense la plus populaire</p>
-            <p className="text-amber-300 text-sm font-semibold">{data.most_popular_reward}</p>
-          </div>
-        )}
-        {data.avg_points_before_first_redemption > 0 && (
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-500">Pts moyens avant 1er rachat</span>
-            <span className="text-white font-bold">{data.avg_points_before_first_redemption} pts</span>
-          </div>
-        )}
-      </div>
-
-      {/* ── Business indicators ─────────────────────────────────────────────── */}
-      <SectionLabel>Indicateurs business</SectionLabel>
-
-      <div className="md:grid md:grid-cols-2 md:gap-4 space-y-1 md:space-y-0">
-        <div className="space-y-1">
-          <KpiRow items={[
-            { label: 'Score fidélité moy.', value: data.avg_loyalty_score, sub: 'pts / visite' },
-            { label: 'Taux rétention', value: `${data.retention_rate}%`, sub: 'clients revenus' },
-          ]} />
-        </div>
-        {/* Customer growth chart */}
-        <ACard title="Croissance clients" subtitle="12 dernières semaines">
-        <CanvasChart key="cust-growth" type="line" height={140}
-          data={{
-            labels: data.cumulative_customers.map(c => c.label),
-            datasets: [{ data: data.cumulative_customers.map(c => c.count), borderColor: '#22c55e', backgroundColor: '#22c55e18', fill: true, tension: 0.4, pointRadius: 0, pointHoverRadius: 4, borderWidth: 2 }],
-          }}
-          options={{ ...CHART_OPTS, scales: { ...CHART_OPTS.scales, x: { ...CHART_OPTS.scales.x, ticks: { ...CHART_OPTS.scales.x.ticks, maxTicksLimit: 6 } } } }}
-        />
-        </ACard>
-      </div>
-
-      <div style={{ height: '0.5rem' }} />
     </div>
   );
 }
@@ -1090,18 +1097,13 @@ export default function DashboardPage({ auth, dashData, dashLoading, onLogout, o
   const customers = dashData?.customers ?? [];
   const rewards   = dashData?.rewards   ?? [];
 
-  function handleScanSuccess() {
-    setShowScan(false);
-    onRefresh();
-  }
-
   const TABS = [
-    { id: 'home',      label: 'Accueil', Icon: IconHome     },
-    { id: 'clients',   label: 'Clients', Icon: IconUsers    },
-    { id: 'rewards',   label: 'Primes',  Icon: IconGift     },
-    { id: 'analytics', label: 'Stats',   Icon: IconChart    },
-    { id: 'history',   label: 'Scans',   Icon: IconHistory  },
-    { id: 'settings',  label: 'Compte',  Icon: IconSettings },
+    { id: 'home',      label: 'Accueil',    Icon: IconHome     },
+    { id: 'clients',   label: 'Clients',    Icon: IconUsers    },
+    { id: 'rewards',   label: 'Primes',     Icon: IconGift     },
+    { id: 'analytics', label: 'Stats',      Icon: IconChart    },
+    { id: 'history',   label: 'Scans',      Icon: IconHistory  },
+    { id: 'settings',  label: 'Compte',     Icon: IconSettings },
   ];
 
   const TAB_TITLES = {
@@ -1114,11 +1116,9 @@ export default function DashboardPage({ auth, dashData, dashLoading, onLogout, o
 
       {/* ── Desktop sidebar ───────────────────────────────────────────────────── */}
       <aside className="hidden md:flex flex-col fixed inset-y-0 left-0 w-56 bg-[#0c0c14] border-r border-white/5 z-40">
-        {/* Merchant identity */}
         <div className="px-4 py-5 border-b border-white/5 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white text-sm font-bold shrink-0"
-                 style={{ backgroundColor: color }}>
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white text-sm font-bold shrink-0" style={{ backgroundColor: color }}>
               {merchant.name.charAt(0).toUpperCase()}
             </div>
             <div className="min-w-0">
@@ -1127,15 +1127,12 @@ export default function DashboardPage({ auth, dashData, dashLoading, onLogout, o
             </div>
           </div>
         </div>
-        {/* Nav items */}
         <nav className="flex-1 px-3 py-3 space-y-0.5 overflow-y-auto">
           {TABS.map(({ id, label, Icon }) => {
             const active = tab === id;
             return (
               <button key={id} onClick={() => setTab(id)}
-                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-left ${
-                  active ? 'bg-indigo-500/12 text-indigo-300' : 'text-gray-500 hover:bg-white/[0.04] hover:text-gray-200'
-                }`}>
+                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-left ${active ? 'bg-indigo-500/12 text-indigo-300' : 'text-gray-500 hover:bg-white/[0.04] hover:text-gray-200'}`}>
                 <span className="shrink-0"><Icon /></span>
                 {label}
                 {active && <span className="ml-auto w-1.5 h-1.5 rounded-full shrink-0" style={{ background: color }} />}
@@ -1143,21 +1140,16 @@ export default function DashboardPage({ auth, dashData, dashLoading, onLogout, o
             );
           })}
         </nav>
-        {/* Bottom actions */}
         <div className="px-3 py-3 border-t border-white/5 space-y-0.5 shrink-0">
           <button onClick={onRefresh}
             className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-500 hover:bg-white/[0.04] hover:text-gray-200 transition-all">
-            <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
-            </svg>
+            <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
             Actualiser
             {dashLoading && <div className="ml-auto w-3.5 h-3.5 border border-gray-600 border-t-gray-300 rounded-full animate-spin" />}
           </button>
           <button onClick={onLogout}
             className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-red-400/70 hover:text-red-300 hover:bg-white/[0.04] transition-all">
-            <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" />
-            </svg>
+            <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75"/></svg>
             Déconnexion
           </button>
         </div>
@@ -1169,8 +1161,7 @@ export default function DashboardPage({ auth, dashData, dashLoading, onLogout, o
         {/* Mobile header */}
         <header className="md:hidden flex items-center justify-between px-5 pt-safe-top pb-4 pt-5 border-b border-white/5 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm font-bold shrink-0"
-                 style={{ backgroundColor: color }}>
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm font-bold shrink-0" style={{ backgroundColor: color }}>
               {merchant.name.charAt(0).toUpperCase()}
             </div>
             <div>
@@ -1182,15 +1173,11 @@ export default function DashboardPage({ auth, dashData, dashLoading, onLogout, o
             {dashLoading && <div className="w-4 h-4 border border-gray-700 border-t-gray-400 rounded-full animate-spin" />}
             <button onClick={onRefresh} title="Actualiser"
               className="w-9 h-9 rounded-xl bg-gray-900 hover:bg-gray-800 active:scale-90 flex items-center justify-center text-gray-500 hover:text-white transition-all">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
-              </svg>
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
             </button>
             <button onClick={onLogout} title="Déconnexion"
               className="w-9 h-9 rounded-xl bg-gray-900 hover:bg-gray-800 active:scale-90 flex items-center justify-center text-gray-500 hover:text-white transition-all">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" />
-              </svg>
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75"/></svg>
             </button>
           </div>
         </header>
@@ -1202,9 +1189,7 @@ export default function DashboardPage({ auth, dashData, dashLoading, onLogout, o
             {dashLoading && <div className="w-4 h-4 border border-gray-700 border-t-gray-400 rounded-full animate-spin" />}
             <button onClick={onRefresh}
               className="flex items-center gap-1.5 text-gray-500 hover:text-white text-xs px-3 py-1.5 rounded-lg hover:bg-white/5 transition-all">
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
-              </svg>
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
               Actualiser
             </button>
           </div>
@@ -1216,10 +1201,8 @@ export default function DashboardPage({ auth, dashData, dashLoading, onLogout, o
           {tab === 'home' && merchant.subscription_status !== 'suspended' && (
             <OnboardingChecklist merchant={merchant} stats={stats} rewards={rewards} />
           )}
-          {tab === 'home'      && <HomeTab merchant={merchant} stats={stats} onScanClick={() => setShowScan(true)} />}
-          {tab === 'clients'   && (
-            <ClientsTab customers={customers} rewards={rewards} token={auth.token} onRewardsChange={onRefresh} />
-          )}
+          {tab === 'home'      && <HomeTab merchant={merchant} stats={stats} rewards={rewards} token={auth.token} onScanClick={() => setShowScan(true)} />}
+          {tab === 'clients'   && <ClientsTab customers={customers} rewards={rewards} token={auth.token} onRewardsChange={onRefresh} />}
           {tab === 'rewards'   && <RewardsTab rewards={rewards} token={auth.token} onRewardsChange={onRefresh} />}
           {tab === 'analytics' && <AnalyticsTab token={auth.token} color={color} />}
           {tab === 'history'   && <HistoryTab token={auth.token} />}
@@ -1233,16 +1216,10 @@ export default function DashboardPage({ auth, dashData, dashLoading, onLogout, o
               const active = tab === id;
               return (
                 <button key={id} onClick={() => setTab(id)}
-                  className={`flex-1 flex flex-col items-center justify-center gap-1 py-3 transition-colors ${
-                    active ? 'text-white' : 'text-gray-600 hover:text-gray-400'
-                  }`}>
-                  <div className={`transition-transform ${active ? 'scale-110' : ''}`}>
-                    <Icon />
-                  </div>
+                  className={`flex-1 flex flex-col items-center justify-center gap-1 py-3 transition-colors ${active ? 'text-white' : 'text-gray-600 hover:text-gray-400'}`}>
+                  <div className={`transition-transform ${active ? 'scale-110' : ''}`}><Icon /></div>
                   <span className="text-[10px] font-medium">{label}</span>
-                  {active && (
-                    <span className="absolute bottom-0 w-6 h-0.5 rounded-full" style={{ background: color }} />
-                  )}
+                  {active && <span className="absolute bottom-0 w-6 h-0.5 rounded-full" style={{ background: color }} />}
                 </button>
               );
             })}
@@ -1250,13 +1227,8 @@ export default function DashboardPage({ auth, dashData, dashLoading, onLogout, o
         </nav>
       </div>
 
-      {/* Scan modal */}
       {showScan && (
-        <ScanModal
-          token={auth.token}
-          onClose={() => setShowScan(false)}
-          onSuccess={handleScanSuccess}
-        />
+        <ScanModal token={auth.token} onClose={() => setShowScan(false)} onSuccess={() => { setShowScan(false); onRefresh(); }} />
       )}
     </div>
   );

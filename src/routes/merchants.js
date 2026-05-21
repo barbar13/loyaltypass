@@ -398,7 +398,7 @@ router.get('/analytics', auth, async (req, res) => {
     const topCustomers = memberships
       .map(m => ({ first_name: m.first_name, phone: m.phone, points: Number(m.points),
                    visit_count: Number(m.visit_count), last_visit: m.last_visit }))
-      .sort((a, b) => b.points - a.points).slice(0, 10);
+      .sort((a, b) => b.points - a.points).slice(0, 50);
 
     const lostCustomers = inactiveCustomers
       .sort((a, b) => (a.last_visit || '') < (b.last_visit || '') ? -1 : 1).slice(0, 20)
@@ -437,6 +437,7 @@ router.get('/analytics', auth, async (req, res) => {
 
     // ── Rewards analysis ──────────────────────────────────────────────────
     const totalPointsDistrib   = positiveTxns.reduce((s, t) => s + t.points, 0);
+    const totalPointsRedeemed  = redemptions.reduce((s, t) => s + Math.abs(t.points), 0);
     const customersWhoRedeemed = new Set(redemptions.map(r => r.customer_id));
     const redemptionRate       = memberships.length > 0
       ? Math.round((customersWhoRedeemed.size / memberships.length) * 100) : 0;
@@ -499,6 +500,7 @@ router.get('/analytics', auth, async (req, res) => {
       this_month_customers: thisMonthCustomers,
       last_month_customers: lastMonthCustomers,
       total_points_distributed:           totalPointsDistrib,
+      total_points_redeemed:              totalPointsRedeemed,
       total_redeemed:                     redemptions.length,
       redemption_rate:                    redemptionRate,
       most_popular_reward:                mostPopularReward,

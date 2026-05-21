@@ -698,16 +698,16 @@ function CanvasChart({ type, data, options, height = 180, chartKey }) {
     const c = new Chart(ref.current, { type, data, options });
     return () => c.destroy();
   }, [chartKey]); // eslint-disable-line react-hooks/exhaustive-deps
-  return <div style={{ height }}><canvas ref={ref} /></div>;
+  return <div style={{ height, position: 'relative', minWidth: 0 }}><canvas ref={ref} /></div>;
 }
 
 function KpiCard({ label, value, sub, trend, borderColor }) {
   const up = trend > 0;
   return (
-    <div className="bg-[#0e0e18] border border-white/5 rounded-2xl p-5 relative overflow-hidden">
+    <div className="bg-[#0e0e18] border border-white/5 rounded-2xl p-3.5 md:p-5 relative overflow-hidden">
       <div className="absolute left-0 top-3 bottom-3 w-0.5 rounded-r" style={{ background: borderColor }} />
-      <p className="text-gray-500 text-xs font-medium uppercase tracking-wider mb-3 leading-tight">{label}</p>
-      <p className="text-3xl font-black text-white leading-none mb-2">{value}</p>
+      <p className="text-gray-500 text-[10px] md:text-xs font-medium uppercase tracking-wider mb-2 md:mb-3 leading-tight">{label}</p>
+      <p className="text-2xl md:text-3xl font-black text-white leading-none mb-1.5 md:mb-2">{value}</p>
       <div className="flex items-center gap-2">
         {trend != null && (
           <span className={`inline-flex items-center gap-0.5 text-xs font-bold px-1.5 py-0.5 rounded ${up ? 'bg-emerald-500/15 text-emerald-400' : 'text-red-400 bg-red-500/15'}`}>
@@ -722,7 +722,7 @@ function KpiCard({ label, value, sub, trend, borderColor }) {
 
 function ChartCard({ title, subtitle, children, action }) {
   return (
-    <div className="bg-[#0e0e18] border border-white/5 rounded-2xl p-5">
+    <div className="bg-[#0e0e18] border border-white/5 rounded-2xl p-5 overflow-hidden min-w-0">
       <div className="flex items-center justify-between mb-4">
         <div>
           <p className="text-white text-sm font-semibold">{title}</p>
@@ -780,10 +780,10 @@ function TopClientsTable({ customers }) {
     setPage(0);
   }
 
-  function ThCol({ col, children }) {
+  function ThCol({ col, children, className = '' }) {
     const active = sortCol === col;
     return (
-      <th className="text-left px-4 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:text-gray-300 transition select-none"
+      <th className={`text-left px-3 md:px-4 py-3 md:py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:text-gray-300 transition select-none ${className}`}
         onClick={() => sort(col)}>
         <span className="flex items-center gap-1">
           {children}
@@ -796,7 +796,7 @@ function TopClientsTable({ customers }) {
   return (
     <div className="bg-[#0e0e18] border border-white/5 rounded-2xl overflow-hidden">
       {/* Header */}
-      <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between gap-3 flex-wrap">
+      <div className="px-4 py-3.5 border-b border-white/5 flex items-center justify-between gap-3 flex-wrap">
         <div>
           <p className="text-white text-sm font-semibold">Top clients</p>
           <p className="text-gray-600 text-xs mt-0.5">{filtered.length} client{filtered.length > 1 ? 's' : ''}</p>
@@ -829,11 +829,11 @@ function TopClientsTable({ customers }) {
             <thead>
               <tr className="border-b border-white/5">
                 <ThCol col="first_name">Nom</ThCol>
-                <th className="text-left px-4 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Téléphone</th>
+                <th className="text-left px-3 md:px-4 py-3 md:py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Téléphone</th>
                 <ThCol col="points">Points</ThCol>
-                <ThCol col="visit_count">Visites</ThCol>
+                <ThCol col="visit_count" className="hidden md:table-cell">Visites</ThCol>
                 <ThCol col="last_visit">Dernière visite</ThCol>
-                <th className="text-left px-4 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Statut</th>
+                <th className="text-left px-3 md:px-4 py-3 md:py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Statut</th>
               </tr>
             </thead>
             <tbody>
@@ -842,21 +842,21 @@ function TopClientsTable({ customers }) {
                 const sc = statusCfg[s];
                 return (
                   <tr key={i} className="border-b border-white/[0.04] last:border-0 hover:bg-white/[0.02] transition-colors">
-                    <td className="px-4 py-3.5">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-lg bg-gray-800 flex items-center justify-center text-white text-xs font-bold shrink-0">{c.first_name.charAt(0).toUpperCase()}</div>
-                        <p className="text-white text-sm font-medium">{c.first_name}</p>
+                    <td className="px-3 md:px-4 py-3 md:py-3.5">
+                      <div className="flex items-center gap-2">
+                        <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-gray-800 flex items-center justify-center text-white text-xs font-bold shrink-0">{c.first_name.charAt(0).toUpperCase()}</div>
+                        <p className="text-white text-xs md:text-sm font-medium truncate max-w-[80px] md:max-w-none">{c.first_name}</p>
                       </div>
                     </td>
-                    <td className="px-4 py-3.5 text-gray-500 text-xs">{c.phone || '—'}</td>
-                    <td className="px-4 py-3.5">
+                    <td className="px-3 md:px-4 py-3 md:py-3.5 text-gray-500 text-xs hidden md:table-cell">{c.phone || '—'}</td>
+                    <td className="px-3 md:px-4 py-3 md:py-3.5">
                       <span className="text-white font-bold text-sm">{Number(c.points).toLocaleString('fr-FR')}</span>
                       <span className="text-gray-600 text-xs"> pts</span>
                     </td>
-                    <td className="px-4 py-3.5 text-gray-300 text-sm">{c.visit_count ?? '—'}</td>
-                    <td className="px-4 py-3.5 text-gray-500 text-xs">{fmtDate(c.last_visit)}</td>
-                    <td className="px-4 py-3.5">
-                      <span className={`inline-flex px-2 py-0.5 rounded-md text-[10px] font-bold leading-4 ${sc.cls}`}>{sc.label}</span>
+                    <td className="px-3 md:px-4 py-3 md:py-3.5 text-gray-300 text-sm hidden md:table-cell">{c.visit_count ?? '—'}</td>
+                    <td className="px-3 md:px-4 py-3 md:py-3.5 text-gray-500 text-xs">{fmtDate(c.last_visit)}</td>
+                    <td className="px-3 md:px-4 py-3 md:py-3.5">
+                      <span className={`inline-flex px-1.5 py-0.5 rounded-md text-[10px] font-bold leading-4 ${sc.cls}`}>{sc.label}</span>
                     </td>
                   </tr>
                 );
@@ -946,7 +946,7 @@ function AnalyticsTab({ token, color }) {
   const ck = String(loadKey); // chart remount key
 
   return (
-    <div className="px-5 md:px-6 pt-5 pb-8 space-y-4">
+    <div className="px-3 md:px-6 pt-5 pb-8 space-y-4 w-full overflow-x-hidden">
 
       {/* Refresh */}
       <div className="flex justify-end">
@@ -965,40 +965,40 @@ function AnalyticsTab({ token, color }) {
       </div>
 
       {/* ── Row 2: Scans/day (3/5) + Weekday (2/5) ───────────────────────────── */}
-      <div className="grid md:grid-cols-5 gap-4">
-        <div className="md:col-span-3">
+      <div className="grid md:grid-cols-5 gap-3 md:gap-4">
+        <div className="md:col-span-3 min-w-0">
           <ChartCard title="Scans par jour" subtitle="30 derniers jours">
-            <CanvasChart key={`sd-${ck}`} chartKey={ck} type="line" height={190}
+            <CanvasChart key={`sd-${ck}`} chartKey={ck} type="line" height={160}
               data={{
                 labels: data.scans_per_day.map(d => d.day.slice(5)),
                 datasets: [{ data: data.scans_per_day.map(d => d.count), borderColor: brand, backgroundColor: brand + '18', fill: true, tension: 0.4, pointRadius: 0, pointHoverRadius: 4, borderWidth: 2 }],
               }}
-              options={{ ...BASE_CHART_OPTS, scales: { ...BASE_CHART_OPTS.scales, x: { ...BASE_CHART_OPTS.scales.x, ticks: { ...BASE_CHART_OPTS.scales.x.ticks, maxTicksLimit: 8 } } } }}
+              options={{ ...BASE_CHART_OPTS, scales: { ...BASE_CHART_OPTS.scales, x: { ...BASE_CHART_OPTS.scales.x, ticks: { ...BASE_CHART_OPTS.scales.x.ticks, maxTicksLimit: 7, font: { size: 9 } } } } }}
             />
           </ChartCard>
         </div>
-        <div className="md:col-span-2">
+        <div className="md:col-span-2 min-w-0">
           <ChartCard title="Visites par jour" subtitle="30 derniers jours">
-            <CanvasChart key={`dow-${ck}`} chartKey={ck} type="bar" height={190}
+            <CanvasChart key={`dow-${ck}`} chartKey={ck} type="bar" height={160}
               data={{
                 labels: DOW,
-                datasets: [{ data: data.scans_by_weekday, backgroundColor: CHART_COLORS.amber + 'bb', hoverBackgroundColor: CHART_COLORS.amber, borderRadius: 5, borderSkipped: false }],
+                datasets: [{ data: data.scans_by_weekday, backgroundColor: CHART_COLORS.amber + 'bb', hoverBackgroundColor: CHART_COLORS.amber, borderRadius: 4, borderSkipped: false }],
               }}
-              options={BASE_CHART_OPTS}
+              options={{ ...BASE_CHART_OPTS, scales: { ...BASE_CHART_OPTS.scales, x: { ...BASE_CHART_OPTS.scales.x, ticks: { ...BASE_CHART_OPTS.scales.x.ticks, font: { size: 9 } } }, y: { ...BASE_CHART_OPTS.scales.y, ticks: { ...BASE_CHART_OPTS.scales.y.ticks, font: { size: 9 } } } } }}
             />
           </ChartCard>
         </div>
       </div>
 
       {/* ── Row 3: New clients/week + Points donut ───────────────────────────── */}
-      <div className="grid md:grid-cols-2 gap-4">
+      <div className="grid md:grid-cols-2 gap-3 md:gap-4">
         <ChartCard title="Nouveaux clients par semaine" subtitle="8 dernières semaines">
-          <CanvasChart key={`wc-${ck}`} chartKey={ck} type="bar" height={190}
+          <CanvasChart key={`wc-${ck}`} chartKey={ck} type="bar" height={160}
             data={{
               labels: weeklyNew.map(w => w.label),
-              datasets: [{ data: weeklyNew.map(w => w.count), backgroundColor: CHART_COLORS.emerald + 'bb', hoverBackgroundColor: CHART_COLORS.emerald, borderRadius: 5, borderSkipped: false }],
+              datasets: [{ data: weeklyNew.map(w => w.count), backgroundColor: CHART_COLORS.emerald + 'bb', hoverBackgroundColor: CHART_COLORS.emerald, borderRadius: 4, borderSkipped: false }],
             }}
-            options={{ ...BASE_CHART_OPTS, scales: { ...BASE_CHART_OPTS.scales, x: { ...BASE_CHART_OPTS.scales.x, ticks: { ...BASE_CHART_OPTS.scales.x.ticks, maxRotation: 30, maxTicksLimit: 8 } } } }}
+            options={{ ...BASE_CHART_OPTS, scales: { ...BASE_CHART_OPTS.scales, x: { ...BASE_CHART_OPTS.scales.x, ticks: { ...BASE_CHART_OPTS.scales.x.ticks, maxRotation: 30, maxTicksLimit: 8, font: { size: 9 } } }, y: { ...BASE_CHART_OPTS.scales.y, ticks: { ...BASE_CHART_OPTS.scales.y.ticks, font: { size: 9 } } } } }}
           />
         </ChartCard>
 
@@ -1008,9 +1008,9 @@ function AnalyticsTab({ token, color }) {
               <p className="text-gray-600 text-sm">Aucun point distribué encore</p>
             </div>
           ) : (
-            <div className="flex items-center gap-6" style={{ height: 190 }}>
-              <div className="flex-1" style={{ height: 180 }}>
-                <CanvasChart key={`donut-${ck}`} chartKey={ck} type="doughnut" height={180}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+              <div className="flex-1 min-w-0" style={{ height: 170, position: 'relative' }}>
+                <CanvasChart key={`donut-${ck}`} chartKey={ck} type="doughnut" height={170}
                   data={{
                     labels: ['Points actifs', 'Points échangés'],
                     datasets: [{ data: [ptsNet, ptsRedeemed], backgroundColor: [CHART_COLORS.indigo, CHART_COLORS.rose], borderColor: '#0e0e18', borderWidth: 3, hoverOffset: 4 }],
@@ -1018,25 +1018,25 @@ function AnalyticsTab({ token, color }) {
                   options={{
                     responsive: true, maintainAspectRatio: false,
                     plugins: {
-                      legend: { display: true, position: 'bottom', labels: { color: '#6b7280', font: { size: 11 }, padding: 12, boxWidth: 10, usePointStyle: true } },
-                      tooltip: { backgroundColor: '#1c1c28', titleColor: '#9ca3af', bodyColor: '#f9fafb', borderColor: '#2d2d3a', borderWidth: 1, padding: 10 },
+                      legend: { display: true, position: 'bottom', labels: { color: '#6b7280', font: { size: 10 }, padding: 10, boxWidth: 8, usePointStyle: true } },
+                      tooltip: { backgroundColor: '#1c1c28', titleColor: '#9ca3af', bodyColor: '#f9fafb', borderColor: '#2d2d3a', borderWidth: 1, padding: 8 },
                     },
                     cutout: '68%',
                   }}
                 />
               </div>
-              <div className="shrink-0 space-y-3">
+              <div className="shrink-0 flex flex-row sm:flex-col gap-4 sm:gap-3 justify-around sm:justify-start">
                 <div>
                   <p className="text-gray-600 text-[10px] uppercase tracking-wide">Distribués</p>
-                  <p className="text-white font-bold text-lg leading-none">{ptsDist.toLocaleString('fr-FR')}</p>
+                  <p className="text-white font-bold text-base leading-none">{ptsDist.toLocaleString('fr-FR')}</p>
                 </div>
                 <div>
                   <p className="text-gray-600 text-[10px] uppercase tracking-wide">Échangés</p>
-                  <p className="text-rose-400 font-bold text-lg leading-none">{ptsRedeemed.toLocaleString('fr-FR')}</p>
+                  <p className="text-rose-400 font-bold text-base leading-none">{ptsRedeemed.toLocaleString('fr-FR')}</p>
                 </div>
                 <div>
                   <p className="text-gray-600 text-[10px] uppercase tracking-wide">Taux</p>
-                  <p className="text-white font-bold text-lg leading-none">{ptsDist > 0 ? Math.round((ptsRedeemed / ptsDist) * 100) : 0}%</p>
+                  <p className="text-white font-bold text-base leading-none">{ptsDist > 0 ? Math.round((ptsRedeemed / ptsDist) * 100) : 0}%</p>
                 </div>
               </div>
             </div>

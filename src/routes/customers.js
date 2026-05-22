@@ -126,7 +126,7 @@ router.get('/:qr_code', async (req, res) => {
 
     const memberships = await db.all(`
       SELECT
-        mb.id, mb.points, mb.joined_at,
+        mb.id, mb.points, mb.stamps_count, mb.joined_at,
         me.id                AS merchant_id,
         me.name              AS merchant_name,
         me.color,

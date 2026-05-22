@@ -1,5 +1,20 @@
 import { useState, useEffect, useRef } from 'react';
 import { Chart, registerables } from 'chart.js';
+
+// Module-level stream cache — survives React re-mounts within the same page session.
+// Prevents redundant getUserMedia calls and avoids re-showing the permission prompt.
+let _cameraStream = null;
+async function acquireCameraStream() {
+  if (_cameraStream?.active) return _cameraStream;
+  if (!navigator.mediaDevices?.getUserMedia) return null;
+  try {
+    _cameraStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: 'environment' } },
+      audio: false,
+    });
+    return _cameraStream;
+  } catch { return null; }
+}
 import ScanModal  from './ScanModal.jsx';
 import { addReward, deleteReward, redeemReward, updateProfile, getScans, createCheckout, getAnalytics, sendNotification, getNotifications } from '../api.js';
 
@@ -1713,19 +1728,10 @@ function AnalyticsTab({ token, color }) {
 export default function DashboardPage({ auth, dashData, dashLoading, onLogout, onRefresh }) {
   const [tab, setTab]           = useState('home');
   const [showScan, setShowScan] = useState(false);
-  const cameraStreamRef         = useRef(null);
-
-  // Pre-acquire camera stream so iOS Safari only asks permission once per session.
-  // The stream stays alive in cameraStreamRef; QrReader clones it for each scan session.
+  // Pre-acquire camera stream. Uses module-level cache so re-mounts
+  // (hot reloads, tab switches) never call getUserMedia a second time.
   async function openScanner() {
-    if (!cameraStreamRef.current?.active && navigator.mediaDevices?.getUserMedia) {
-      try {
-        cameraStreamRef.current = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: { ideal: 'environment' } },
-          audio: false,
-        });
-      } catch { /* QrReader will request its own permission as fallback */ }
-    }
+    await acquireCameraStream();
     setShowScan(true);
   }
 
@@ -1870,7 +1876,7 @@ export default function DashboardPage({ auth, dashData, dashLoading, onLogout, o
           token={auth.token}
           onClose={() => { setShowScan(false); onRefresh(); }}
           onRefresh={onRefresh}
-          cameraStream={cameraStreamRef.current}
+          cameraStream={_cameraStream}
         />
       )}
     </div>

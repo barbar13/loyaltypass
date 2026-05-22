@@ -156,8 +156,8 @@
     </div>
   </div>
 
-  <!-- Home screen tutorial -->
-  <div id="homescreen-tutorial" class="w-full max-w-sm animate-fade-up delay-4">
+  <!-- (homescreen tutorial moved to /card page — shown after enrollment is fully complete) -->
+  <div id="homescreen-tutorial" class="w-full max-w-sm animate-fade-up delay-4" style="display:none">
     <div class="bg-gray-900 border border-white/5 rounded-3xl p-5">
       <div class="flex items-center gap-2.5 mb-1">
         <div class="w-8 h-8 rounded-xl bg-indigo-500/15 flex items-center justify-center shrink-0">
@@ -522,22 +522,6 @@
       hdr.appendChild(tog);
     }
     applyLang();
-  });
-
-  // ── Home screen tutorial tab switcher ────────────────────────────────────
-  function showTutorialTab(os) {
-    const ios = os === 'ios';
-    $('steps-ios').style.display     = ios ? 'block' : 'none';
-    $('steps-android').style.display = ios ? 'none'  : 'block';
-    const activeTab   = 'bg-gray-700 text-white';
-    const inactiveTab = 'text-gray-500';
-    $('tab-ios').className     = `flex-1 py-2 rounded-lg text-xs font-semibold transition-all ${ios ? activeTab : inactiveTab}`;
-    $('tab-android').className = `flex-1 py-2 rounded-lg text-xs font-semibold transition-all ${ios ? inactiveTab : activeTab}`;
-  }
-  // Auto-detect OS and show correct tab
-  document.addEventListener('DOMContentLoaded', () => {
-    const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
-    showTutorialTab(isIos ? 'ios' : 'android');
   });
 
   init();

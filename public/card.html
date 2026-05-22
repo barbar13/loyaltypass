@@ -57,6 +57,132 @@
 </head>
 <body>
 
+<!-- ── Homescreen prompt modal ─────────────────────────────────────────────── -->
+<div id="hs-overlay" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.65);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)">
+  <div style="position:absolute;bottom:0;left:0;right:0;background:#111827;border-radius:28px 28px 0 0;padding:28px 20px max(28px,env(safe-area-inset-bottom)) 20px;max-height:90dvh;overflow-y:auto">
+
+    <!-- Drag handle -->
+    <div style="width:36px;height:4px;background:#374151;border-radius:9999px;margin:0 auto 24px"></div>
+
+    <!-- Phase 1: Prompt -->
+    <div id="hs-prompt">
+      <div style="display:flex;justify-content:center;margin-bottom:16px">
+        <div style="width:60px;height:60px;border-radius:16px;background:#6366f1;display:flex;align-items:center;justify-content:center;box-shadow:0 12px 32px rgba(99,102,241,.4)">
+          <svg width="30" height="30" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/>
+          </svg>
+        </div>
+      </div>
+      <h2 style="color:#f9fafb;font-size:20px;font-weight:800;text-align:center;margin-bottom:10px;letter-spacing:-.01em">Ajoutez votre carte à l'écran d'accueil</h2>
+      <p style="color:#9ca3af;font-size:14px;text-align:center;line-height:1.65;margin-bottom:6px">Accédez à vos points en 1 tap, sans ouvrir le navigateur. Comme une vraie app de fidélité.</p>
+      <p style="color:#6366f1;font-size:12px;font-weight:700;text-align:center;margin-bottom:24px;letter-spacing:.02em">VIVEMENT RECOMMANDÉ</p>
+      <button onclick="showHsTutorial()" style="display:block;width:100%;padding:15px;border-radius:14px;background:#6366f1;color:white;font-size:15px;font-weight:700;border:none;cursor:pointer;margin-bottom:10px;transition:filter .15s" onmouseover="this.style.filter='brightness(1.1)'" onmouseout="this.style.filter=''">
+        Ajouter à mon écran d'accueil
+      </button>
+      <button onclick="dismissHs()" style="display:block;width:100%;padding:14px;border-radius:14px;background:transparent;color:#6b7280;font-size:14px;font-weight:500;border:1px solid #374151;cursor:pointer">
+        Continuer sans
+      </button>
+    </div>
+
+    <!-- Phase 2: Tutorial (hidden until "Ajouter" chosen) -->
+    <div id="hs-tutorial" style="display:none">
+      <!-- OS tab switcher -->
+      <div style="display:flex;background:#1f2937;border-radius:12px;padding:4px;gap:4px;margin-bottom:20px">
+        <button id="hs-tab-ios" onclick="hsShowOs('ios')" style="flex:1;padding:8px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:600;transition:all .15s">
+          iPhone / Safari
+        </button>
+        <button id="hs-tab-android" onclick="hsShowOs('android')" style="flex:1;padding:8px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:600;transition:all .15s">
+          Android / Chrome
+        </button>
+      </div>
+
+      <!-- iPhone steps -->
+      <div id="hs-steps-ios" class="space-y-4" style="display:none">
+        <div style="display:flex;align-items:flex-start;gap:12px">
+          <div style="width:28px;height:28px;border-radius:50%;background:#6366f1;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:700;flex-shrink:0;margin-top:2px">1</div>
+          <div>
+            <p style="color:#f9fafb;font-size:14px;font-weight:600;margin-bottom:4px">Appuyez sur le bouton Partager</p>
+            <p style="color:#6b7280;font-size:12px;line-height:1.5;margin-bottom:8px">Le carré avec une flèche vers le haut, en bas de Safari</p>
+            <div style="display:inline-flex;align-items:center;gap:8px;background:#1f2937;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:8px 12px">
+              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#818cf8" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
+              <span style="color:#9ca3af;font-size:12px">Partager</span>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px">
+          <div style="width:28px;height:28px;border-radius:50%;background:#6366f1;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:700;flex-shrink:0;margin-top:2px">2</div>
+          <div>
+            <p style="color:#f9fafb;font-size:14px;font-weight:600;margin-bottom:6px">Faites défiler et appuyez sur</p>
+            <div style="display:inline-flex;align-items:center;gap:8px;background:#1f2937;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:8px 12px">
+              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#d1d5db" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+              <span style="color:white;font-size:12px;font-weight:600">Sur l'écran d'accueil</span>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px">
+          <div style="width:28px;height:28px;border-radius:50%;background:#6366f1;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:700;flex-shrink:0;margin-top:2px">3</div>
+          <div>
+            <p style="color:#f9fafb;font-size:14px;font-weight:600">Appuyez sur <span style="color:#818cf8">"Ajouter"</span> en haut à droite</p>
+          </div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px">
+          <div style="width:28px;height:28px;border-radius:50%;background:#10b981;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+          </div>
+          <div>
+            <p style="color:#f9fafb;font-size:14px;font-weight:600">C'est fait !</p>
+            <p style="color:#6b7280;font-size:12px;margin-top:2px">L'icône Fidelyzio apparaît sur votre écran d'accueil</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Android steps -->
+      <div id="hs-steps-android" style="display:none" class="space-y-4">
+        <div style="display:flex;align-items:flex-start;gap:12px">
+          <div style="width:28px;height:28px;border-radius:50%;background:#6366f1;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:700;flex-shrink:0;margin-top:2px">1</div>
+          <div>
+            <p style="color:#f9fafb;font-size:14px;font-weight:600;margin-bottom:6px">Appuyez sur le menu Chrome</p>
+            <div style="display:inline-flex;align-items:center;gap:8px;background:#1f2937;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:8px 12px">
+              <svg width="16" height="16" fill="#9ca3af" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+              <span style="color:#9ca3af;font-size:12px">3 points en haut à droite</span>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px">
+          <div style="width:28px;height:28px;border-radius:50%;background:#6366f1;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:700;flex-shrink:0;margin-top:2px">2</div>
+          <div>
+            <p style="color:#f9fafb;font-size:14px;font-weight:600;margin-bottom:6px">Appuyez sur</p>
+            <div style="display:inline-flex;align-items:center;gap:8px;background:#1f2937;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:8px 12px">
+              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#d1d5db" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+              <span style="color:white;font-size:12px;font-weight:600">Ajouter à l'écran d'accueil</span>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px">
+          <div style="width:28px;height:28px;border-radius:50%;background:#6366f1;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:700;flex-shrink:0;margin-top:2px">3</div>
+          <div>
+            <p style="color:#f9fafb;font-size:14px;font-weight:600">Appuyez sur <span style="color:#818cf8">"Ajouter"</span> pour confirmer</p>
+          </div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px">
+          <div style="width:28px;height:28px;border-radius:50%;background:#10b981;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+          </div>
+          <div>
+            <p style="color:#f9fafb;font-size:14px;font-weight:600">C'est fait !</p>
+            <p style="color:#6b7280;font-size:12px;margin-top:2px">L'icône Fidelyzio apparaît sur votre écran d'accueil</p>
+          </div>
+        </div>
+      </div>
+
+      <button onclick="dismissHs()" style="display:block;width:100%;padding:14px;border-radius:14px;background:#6366f1;color:white;font-size:14px;font-weight:700;border:none;cursor:pointer;margin-top:20px">
+        J'ai ajouté ma carte →
+      </button>
+    </div>
+
+  </div>
+</div>
+
 <!-- Pull-to-refresh bar -->
 <div id="ptr-bar">
   <svg id="ptr-spinner" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2.5">
@@ -78,38 +204,7 @@
 <div id="s-card" style="display:none" class="min-h-dvh flex flex-col px-5 pt-safe pb-safe">
   <div class="max-w-sm mx-auto w-full">
 
-    <!-- Add-to-home-screen banner (dismissible) -->
-    <div id="aths-banner" style="display:none" class="mt-4 mb-1 rounded-2xl border border-indigo-500/20 bg-indigo-500/8 px-4 py-4 animate-fade-up">
-      <div class="flex items-start gap-3">
-        <div class="w-9 h-9 rounded-xl bg-indigo-500/15 flex items-center justify-center shrink-0 mt-0.5">
-          <svg class="w-5 h-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/>
-          </svg>
-        </div>
-        <div class="flex-1 min-w-0">
-          <p class="text-white font-semibold text-sm">Accédez à votre carte en un tap</p>
-          <p id="aths-ios" style="display:none" class="text-gray-400 text-xs mt-1 leading-relaxed">
-            iPhone : appuyez sur
-            <svg class="inline w-3.5 h-3.5 text-indigo-400 mb-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
-            puis <strong class="text-white">"Sur l'écran d'accueil"</strong>
-          </p>
-          <p id="aths-android" style="display:none" class="text-gray-400 text-xs mt-1 leading-relaxed">
-            Android : menu
-            <svg class="inline w-3.5 h-3.5 text-gray-400 mb-0.5" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
-            puis <strong class="text-white">"Ajouter à l'écran d'accueil"</strong>
-          </p>
-          <p id="aths-other" style="display:none" class="text-gray-400 text-xs mt-1 leading-relaxed">
-            Ajoutez cette page à vos favoris pour y revenir facilement.
-          </p>
-        </div>
-        <button id="aths-close" onclick="dismissBanner()"
-          class="text-gray-600 hover:text-gray-400 active:scale-90 transition p-1 -mt-1 -mr-1 shrink-0" aria-label="Fermer">
-          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
-          </svg>
-        </button>
-      </div>
-    </div>
+    <!-- (homescreen prompt modal is rendered at root level below) -->
 
     <!-- Header -->
     <div class="text-center py-6 animate-fade-up">
@@ -398,7 +493,7 @@
       renderRedemptions(redemptions);
       markUpdated();
       show('s-card');
-      showBanner();
+      maybeShowHsPrompt();
     } catch (e) {
       $('error-msg').textContent = e.message;
       show('s-error');
@@ -482,25 +577,44 @@
     ptrLabel.textContent   = 'Tirez pour actualiser';
   }, { passive: true });
 
-  // ── Add-to-home-screen banner ─────────────────────────────────────────────
-  function showBanner() {
+  // ── Homescreen prompt modal ───────────────────────────────────────────────
+  const HS_KEY = 'fidelyzio_homescreen_prompted';
+
+  function maybeShowHsPrompt() {
     const isStandalone = window.navigator.standalone === true ||
       window.matchMedia('(display-mode: standalone)').matches;
     if (isStandalone) return;
-    try { if (localStorage.getItem('fidelyzio_aths_' + qrCode)) return; } catch (_) {}
-
-    const isIos     = /iphone|ipad|ipod/i.test(navigator.userAgent);
-    const isAndroid = /android/i.test(navigator.userAgent);
-    $('aths-ios').style.display     = isIos     ? 'block' : 'none';
-    $('aths-android').style.display = isAndroid ? 'block' : 'none';
-    $('aths-other').style.display   = (!isIos && !isAndroid) ? 'block' : 'none';
-    $('aths-banner').style.display  = 'block';
+    try { if (localStorage.getItem(HS_KEY)) return; } catch (_) {}
+    $('hs-overlay').style.display = 'flex';
+    $('hs-overlay').style.alignItems = 'flex-end';
   }
 
-  function dismissBanner() {
-    try { localStorage.setItem('fidelyzio_aths_' + qrCode, '1'); } catch (_) {}
-    $('aths-banner').style.display = 'none';
+  function dismissHs() {
+    try { localStorage.setItem(HS_KEY, '1'); } catch (_) {}
+    $('hs-overlay').style.display = 'none';
   }
+
+  function showHsTutorial() {
+    $('hs-prompt').style.display = 'none';
+    $('hs-tutorial').style.display = 'block';
+    const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    hsShowOs(isIos ? 'ios' : 'android');
+  }
+
+  function hsShowOs(os) {
+    const ios = os === 'ios';
+    $('hs-steps-ios').style.display     = ios ? 'block' : 'none';
+    $('hs-steps-android').style.display = ios ? 'none'  : 'block';
+    const on  = 'background:#374151;color:#f9fafb';
+    const off = 'background:transparent;color:#6b7280';
+    $('hs-tab-ios').style.cssText     = `flex:1;padding:8px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:600;transition:all .15s;${ios ? on : off}`;
+    $('hs-tab-android').style.cssText = `flex:1;padding:8px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:600;transition:all .15s;${ios ? off : on}`;
+  }
+
+  // Tap outside modal panel to dismiss
+  $('hs-overlay').addEventListener('click', function(e) {
+    if (e.target === this) dismissHs();
+  });
 
   // ── Language toggle ───────────────────────────────────────────────────────
   let lang = (() => { try { return localStorage.getItem('fidelyzio_lang') || 'fr'; } catch { return 'fr'; } })();

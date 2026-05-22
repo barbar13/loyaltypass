@@ -1,57 +1,79 @@
 import { useEffect, useRef, useState } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
 
+// Html5Qrcode scanner states
+const STATE_SCANNING = 1;
+const STATE_PAUSED   = 2;
+
 export default function QrReader({ active, onScan }) {
   const scannerRef = useRef(null);
+  const onScanRef  = useRef(onScan);
+  const activeRef  = useRef(active);
   const [camError, setCamError] = useState(null);
 
-  useEffect(() => {
-    if (!active) {
-      if (scannerRef.current?.isScanning) {
-        scannerRef.current.stop().catch(() => {});
-      }
-      return;
-    }
+  onScanRef.current  = onScan;
+  activeRef.current  = active;
 
+  // Start camera ONCE on mount, stop only on unmount.
+  // This keeps the MediaStream alive the whole time the modal is open,
+  // which prevents iOS Safari from re-requesting camera permission.
+  useEffect(() => {
     let cancelled = false;
     setCamError(null);
 
-    // Small delay so the DOM element is ready (especially after re-mount)
     const timer = setTimeout(async () => {
       if (cancelled) return;
 
       const scanner = new Html5Qrcode('qr-viewport');
       scannerRef.current = scanner;
 
-      const config = { fps: 12, qrbox: { width: 220, height: 220 }, aspectRatio: 1 };
+      const config = { fps: 15, qrbox: { width: 220, height: 220 }, aspectRatio: 1 };
+
       const onSuccess = (text) => {
-        if (!scanner.isScanning) return;
-        scanner.stop().catch(() => {});
-        onScan(text);
+        // Pause QR scanning but keep camera feed running
+        try { scanner.pause(false); } catch {}
+        onScanRef.current(text);
       };
-      const onErr = () => {};
 
       try {
-        // Prefer rear camera (environment) — required for iPhone back cam
-        await scanner.start({ facingMode: 'environment' }, config, onSuccess, onErr);
+        await scanner.start({ facingMode: 'environment' }, config, onSuccess, () => {});
       } catch {
-        // Fallback: let the browser pick any camera
         try {
-          await scanner.start({ facingMode: 'user' }, config, onSuccess, onErr);
-        } catch (err) {
+          await scanner.start({ facingMode: 'user' }, config, onSuccess, () => {});
+        } catch {
           if (!cancelled) setCamError('Impossible d\'accéder à la caméra. Vérifiez les permissions dans les réglages.');
+          return;
         }
       }
-    }, 100);
+
+      // Apply initial active state in case it changed while camera was starting
+      if (!activeRef.current) {
+        try { scanner.pause(false); } catch {}
+      }
+    }, 150);
 
     return () => {
       cancelled = true;
       clearTimeout(timer);
-      if (scannerRef.current?.isScanning) {
-        scannerRef.current.stop().catch(() => {});
-      }
+      const s = scannerRef.current;
+      scannerRef.current = null;
+      if (s) s.stop().catch(() => {});
     };
-  }, [active, onScan]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Resume or pause when active prop changes (never stop the stream)
+  useEffect(() => {
+    const s = scannerRef.current;
+    if (!s) return;
+    try {
+      const state = s.getState?.();
+      if (active && state === STATE_PAUSED) {
+        s.resume();
+      } else if (!active && state === STATE_SCANNING) {
+        s.pause(false); // false = keep video tracks running
+      }
+    } catch {}
+  }, [active]);
 
   return (
     <div className="relative w-full aspect-square max-w-sm mx-auto">
@@ -62,7 +84,6 @@ export default function QrReader({ active, onScan }) {
       {!camError && active && (
         <div className="absolute inset-0 pointer-events-none" aria-hidden>
           <div className="absolute inset-8">
-            {/* Corners */}
             {[
               'top-0 left-0 border-t-2 border-l-2 rounded-tl-md',
               'top-0 right-0 border-t-2 border-r-2 rounded-tr-md',
@@ -84,6 +105,7 @@ export default function QrReader({ active, onScan }) {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3l18 18" />
           </svg>
           <p className="text-gray-400 text-sm">{camError}</p>
+          <p className="text-gray-600 text-xs mt-2">Autorisez l'accès dans Réglages → Safari → Caméra</p>
         </div>
       )}
     </div>

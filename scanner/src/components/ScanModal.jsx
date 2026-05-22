@@ -11,23 +11,33 @@ const IcoGift = ({ s = 24 }) => (
 );
 
 // phase: 'scanning' | 'loading' | 'preview' | 'confirming'
-//        | 'success'   (no reward, auto-closes 2.5s)
-//        | 'reward'    (reward available, persistent — merchant must act)
-//        | 'redeeming' (POST /api/scan/redeem in progress)
-//        | 'redeemed'  (redemption done, auto-closes 3s)
-//        | 'fraud' | 'error'
-export default function ScanModal({ token, onClose, onSuccess }) {
-  const [phase, setPhase]             = useState('scanning');
-  const [previewData, setPreview]     = useState(null);
-  const [points, setPoints]           = useState(10);
-  const [result, setResult]           = useState(null);
+//        | 'success'   (auto-resets to scanning after 1.5s)
+//        | 'reward'    (reward available — merchant must act)
+//        | 'redeeming' | 'redeemed' (auto-resets after 2.5s)
+//        | 'fraud' (auto-resets after 2s) | 'error'
+export default function ScanModal({ token, onClose, onRefresh }) {
+  const [phase,        setPhase]        = useState('scanning');
+  const [previewData,  setPreview]      = useState(null);
+  const [points,       setPoints]       = useState(10);
+  const [result,       setResult]       = useState(null);
   const [redeemResult, setRedeemResult] = useState(null);
-  const [errMsg, setErrMsg]           = useState('');
+  const [errMsg,       setErrMsg]       = useState('');
 
   const scannedQrRef = useRef('');
 
+  // Camera is active only when we're waiting for a scan
+  const camActive = phase === 'scanning';
+
+  function reset() {
+    scannedQrRef.current = '';
+    setPhase('scanning');
+    setPreview(null);
+    setResult(null);
+    setRedeemResult(null);
+    setErrMsg('');
+  }
+
   const handleScan = useCallback(async (qrCode) => {
-    console.log('[ScanModal] QR scanned:', qrCode);
     scannedQrRef.current = qrCode;
     setPhase('loading');
     try {
@@ -35,6 +45,8 @@ export default function ScanModal({ token, onClose, onSuccess }) {
       if (data.already_scanned_today) {
         setPreview(data);
         setPhase('fraud');
+        // Auto-reset after 2.5s so merchant can scan next customer immediately
+        setTimeout(() => reset(), 2500);
       } else {
         setPreview(data);
         setPoints(10);
@@ -44,7 +56,7 @@ export default function ScanModal({ token, onClose, onSuccess }) {
       setErrMsg(err.message);
       setPhase('error');
     }
-  }, [token]);
+  }, [token]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleConfirm() {
     const qrCode = scannedQrRef.current;
@@ -54,10 +66,11 @@ export default function ScanModal({ token, onClose, onSuccess }) {
       setResult(data);
       const unlocked = (data.rewards || []).filter(r => data.membership.points >= r.points_required);
       if (unlocked.length > 0) {
-        setPhase('reward');          // persistent — merchant decides whether to redeem
+        setPhase('reward');
       } else {
         setPhase('success');
-        setTimeout(() => onSuccess(), 2500);
+        // Auto-reset to scanning after brief success flash
+        setTimeout(() => { onRefresh?.(); reset(); }, 1500);
       }
     } catch (err) {
       setErrMsg(err.message);
@@ -72,25 +85,16 @@ export default function ScanModal({ token, onClose, onSuccess }) {
       const data = await redeemReward(result.membership.id, reward.id, token);
       setRedeemResult(data);
       setPhase('redeemed');
-      setTimeout(() => onSuccess(), 3000);
+      // Auto-reset to scanning after showing confirmation
+      setTimeout(() => { onRefresh?.(); reset(); }, 2500);
     } catch (err) {
       setErrMsg(err.message);
-      setPhase('reward');      // back to reward modal, error shown inline
+      setPhase('reward');
     }
   }
 
-  function reset() {
-    scannedQrRef.current = '';
-    setPhase('scanning');
-    setPreview(null);
-    setResult(null);
-    setRedeemResult(null);
-    setErrMsg('');
-  }
-
-  const isScanning = phase === 'scanning';
-  const showPanel  = phase === 'preview' || phase === 'confirming';
-  const inReward   = phase === 'reward'  || phase === 'redeeming';
+  const inReward  = phase === 'reward' || phase === 'redeeming';
+  const showPanel = phase === 'preview' || phase === 'confirming';
 
   return (
     <div className="fixed inset-0 z-50 bg-[#0f0f14] flex flex-col">
@@ -100,7 +104,8 @@ export default function ScanModal({ token, onClose, onSuccess }) {
         <h2 className="text-white font-semibold text-base">
           {inReward ? 'Récompense client' : 'Scanner un client'}
         </h2>
-        <button onClick={inReward ? () => onSuccess() : onClose}
+        <button
+          onClick={onClose}
           className="w-9 h-9 rounded-xl bg-gray-800 hover:bg-gray-700 active:scale-90 flex items-center justify-center transition-all text-gray-400 hover:text-white">
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
@@ -108,21 +113,95 @@ export default function ScanModal({ token, onClose, onSuccess }) {
         </button>
       </header>
 
-      {/* ── REWARD MODAL (persistent, replaces camera area) ─────────────────── */}
+      {/* ── Camera area — ALWAYS MOUNTED (keeps MediaStream alive on iOS) ───── */}
+      <div className={`flex-1 flex flex-col px-5 ${(inReward || phase === 'redeemed') ? 'hidden' : ''}`}>
+        <div className="relative">
+          {/* QrReader is always rendered so the camera stream is never killed */}
+          <QrReader active={camActive} onScan={handleScan} />
+
+          {/* Loading overlay on camera */}
+          {phase === 'loading' && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/60 rounded-2xl backdrop-blur-sm">
+              <div className="flex flex-col items-center gap-3">
+                <div className="w-10 h-10 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
+                <span className="text-gray-300 text-sm">Recherche du client…</span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {phase === 'scanning' && (
+          <p className="text-center text-gray-500 text-sm mt-4 animate-fade-in">
+            Pointez vers le QR code du client
+          </p>
+        )}
+
+        {/* Success (no reward) — brief flash before auto-reset */}
+        {phase === 'success' && result && (
+          <div className="flex-1 flex flex-col items-center justify-center mt-6 animate-scale-in gap-4">
+            <div className="w-20 h-20 rounded-full bg-emerald-500/15 flex items-center justify-center">
+              <svg className="w-10 h-10 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+              </svg>
+            </div>
+            <div className="text-center">
+              <p className="text-3xl font-black text-white">+{result.points_added} pts</p>
+              <p className="text-gray-400 mt-1 text-sm">
+                {result.customer.first_name} · Total{' '}
+                <span className="text-white font-semibold">{result.membership.points} pts</span>
+              </p>
+            </div>
+            <p className="text-gray-600 text-xs">Scanner suivant…</p>
+          </div>
+        )}
+
+        {/* Anti-fraud — auto-resets */}
+        {phase === 'fraud' && previewData && (
+          <div className="flex-1 flex flex-col items-center justify-center mt-6 animate-fade-in gap-5">
+            <div className="w-20 h-20 rounded-full bg-amber-500/15 flex items-center justify-center">
+              <svg className="w-10 h-10 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+              </svg>
+            </div>
+            <div className="text-center">
+              <p className="text-amber-400 font-semibold text-base">Déjà scanné aujourd'hui</p>
+              <p className="text-gray-400 text-sm mt-1">
+                {previewData.customer.first_name} a déjà reçu des points chez vous aujourd'hui.
+              </p>
+              <p className="text-gray-600 text-xs mt-2">Points actuels : {previewData.membership.points} pts</p>
+            </div>
+            <p className="text-gray-600 text-xs">Scanner suivant…</p>
+          </div>
+        )}
+
+        {/* Error — manual retry */}
+        {phase === 'error' && (
+          <div className="flex-1 flex flex-col items-center justify-center mt-6 animate-fade-in gap-5">
+            <div className="w-20 h-20 rounded-full bg-red-500/15 flex items-center justify-center">
+              <svg className="w-10 h-10 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+              </svg>
+            </div>
+            <p className="text-red-400 text-center font-medium px-4">{errMsg}</p>
+            <button onClick={reset}
+              className="px-6 py-3 bg-gray-800 hover:bg-gray-700 active:scale-95 rounded-2xl text-white text-sm font-semibold transition-all">
+              Réessayer
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* ── REWARD MODAL — full overlay while camera runs in background ─────── */}
       {inReward && result && (() => {
         const unlocked = (result.rewards || []).filter(r => result.membership.points >= r.points_required);
         return (
           <div className="flex-1 flex flex-col px-5 pb-safe-bottom pb-6 overflow-y-auto animate-fade-in">
-
-            {/* Customer + points summary */}
             <div className="text-center pb-5 border-b border-white/5 mb-5">
               <div className="flex justify-center mb-3 text-amber-400"><IcoGift s={48} /></div>
               <h2 className="text-white font-black text-2xl leading-tight">Récompense disponible !</h2>
               <p className="text-gray-400 text-sm mt-2">
                 {result.customer.first_name}
-                {result.customer.phone
-                  ? <span className="text-gray-600"> · {result.customer.phone}</span>
-                  : null}
+                {result.customer.phone ? <span className="text-gray-600"> · {result.customer.phone}</span> : null}
               </p>
               <p className="text-white font-semibold text-lg mt-1">
                 {result.membership.points} pts
@@ -130,7 +209,6 @@ export default function ScanModal({ token, onClose, onSuccess }) {
               </p>
             </div>
 
-            {/* Inline error if redeem failed */}
             {errMsg && (
               <div className="bg-red-500/10 border border-red-500/25 rounded-2xl px-4 py-3 mb-4 flex items-center gap-2 text-red-400 text-sm">
                 <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -140,11 +218,9 @@ export default function ScanModal({ token, onClose, onSuccess }) {
               </div>
             )}
 
-            {/* One card per unlocked reward */}
             <div className="space-y-3 flex-1">
               {unlocked.map(r => (
-                <div key={r.id}
-                  className="bg-gray-900 border border-amber-400/25 rounded-2xl overflow-hidden">
+                <div key={r.id} className="bg-gray-900 border border-amber-400/25 rounded-2xl overflow-hidden">
                   <div className="px-4 pt-4 pb-3 flex items-center gap-3">
                     <div className="w-11 h-11 rounded-xl bg-amber-500/15 border border-amber-400/25 flex items-center justify-center text-amber-400 shrink-0">
                       <IcoGift s={22} />
@@ -155,31 +231,19 @@ export default function ScanModal({ token, onClose, onSuccess }) {
                     </div>
                   </div>
                   <div className="px-4 pb-4">
-                    <button
-                      onClick={() => handleRedeem(r)}
-                      disabled={phase === 'redeeming'}
+                    <button onClick={() => handleRedeem(r)} disabled={phase === 'redeeming'}
                       className="w-full py-3.5 rounded-xl bg-amber-500 hover:bg-amber-400 active:scale-[0.98] text-white font-bold text-sm transition-all disabled:opacity-60 flex items-center justify-center gap-2 shadow-lg shadow-amber-500/25">
                       {phase === 'redeeming' ? (
-                        <>
-                          <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
-                          </svg>
-                          Offre en cours…
-                        </>
-                      ) : (
-                        'Offrir cette récompense →'
-                      )}
+                        <><svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>Offre en cours…</>
+                      ) : 'Offrir cette récompense →'}
                     </button>
                   </div>
                 </div>
               ))}
             </div>
 
-            {/* Ignore */}
-            <button
-              onClick={() => onSuccess()}
-              disabled={phase === 'redeeming'}
+            {/* Skip reward — back to scanning */}
+            <button onClick={() => { onRefresh?.(); reset(); }} disabled={phase === 'redeeming'}
               className="w-full py-4 rounded-2xl bg-gray-800 hover:bg-gray-700 active:scale-95 text-gray-400 hover:text-gray-200 font-semibold text-sm mt-4 transition-all disabled:opacity-40">
               Ignorer pour cette fois
             </button>
@@ -187,7 +251,7 @@ export default function ScanModal({ token, onClose, onSuccess }) {
         );
       })()}
 
-      {/* ── REDEEMED ─────────────────────────────────────────────────────────── */}
+      {/* ── REDEEMED — brief confirmation, then auto-reset ──────────────────── */}
       {phase === 'redeemed' && redeemResult && (
         <div className="flex-1 flex flex-col items-center justify-center px-5 animate-scale-in gap-5">
           <div className="w-24 h-24 rounded-full bg-amber-500/15 flex items-center justify-center text-amber-400">
@@ -204,91 +268,11 @@ export default function ScanModal({ token, onClose, onSuccess }) {
           <div className="bg-red-500/10 border border-red-500/20 rounded-2xl px-5 py-3 text-center">
             <p className="text-red-400 font-semibold">−{redeemResult.points_deducted} pts déduits</p>
           </div>
-          <p className="text-gray-700 text-xs">Fermeture automatique…</p>
+          <p className="text-gray-600 text-xs">Scanner suivant…</p>
         </div>
       )}
 
-      {/* ── CAMERA + OTHER STATES ────────────────────────────────────────────── */}
-      {!inReward && phase !== 'redeemed' && (
-        <div className="flex-1 flex flex-col px-5">
-          <div className="relative">
-            <QrReader active={isScanning} onScan={handleScan} />
-            {phase === 'loading' && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black/60 rounded-2xl backdrop-blur-sm">
-                <div className="flex flex-col items-center gap-3">
-                  <div className="w-10 h-10 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
-                  <span className="text-gray-300 text-sm">Recherche du client…</span>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {isScanning && (
-            <p className="text-center text-gray-500 text-sm mt-4 animate-fade-in">
-              Pointez vers le QR code du client
-            </p>
-          )}
-
-          {/* Success (no reward) */}
-          {phase === 'success' && result && (
-            <div className="flex-1 flex flex-col items-center justify-center mt-6 animate-scale-in gap-4">
-              <div className="w-20 h-20 rounded-full bg-emerald-500/15 flex items-center justify-center">
-                <svg className="w-10 h-10 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                </svg>
-              </div>
-              <div className="text-center">
-                <p className="text-3xl font-black text-white">+{result.points_added} pts</p>
-                <p className="text-gray-400 mt-1 text-sm">
-                  {result.customer.first_name} · Total{' '}
-                  <span className="text-white font-semibold">{result.membership.points} pts</span>
-                </p>
-              </div>
-              <p className="text-gray-700 text-xs">Fermeture automatique…</p>
-            </div>
-          )}
-
-          {/* Anti-fraud */}
-          {phase === 'fraud' && previewData && (
-            <div className="flex-1 flex flex-col items-center justify-center mt-6 animate-fade-in gap-5">
-              <div className="w-20 h-20 rounded-full bg-amber-500/15 flex items-center justify-center">
-                <svg className="w-10 h-10 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
-                </svg>
-              </div>
-              <div className="text-center">
-                <p className="text-amber-400 font-semibold text-base">Déjà scanné aujourd'hui</p>
-                <p className="text-gray-400 text-sm mt-1">
-                  {previewData.customer.first_name} a déjà reçu des points chez vous aujourd'hui.
-                </p>
-                <p className="text-gray-600 text-xs mt-2">Points actuels : {previewData.membership.points} pts</p>
-              </div>
-              <button onClick={reset}
-                className="px-6 py-3 bg-gray-800 hover:bg-gray-700 active:scale-95 rounded-2xl text-white text-sm font-semibold transition-all">
-                Scanner un autre client
-              </button>
-            </div>
-          )}
-
-          {/* Error */}
-          {phase === 'error' && (
-            <div className="flex-1 flex flex-col items-center justify-center mt-6 animate-fade-in gap-5">
-              <div className="w-20 h-20 rounded-full bg-red-500/15 flex items-center justify-center">
-                <svg className="w-10 h-10 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
-                </svg>
-              </div>
-              <p className="text-red-400 text-center font-medium px-4">{errMsg}</p>
-              <button onClick={reset}
-                className="px-6 py-3 bg-gray-800 hover:bg-gray-700 active:scale-95 rounded-2xl text-white text-sm font-semibold transition-all">
-                Réessayer
-              </button>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Customer info panel (slide up from bottom) */}
+      {/* Customer panel (slide-up bottom sheet) */}
       {showPanel && previewData && (
         <>
           <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-10" onClick={reset} />
@@ -305,9 +289,7 @@ export default function ScanModal({ token, onClose, onSuccess }) {
                 <div className="flex-1 min-w-0">
                   <p className="text-white font-semibold">
                     {previewData.customer.first_name}
-                    {previewData.customer.phone
-                      ? <span className="text-gray-500 font-normal"> · {previewData.customer.phone}</span>
-                      : null}
+                    {previewData.customer.phone ? <span className="text-gray-500 font-normal"> · {previewData.customer.phone}</span> : null}
                   </p>
                   {previewData.is_new_customer && (
                     <p className="text-brand-500 text-xs font-medium">Nouveau client</p>

@@ -170,10 +170,12 @@ router.get('/dashboard', auth, async (req, res) => {
     const [customers, rewards] = await Promise.all([
       db.all(`
         SELECT
-          c.id, c.first_name, c.phone, c.qr_code,
+          c.id, c.first_name, c.phone, c.email, c.qr_code,
           mb.id AS membership_id, mb.points, mb.joined_at,
           (SELECT MAX(t.created_at) FROM transactions t
-           WHERE t.merchant_id = $1 AND t.customer_id = c.id) AS last_visit
+           WHERE t.merchant_id = $1 AND t.customer_id = c.id AND t.points > 0) AS last_visit,
+          (SELECT COUNT(*) FROM transactions t
+           WHERE t.merchant_id = $1 AND t.customer_id = c.id AND t.points > 0) AS visit_count
         FROM memberships mb
         JOIN customers c ON c.id = mb.customer_id
         WHERE mb.merchant_id = $2

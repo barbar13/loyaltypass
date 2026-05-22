@@ -72,13 +72,18 @@ function fmtDate(iso) {
 }
 
 function exportCSV(customers) {
-  const headers = ['Prénom', 'Téléphone', 'Points', 'Visites', 'Dernière visite'];
+  const headers = ['Prénom', 'Téléphone', 'Email', 'Points', 'Nombre de visites', 'Dernière visite', 'Date inscription'];
   const rows = customers.map(c => [
-    c.first_name, c.phone || '', c.points, c.visit_count || '',
-    c.last_visit ? new Date(c.last_visit).toLocaleDateString('fr-FR') : '',
+    c.first_name,
+    c.phone      || '',
+    c.email      || '',
+    c.points     ?? '',
+    c.visit_count != null ? Number(c.visit_count) : '',
+    c.last_visit  ? new Date(c.last_visit).toLocaleDateString('fr-FR')  : '',
+    c.joined_at   ? new Date(c.joined_at).toLocaleDateString('fr-FR')   : '',
   ]);
   const csv = [headers, ...rows]
-    .map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(','))
+    .map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(';'))
     .join('\n');
   const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' });
   const url = URL.createObjectURL(blob);
@@ -1284,12 +1289,12 @@ export default function DashboardPage({ auth, dashData, dashLoading, onLogout, o
   const rewards   = dashData?.rewards   ?? [];
 
   const TABS = [
-    { id: 'home',      label: 'Accueil',    Icon: IconHome     },
-    { id: 'clients',   label: 'Clients',    Icon: IconUsers    },
-    { id: 'rewards',   label: 'Primes',     Icon: IconGift     },
-    { id: 'analytics', label: 'Stats',      Icon: IconChart    },
-    { id: 'history',   label: 'Scans',      Icon: IconHistory  },
-    { id: 'settings',  label: 'Compte',     Icon: IconSettings },
+    { id: 'home',      label: 'Accueil',      short: 'Accueil',  Icon: IconHome     },
+    { id: 'clients',   label: 'Clients',      short: 'Clients',  Icon: IconUsers    },
+    { id: 'rewards',   label: 'Récompenses',  short: 'Récomp.',  Icon: IconGift     },
+    { id: 'analytics', label: 'Statistiques', short: 'Stats',    Icon: IconChart    },
+    { id: 'history',   label: 'Historique',   short: 'Scans',    Icon: IconHistory  },
+    { id: 'settings',  label: 'Paramètres',   short: 'Compte',   Icon: IconSettings },
   ];
 
   const TAB_TITLES = {
@@ -1398,13 +1403,13 @@ export default function DashboardPage({ auth, dashData, dashLoading, onLogout, o
         {/* Mobile bottom tab bar */}
         <nav className="md:hidden fixed bottom-0 inset-x-0 bg-[#0f0f14]/95 backdrop-blur border-t border-white/5 pb-safe-bottom z-30">
           <div className="flex">
-            {TABS.map(({ id, label, Icon }) => {
+            {TABS.map(({ id, label, short, Icon }) => {
               const active = tab === id;
               return (
                 <button key={id} onClick={() => setTab(id)}
                   className={`flex-1 flex flex-col items-center justify-center gap-1 py-3 transition-colors ${active ? 'text-white' : 'text-gray-600 hover:text-gray-400'}`}>
                   <div className={`transition-transform ${active ? 'scale-110' : ''}`}><Icon /></div>
-                  <span className="text-[10px] font-medium">{label}</span>
+                  <span className="text-[10px] font-medium whitespace-nowrap">{short || label}</span>
                   {active && <span className="absolute bottom-0 w-6 h-0.5 rounded-full" style={{ background: color }} />}
                 </button>
               );
@@ -1414,7 +1419,7 @@ export default function DashboardPage({ auth, dashData, dashLoading, onLogout, o
       </div>
 
       {showScan && (
-        <ScanModal token={auth.token} onClose={() => setShowScan(false)} onSuccess={() => { setShowScan(false); onRefresh(); }} />
+        <ScanModal token={auth.token} onClose={() => { setShowScan(false); onRefresh(); }} onRefresh={onRefresh} />
       )}
     </div>
   );

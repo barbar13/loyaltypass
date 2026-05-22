@@ -711,15 +711,22 @@ const CHART_COLORS = {
   blue: '#3b82f6', violet: '#8b5cf6',
 };
 
+const TOOLTIP_OPTS = {
+  enabled: true,
+  backgroundColor: '#1c1c28', titleColor: '#9ca3af', bodyColor: '#f9fafb',
+  borderColor: '#2d2d3a', borderWidth: 1, padding: 12, displayColors: false,
+  titleFont: { size: 13 }, bodyFont: { size: 14 },
+  cornerRadius: 10,
+};
+
 const BASE_CHART_OPTS = {
   responsive: true, maintainAspectRatio: false,
+  // intersect:false makes tooltips appear on touch anywhere on the chart column,
+  // not only when the finger is exactly on the data point
+  interaction: { mode: 'index', intersect: false, axis: 'x' },
   plugins: {
     legend: { display: false },
-    tooltip: {
-      backgroundColor: '#1c1c28', titleColor: '#9ca3af', bodyColor: '#f9fafb',
-      borderColor: '#2d2d3a', borderWidth: 1, padding: 12, displayColors: false,
-      titleFont: { size: 13 }, bodyFont: { size: 14 },
-    },
+    tooltip: TOOLTIP_OPTS,
   },
   scales: {
     x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#6b7280', font: { size: 13 }, maxRotation: 0 }, border: { display: false } },
@@ -1226,9 +1233,10 @@ function AnalyticsTab({ token, color }) {
                   }}
                   options={{
                     responsive: true, maintainAspectRatio: false,
+                    interaction: { mode: 'nearest', intersect: true },
                     plugins: {
                       legend: { display: true, position: 'bottom', labels: { color: '#6b7280', font: { size: 13 }, padding: 12, boxWidth: 10, usePointStyle: true } },
-                      tooltip: { backgroundColor: '#1c1c28', titleColor: '#9ca3af', bodyColor: '#f9fafb', borderColor: '#2d2d3a', borderWidth: 1, padding: 12, titleFont: { size: 13 }, bodyFont: { size: 14 } },
+                      tooltip: { ...TOOLTIP_OPTS, displayColors: true },
                     },
                     cutout: '68%',
                   }}

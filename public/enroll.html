@@ -7,6 +7,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#0f0f14">
   <title>Fidelyzio – Inscription</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="apple-touch-icon" href="/favicon.svg">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -151,6 +153,126 @@
     <div class="bg-gray-900 border border-white/5 rounded-3xl p-5">
       <p class="text-gray-500 text-xs font-semibold uppercase tracking-widest mb-3">Récompenses disponibles</p>
       <div id="rewards-list" class="space-y-2"></div>
+    </div>
+  </div>
+
+  <!-- Home screen tutorial -->
+  <div id="homescreen-tutorial" class="w-full max-w-sm animate-fade-up delay-4">
+    <div class="bg-gray-900 border border-white/5 rounded-3xl p-5">
+      <div class="flex items-center gap-2.5 mb-1">
+        <div class="w-8 h-8 rounded-xl bg-indigo-500/15 flex items-center justify-center shrink-0">
+          <svg class="w-4 h-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/>
+          </svg>
+        </div>
+        <p class="text-white font-semibold text-sm">Accédez en 1 tap</p>
+      </div>
+      <p class="text-gray-500 text-xs mb-4 leading-relaxed">Ajoutez votre carte à l'écran d'accueil pour l'avoir toujours sous la main, comme une vraie app.</p>
+
+      <!-- OS Tabs -->
+      <div class="flex bg-gray-800 rounded-xl p-1 gap-1 mb-5">
+        <button id="tab-ios" onclick="showTutorialTab('ios')"
+                class="flex-1 py-2 rounded-lg text-xs font-semibold transition-all">
+          iPhone / Safari
+        </button>
+        <button id="tab-android" onclick="showTutorialTab('android')"
+                class="flex-1 py-2 rounded-lg text-xs font-semibold transition-all">
+          Android / Chrome
+        </button>
+      </div>
+
+      <!-- iPhone steps -->
+      <div id="steps-ios" class="space-y-4">
+        <div class="flex items-start gap-3">
+          <div class="w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xs font-bold shrink-0 mt-0.5">1</div>
+          <div class="flex-1">
+            <p class="text-white text-sm font-medium">Appuyez sur le bouton Partager</p>
+            <p class="text-gray-500 text-xs mt-0.5 leading-relaxed">Le carré avec une flèche vers le haut en bas de Safari</p>
+            <div class="mt-2 inline-flex items-center gap-2 bg-gray-800 border border-white/5 rounded-xl px-3 py-2">
+              <svg class="w-4 h-4 text-indigo-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+              </svg>
+              <span class="text-gray-400 text-xs">Partager</span>
+            </div>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xs font-bold shrink-0 mt-0.5">2</div>
+          <div class="flex-1">
+            <p class="text-white text-sm font-medium">Faites défiler et appuyez sur</p>
+            <div class="mt-1.5 inline-flex items-center gap-2 bg-gray-800 border border-white/5 rounded-xl px-3 py-2">
+              <svg class="w-4 h-4 text-gray-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+              </svg>
+              <span class="text-white text-xs font-medium">Sur l'écran d'accueil</span>
+            </div>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xs font-bold shrink-0 mt-0.5">3</div>
+          <div class="flex-1">
+            <p class="text-white text-sm font-medium">Appuyez sur <span class="text-indigo-400">"Ajouter"</span> en haut à droite</p>
+            <p class="text-gray-500 text-xs mt-0.5">Confirmez en haut à droite de l'écran</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-7 h-7 rounded-full bg-emerald-600 flex items-center justify-center shrink-0 mt-0.5">
+            <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
+            </svg>
+          </div>
+          <div class="flex-1">
+            <p class="text-white text-sm font-medium">C'est fait !</p>
+            <p class="text-gray-500 text-xs mt-0.5">L'icône Fidelyzio apparaît sur votre écran d'accueil</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Android steps -->
+      <div id="steps-android" class="space-y-4" style="display:none">
+        <div class="flex items-start gap-3">
+          <div class="w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xs font-bold shrink-0 mt-0.5">1</div>
+          <div class="flex-1">
+            <p class="text-white text-sm font-medium">Appuyez sur le menu Chrome</p>
+            <div class="mt-2 inline-flex items-center gap-2 bg-gray-800 border border-white/5 rounded-xl px-3 py-2">
+              <svg class="w-4 h-4 text-gray-300 shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                <circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/>
+              </svg>
+              <span class="text-gray-400 text-xs">3 points en haut à droite</span>
+            </div>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xs font-bold shrink-0 mt-0.5">2</div>
+          <div class="flex-1">
+            <p class="text-white text-sm font-medium">Sélectionnez</p>
+            <div class="mt-1.5 inline-flex items-center gap-2 bg-gray-800 border border-white/5 rounded-xl px-3 py-2">
+              <svg class="w-4 h-4 text-gray-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+              </svg>
+              <span class="text-white text-xs font-medium">Ajouter à l'écran d'accueil</span>
+            </div>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xs font-bold shrink-0 mt-0.5">3</div>
+          <div class="flex-1">
+            <p class="text-white text-sm font-medium">Appuyez sur <span class="text-indigo-400">"Ajouter"</span></p>
+            <p class="text-gray-500 text-xs mt-0.5">Confirmez dans la boîte de dialogue</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-7 h-7 rounded-full bg-emerald-600 flex items-center justify-center shrink-0 mt-0.5">
+            <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
+            </svg>
+          </div>
+          <div class="flex-1">
+            <p class="text-white text-sm font-medium">C'est fait !</p>
+            <p class="text-gray-500 text-xs mt-0.5">L'icône Fidelyzio apparaît sur votre écran d'accueil</p>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -318,7 +440,7 @@
       $('rewards-section').classList.remove('hidden');
       $('rewards-list').innerHTML = rewards.map(r => `
         <div class="flex items-center justify-between bg-gray-800 rounded-2xl px-4 py-3">
-          <span class="text-white text-sm">🎁 ${esc(r.description)}</span>
+          <span class="text-white text-sm flex items-center gap-1.5"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z"/></svg>${esc(r.description)}</span>
           <span class="text-gray-400 text-xs font-semibold">${r.points_required} pts</span>
         </div>
       `).join('');
@@ -400,6 +522,22 @@
       hdr.appendChild(tog);
     }
     applyLang();
+  });
+
+  // ── Home screen tutorial tab switcher ────────────────────────────────────
+  function showTutorialTab(os) {
+    const ios = os === 'ios';
+    $('steps-ios').style.display     = ios ? 'block' : 'none';
+    $('steps-android').style.display = ios ? 'none'  : 'block';
+    const activeTab   = 'bg-gray-700 text-white';
+    const inactiveTab = 'text-gray-500';
+    $('tab-ios').className     = `flex-1 py-2 rounded-lg text-xs font-semibold transition-all ${ios ? activeTab : inactiveTab}`;
+    $('tab-android').className = `flex-1 py-2 rounded-lg text-xs font-semibold transition-all ${ios ? inactiveTab : activeTab}`;
+  }
+  // Auto-detect OS and show correct tab
+  document.addEventListener('DOMContentLoaded', () => {
+    const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    showTutorialTab(isIos ? 'ios' : 'android');
   });
 
   init();

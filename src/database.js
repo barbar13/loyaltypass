@@ -82,6 +82,16 @@ if (process.env.DATABASE_URL) {
       created_at  TIMESTAMPTZ DEFAULT NOW(),
       UNIQUE (customer_id, endpoint)
     );
+
+    CREATE TABLE IF NOT EXISTS notification_logs (
+      id              SERIAL PRIMARY KEY,
+      merchant_id     INTEGER NOT NULL REFERENCES merchants(id) ON DELETE CASCADE,
+      title           TEXT    NOT NULL,
+      body            TEXT    NOT NULL,
+      audience        TEXT    NOT NULL DEFAULT 'all',
+      recipient_count INTEGER NOT NULL DEFAULT 0,
+      sent_at         TIMESTAMPTZ DEFAULT NOW()
+    );
   `).then(() => runPgMigrations()).catch(err => {
     console.error('PostgreSQL schema init failed:', err.message);
     process.exit(1);
@@ -271,6 +281,17 @@ if (process.env.DATABASE_URL) {
     created_at  DATETIME DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (customer_id, endpoint),
     FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE
+  );`);
+
+  sqlite.exec(`CREATE TABLE IF NOT EXISTS notification_logs (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    merchant_id     INTEGER NOT NULL,
+    title           TEXT    NOT NULL,
+    body            TEXT    NOT NULL,
+    audience        TEXT    NOT NULL DEFAULT 'all',
+    recipient_count INTEGER NOT NULL DEFAULT 0,
+    sent_at         DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (merchant_id) REFERENCES merchants(id) ON DELETE CASCADE
   );`);
 
   // Convert $1, $2, ... → ? (SQLite positional) and reorder params accordingly.

@@ -92,6 +92,20 @@ export function deleteReward(id, token) {
   });
 }
 
+export function sendNotification(token, { title, body, audience }) {
+  return request('/merchants/notify', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ title, body, audience }),
+  });
+}
+
+export function getNotifications(token) {
+  return request('/merchants/notifications', {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
 export function getAnalytics(token, { dateFrom, dateTo } = {}) {
   const p = new URLSearchParams();
   if (dateFrom) p.set('date_from', dateFrom);

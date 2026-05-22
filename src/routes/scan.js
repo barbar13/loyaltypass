@@ -147,13 +147,29 @@ router.post('/', auth, async (req, res) => {
         }
 
         // Check if reward just became available
-        const unlockedReward = rewards.find(r => updatedMembership.points >= r.points_required);
-        const pushTitle = unlockedReward
-          ? `🎁 Récompense disponible chez ${merchant.name} !`
-          : `+${pts} points chez ${merchant.name} !`;
-        const pushBody  = unlockedReward
-          ? `${unlockedReward.description} — ${updatedMembership.points} pts`
-          : `Votre solde : ${updatedMembership.points} pts`;
+        const newPts = Number(updatedMembership.points);
+        const oldPts = newPts - pts;
+        const unlockedReward = rewards.find(r => newPts >= r.points_required);
+
+        let pushTitle, pushBody;
+        if (unlockedReward) {
+          pushTitle = `Récompense disponible chez ${merchant.name} !`;
+          pushBody  = `${unlockedReward.description} — ${newPts} pts`;
+        } else {
+          // Check if customer just crossed 80% of any reward threshold
+          const nearReward = rewards.find(r => {
+            const thresh = r.points_required;
+            return newPts >= thresh * 0.8 && oldPts < thresh * 0.8;
+          });
+          if (nearReward) {
+            const remaining = nearReward.points_required - newPts;
+            pushTitle = `Plus que ${remaining} points !`;
+            pushBody  = `Encore ${remaining} pts pour "${nearReward.description}" chez ${merchant.name} !`;
+          } else {
+            pushTitle = `+${pts} points chez ${merchant.name} !`;
+            pushBody  = `Votre solde : ${newPts} pts`;
+          }
+        }
 
         sendToCustomer(customer.id, { title: pushTitle, body: pushBody, url: cardUrl });
       } catch (_) {}

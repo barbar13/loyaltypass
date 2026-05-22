@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Chart, registerables } from 'chart.js';
 import ScanModal  from './ScanModal.jsx';
-import { addReward, deleteReward, redeemReward, updateProfile, getScans, createCheckout, getAnalytics } from '../api.js';
+import { addReward, deleteReward, redeemReward, updateProfile, getScans, createCheckout, getAnalytics, sendNotification, getNotifications } from '../api.js';
 
 Chart.register(...registerables);
 
@@ -38,6 +38,11 @@ const IconSettings = () => (
     <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
   </svg>
 );
+const IconBell = () => (
+  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
+  </svg>
+);
 
 // ── Supplemental icons (emoji-free) ──────────────────────────────────────────
 
@@ -50,6 +55,8 @@ const IcoWarn   = ({ s = 28 }) => <svg width={s} height={s} fill="none" viewBox=
 const IcoInbox  = ({ s = 24 }) => <svg width={s} height={s} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 13.5h3.86a2.25 2.25 0 0 1 2.012 1.244l.256.512a2.25 2.25 0 0 0 2.013 1.244h3.218a2.25 2.25 0 0 0 2.013-1.244l.256-.512a2.25 2.25 0 0 1 2.013-1.244h3.859m-19.5.338V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18v-4.162c0-.224-.034-.447-.1-.661L19.24 5.338a2.25 2.25 0 0 0-2.15-1.588H6.911a2.25 2.25 0 0 0-2.15 1.588L2.35 13.177a2.25 2.25 0 0 0-.1.661Z"/></svg>;
 const IcoPeople = ({ s = 24 }) => <svg width={s} height={s} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"/></svg>;
 const IcoMobile = ({ s = 20 }) => <svg width={s} height={s} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3"/></svg>;
+const IcoBell   = ({ s = 20 }) => <svg width={s} height={s} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"/></svg>;
+const IcoSend   = ({ s = 16 }) => <svg width={s} height={s} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5"/></svg>;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -847,6 +854,189 @@ function SettingsTab({ merchant, token, onRefresh }) {
   );
 }
 
+// ── NotificationsTab ──────────────────────────────────────────────────────────
+
+const AUDIENCE_OPTS = [
+  { value: 'all',        label: 'Tous mes clients' },
+  { value: 'inactive',   label: 'Clients inactifs depuis 7+ jours' },
+  { value: 'near_reward',label: 'Proches d\'une récompense (≥ 80% du seuil)' },
+];
+
+function audienceLabel(a) {
+  return { all: 'Tous les clients', inactive: 'Clients inactifs', near_reward: 'Proches récompense',
+           auto_inactive: 'Auto · Inactifs', auto_near_reward: 'Auto · Proches récompense' }[a] ?? a;
+}
+
+function estimateAudience(audience, customers, rewards) {
+  if (audience === 'all') return customers.length;
+  if (audience === 'inactive') {
+    const cutoff = Date.now() - 7 * 86400000;
+    return customers.filter(c => !c.last_visit || new Date(c.last_visit).getTime() < cutoff).length;
+  }
+  if (audience === 'near_reward') {
+    const active = (rewards || []).filter(r => r.active);
+    if (!active.length) return 0;
+    return customers.filter(c => {
+      const pts = Number(c.points);
+      return active.some(r => pts >= r.points_required * 0.8 && pts < r.points_required);
+    }).length;
+  }
+  return 0;
+}
+
+function NotificationsTab({ token, customers, rewards }) {
+  const [title,    setTitle]    = useState('');
+  const [body,     setBody]     = useState('');
+  const [audience, setAudience] = useState('all');
+  const [sending,  setSending]  = useState(false);
+  const [result,   setResult]   = useState(null);   // { sent } | { error }
+  const [history,  setHistory]  = useState(null);
+
+  useEffect(() => {
+    getNotifications(token)
+      .then(d => setHistory(d.notifications || []))
+      .catch(() => setHistory([]));
+  }, [token]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function handleSend() {
+    if (!title.trim() || !body.trim()) return;
+    setSending(true); setResult(null);
+    try {
+      const data = await sendNotification(token, { title: title.trim(), body: body.trim(), audience });
+      setResult({ sent: data.sent });
+      setTitle(''); setBody('');
+      getNotifications(token).then(d => setHistory(d.notifications || [])).catch(() => {});
+    } catch (err) {
+      setResult({ error: err.message });
+    } finally { setSending(false); }
+  }
+
+  const estimate = estimateAudience(audience, customers, rewards);
+  const canSend  = title.trim().length > 0 && body.trim().length > 0 && !sending;
+
+  return (
+    <div className="px-5 md:px-6 pt-2 pb-8 md:max-w-2xl">
+
+      {/* ── Compose form ── */}
+      <div className="bg-[#0e0e18] border border-white/5 rounded-2xl p-5 mb-6">
+        <p className="text-gray-400 text-sm font-semibold mb-4">Nouvelle notification</p>
+
+        {/* Title */}
+        <div className="mb-3">
+          <div className="flex items-center justify-between mb-1.5">
+            <label className="text-xs text-gray-500">Titre</label>
+            <span className={`text-[10px] tabular-nums ${title.length > 44 ? 'text-amber-400' : 'text-gray-600'}`}>{title.length}/50</span>
+          </div>
+          <input type="text" maxLength={50} value={title} onChange={e => setTitle(e.target.value)}
+            placeholder="ex : Offre spéciale ce week-end !"
+            className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-600 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 transition" />
+        </div>
+
+        {/* Body */}
+        <div className="mb-3">
+          <div className="flex items-center justify-between mb-1.5">
+            <label className="text-xs text-gray-500">Message</label>
+            <span className={`text-[10px] tabular-nums ${body.length > 130 ? 'text-amber-400' : 'text-gray-600'}`}>{body.length}/150</span>
+          </div>
+          <textarea maxLength={150} rows={3} value={body} onChange={e => setBody(e.target.value)}
+            placeholder="ex : Venez profiter de vos points, on vous attend !"
+            className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-600 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 transition resize-none" />
+        </div>
+
+        {/* Audience */}
+        <div className="mb-4">
+          <label className="text-xs text-gray-500 mb-1.5 block">Audience</label>
+          <div className="relative">
+            <select value={audience} onChange={e => setAudience(e.target.value)}
+              className="w-full appearance-none bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 pr-9 text-white text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+              style={{ colorScheme: 'dark' }}>
+              {AUDIENCE_OPTS.map(o => (
+                <option key={o.value} value={o.value}>
+                  {o.label} ({estimateAudience(o.value, customers, rewards)} clients estimés)
+                </option>
+              ))}
+            </select>
+            <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+            </svg>
+          </div>
+          <p className="text-gray-700 text-[10px] mt-1.5">≈ {estimate} client{estimate !== 1 ? 's' : ''} recevront cette notification</p>
+        </div>
+
+        {/* Phone preview */}
+        {(title || body) && (
+          <div className="mb-4">
+            <p className="text-gray-600 text-[10px] uppercase tracking-wider mb-2">Aperçu</p>
+            <div className="bg-white rounded-2xl p-3.5 shadow-md">
+              <div className="flex items-start gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-[#0d1420] flex items-center justify-center shrink-0 mt-0.5">
+                  <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#f0b429" strokeWidth="1.8">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5Z"/>
+                  </svg>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[#111827] font-semibold text-sm leading-tight">{title || '…'}</p>
+                  <p className="text-[#6b7280] text-xs mt-0.5 leading-snug line-clamp-2">{body || '…'}</p>
+                  <p className="text-[#9ca3af] text-[10px] mt-1">Fidelyzio · maintenant</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Result banner */}
+        {result && (
+          result.error
+            ? <div className="mb-3 bg-red-500/10 border border-red-500/25 rounded-xl px-4 py-2.5 text-red-400 text-sm">{result.error}</div>
+            : <div className="mb-3 bg-emerald-500/10 border border-emerald-500/25 rounded-xl px-4 py-2.5 text-emerald-400 text-sm flex items-center gap-2">
+                <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+                Envoyée à {result.sent} destinataire{result.sent !== 1 ? 's' : ''}
+              </div>
+        )}
+
+        {/* Send button */}
+        <button onClick={handleSend} disabled={!canSend}
+          className="w-full py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:scale-[.98] disabled:opacity-50 text-white font-semibold text-sm transition-all flex items-center justify-center gap-2">
+          {sending
+            ? <><svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>Envoi…</>
+            : <><IcoSend s={16} />Envoyer maintenant</>}
+        </button>
+      </div>
+
+      {/* ── History ── */}
+      <p className="text-gray-500 text-xs font-semibold uppercase tracking-widest mb-3">Historique</p>
+      {history === null && (
+        <div className="space-y-2">
+          {[1,2,3].map(i => <div key={i} className="h-16 bg-[#0e0e18] border border-white/5 rounded-xl animate-pulse" />)}
+        </div>
+      )}
+      {history !== null && history.length === 0 && (
+        <div className="text-center py-10 bg-[#0e0e18] border border-white/5 rounded-2xl">
+          <div className="flex justify-center mb-2 text-gray-600"><IcoBell s={28} /></div>
+          <p className="text-gray-600 text-sm">Aucune notification envoyée</p>
+        </div>
+      )}
+      {history !== null && history.length > 0 && (
+        <div className="space-y-2">
+          {history.map(n => (
+            <div key={n.id} className="bg-[#0e0e18] border border-white/5 rounded-xl px-4 py-3.5">
+              <div className="flex items-start justify-between gap-2 mb-0.5">
+                <p className="text-white text-sm font-semibold leading-snug flex-1 truncate">{n.title}</p>
+                <span className="text-gray-600 text-[10px] shrink-0 mt-0.5">{fmtRelative(n.sent_at)}</span>
+              </div>
+              <p className="text-gray-500 text-xs leading-snug mb-2 line-clamp-2">{n.body}</p>
+              <div className="flex items-center gap-3">
+                <span className="text-[10px] bg-gray-800 text-gray-500 px-2 py-0.5 rounded-full">{audienceLabel(n.audience)}</span>
+                <span className="text-[10px] text-indigo-400 font-semibold">{n.recipient_count} destinataire{n.recipient_count !== 1 ? 's' : ''}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Analytics: building blocks ────────────────────────────────────────────────
 
 const CHART_COLORS = {
@@ -1464,16 +1654,17 @@ export default function DashboardPage({ auth, dashData, dashLoading, onLogout, o
   const rewards   = dashData?.rewards   ?? [];
 
   const TABS = [
-    { id: 'home',      label: 'Accueil',      short: 'Accueil', Icon: IconHome     },
-    { id: 'clients',   label: 'Clients',      short: 'Clients', Icon: IconUsers    },
-    { id: 'rewards',   label: 'Récompenses',  short: 'Récomp.', Icon: IconGift     },
-    { id: 'analytics', label: 'Statistiques', short: 'Stats',   Icon: IconChart    },
-    { id: 'settings',  label: 'Paramètres',   short: 'Compte',  Icon: IconSettings },
+    { id: 'home',          label: 'Accueil',       short: 'Accueil', Icon: IconHome     },
+    { id: 'clients',       label: 'Clients',       short: 'Clients', Icon: IconUsers    },
+    { id: 'rewards',       label: 'Récompenses',   short: 'Récomp.', Icon: IconGift     },
+    { id: 'notifications', label: 'Notifications', short: 'Notifs',  Icon: IconBell     },
+    { id: 'analytics',     label: 'Statistiques',  short: 'Stats',   Icon: IconChart    },
+    { id: 'settings',      label: 'Paramètres',    short: 'Compte',  Icon: IconSettings },
   ];
 
   const TAB_TITLES = {
     home: 'Tableau de bord', clients: 'Clients', rewards: 'Récompenses',
-    analytics: 'Statistiques', settings: 'Paramètres',
+    notifications: 'Notifications', analytics: 'Statistiques', settings: 'Paramètres',
   };
 
   return (
@@ -1567,10 +1758,11 @@ export default function DashboardPage({ auth, dashData, dashLoading, onLogout, o
             <OnboardingChecklist merchant={merchant} stats={stats} rewards={rewards} />
           )}
           {tab === 'home'      && <HomeTab merchant={merchant} stats={stats} rewards={rewards} token={auth.token} onScanClick={openScanner} />}
-          {tab === 'clients'   && <ClientsTab customers={customers} rewards={rewards} token={auth.token} onRewardsChange={onRefresh} />}
-          {tab === 'rewards'   && <RewardsTab rewards={rewards} token={auth.token} onRewardsChange={onRefresh} />}
-          {tab === 'analytics' && <AnalyticsTab token={auth.token} color={color} />}
-          {tab === 'settings'  && <SettingsTab merchant={merchant} token={auth.token} onRefresh={onRefresh} />}
+          {tab === 'clients'       && <ClientsTab customers={customers} rewards={rewards} token={auth.token} onRewardsChange={onRefresh} />}
+          {tab === 'rewards'       && <RewardsTab rewards={rewards} token={auth.token} onRewardsChange={onRefresh} />}
+          {tab === 'notifications' && <NotificationsTab token={auth.token} customers={customers} rewards={rewards} />}
+          {tab === 'analytics'     && <AnalyticsTab token={auth.token} color={color} />}
+          {tab === 'settings'      && <SettingsTab merchant={merchant} token={auth.token} onRefresh={onRefresh} />}
         </main>
 
         {/* Mobile bottom tab bar */}

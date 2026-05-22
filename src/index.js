@@ -9,7 +9,7 @@ const customerRoutes  = require('./routes/customers');
 const scanRoutes      = require('./routes/scan');
 const adminRoutes     = require('./routes/admin');
 const billing         = require('./routes/billing');
-const { router: notifRouter } = require('./routes/notifications');
+const { router: notifRouter, sendAutoNotifications } = require('./routes/notifications');
 const { generateWalletPass }  = require('./routes/google-wallet');
 
 const app  = express();
@@ -118,5 +118,17 @@ app.use((err, _req, res, _next) => {
 app.listen(PORT, () => {
   console.log(`Fidelyzio API démarrée sur http://localhost:${PORT}`);
 });
+
+// ── Daily auto-notifications at 10:00 server time ─────────────────────────────
+// Check every 5 minutes; fire once per day when the hour is 10.
+let autoNotifLastDate = '';
+setInterval(() => {
+  const now  = new Date();
+  const date = now.toISOString().slice(0, 10);
+  if (now.getHours() === 10 && autoNotifLastDate !== date) {
+    autoNotifLastDate = date;
+    sendAutoNotifications().catch(err => console.error('[AutoNotif]', err.message));
+  }
+}, 5 * 60 * 1000);
 
 module.exports = app;

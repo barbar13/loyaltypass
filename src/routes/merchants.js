@@ -6,6 +6,7 @@ const QRCode   = require('qrcode');
 const db       = require('../database');
 const auth     = require('../middleware/auth');
 const email    = require('../email');
+const { sendToMerchantAudience } = require('./notifications');
 
 const router      = express.Router();
 const SALT_ROUNDS = 12;
@@ -567,6 +568,43 @@ router.get('/analytics', auth, async (req, res) => {
     });
   } catch (err) {
     console.error('[Analytics] Error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ─── Push notifications ───────────────────────────────────────────────────────
+
+// POST /api/merchants/notify — send a manual push notification to an audience
+router.post('/notify', auth, async (req, res) => {
+  const merchantId = req.merchant.id;
+  const { title, body, audience = 'all' } = req.body;
+
+  if (!title?.trim() || !body?.trim())
+    return res.status(400).json({ error: 'title et body sont requis' });
+  if (title.length > 50)
+    return res.status(400).json({ error: 'title max 50 caractères' });
+  if (body.length > 150)
+    return res.status(400).json({ error: 'body max 150 caractères' });
+  if (!['all', 'inactive', 'near_reward'].includes(audience))
+    return res.status(400).json({ error: 'audience invalide' });
+
+  const result = await sendToMerchantAudience(merchantId, audience, title.trim(), body.trim());
+  if (result.error && !process.env.VAPID_PUBLIC_KEY)
+    return res.status(503).json({ error: result.error });
+
+  res.json({ sent: result.sent ?? 0 });
+});
+
+// GET /api/merchants/notifications — history of sent notifications
+router.get('/notifications', auth, async (req, res) => {
+  const merchantId = req.merchant.id;
+  try {
+    const notifications = await db.all(
+      'SELECT id, title, body, audience, recipient_count, sent_at FROM notification_logs WHERE merchant_id = $1 ORDER BY sent_at DESC LIMIT 50',
+      [merchantId]
+    );
+    res.json({ notifications });
+  } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });

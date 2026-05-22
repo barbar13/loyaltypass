@@ -1085,12 +1085,12 @@ function ChartEmpty({ icon, msg, sub, height = 160 }) {
 // ── DateRangePicker ───────────────────────────────────────────────────────────
 
 const DATE_PRESETS = [
-  { id: '7d',     label: '7 jours',    days: 7 },
-  { id: '30d',    label: '30 jours',   days: 30 },
-  { id: '3m',     label: '3 mois',     days: 90 },
-  { id: '6m',     label: '6 mois',     days: 180 },
-  { id: 'year',   label: 'Cette année', days: null },
-  { id: 'custom', label: 'Personnalisé', days: 'custom' },
+  { id: '7d',     label: '7 derniers jours',   days: 7 },
+  { id: '30d',    label: '30 derniers jours',  days: 30 },
+  { id: '3m',     label: '3 derniers mois',    days: 90 },
+  { id: '6m',     label: '6 derniers mois',    days: 180 },
+  { id: 'year',   label: 'Cette année',        days: null },
+  { id: 'custom', label: 'Période personnalisée', days: 'custom' },
 ];
 
 function todayStr() { return new Date().toISOString().slice(0, 10); }
@@ -1108,13 +1108,16 @@ function DateRangePicker({ value, onChange }) {
   const [customTo,   setCustomTo]   = useState(value.to);
   const isCustom = value.presetId === 'custom';
 
-  function selectPreset(preset) {
-    if (preset.id === 'custom') {
+  function handleSelect(e) {
+    const id = e.target.value;
+    if (id === 'custom') {
       onChange({ presetId: 'custom', from: value.from, to: value.to });
       return;
     }
+    const preset = DATE_PRESETS.find(p => p.id === id);
+    if (!preset) return;
     const { from, to } = presetRange(preset);
-    onChange({ presetId: preset.id, from, to });
+    onChange({ presetId: id, from, to });
   }
 
   function applyCustom() {
@@ -1123,31 +1126,37 @@ function DateRangePicker({ value, onChange }) {
   }
 
   return (
-    <div className="bg-[#0e0e18] border border-white/5 rounded-2xl p-3 md:p-4">
-      {/* Preset pills */}
-      <div className="flex flex-wrap gap-1.5 mb-2">
-        {DATE_PRESETS.map(p => (
-          <button key={p.id} onClick={() => selectPreset(p)}
-            className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all active:scale-95 ${
-              value.presetId === p.id
-                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/25'
-                : 'bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700 border border-white/5'
-            }`}>
-            {p.label}
-          </button>
-        ))}
+    <div className="bg-[#0e0e18] border border-white/5 rounded-2xl px-4 py-3">
+      {/* Dropdown */}
+      <div className="relative">
+        <select
+          value={value.presetId}
+          onChange={handleSelect}
+          className="w-full appearance-none bg-gray-800 border border-white/8 rounded-xl px-4 py-2.5 pr-9 text-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+          style={{ colorScheme: 'dark' }}
+        >
+          {DATE_PRESETS.map(p => (
+            <option key={p.id} value={p.id}>{p.label}</option>
+          ))}
+        </select>
+        {/* Chevron */}
+        <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+        </svg>
       </div>
 
-      {/* Custom date inputs */}
+      {/* Custom date inputs — shown only for "Période personnalisée" */}
       {isCustom && (
-        <div className="flex items-center gap-2 flex-wrap mt-2 pt-2 border-t border-white/5">
+        <div className="flex items-center gap-2 flex-wrap mt-3 pt-3 border-t border-white/5">
           <input type="date" value={customFrom} max={customTo || todayStr()}
             onChange={e => setCustomFrom(e.target.value)}
-            className="bg-gray-900 border border-white/8 rounded-xl px-3 py-2 text-gray-200 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 flex-1 min-w-[130px]" />
+            className="bg-gray-900 border border-white/8 rounded-xl px-3 py-2 text-gray-200 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 flex-1 min-w-[130px]"
+            style={{ colorScheme: 'dark' }} />
           <span className="text-gray-600 text-xs shrink-0">→</span>
           <input type="date" value={customTo} min={customFrom} max={todayStr()}
             onChange={e => setCustomTo(e.target.value)}
-            className="bg-gray-900 border border-white/8 rounded-xl px-3 py-2 text-gray-200 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 flex-1 min-w-[130px]" />
+            className="bg-gray-900 border border-white/8 rounded-xl px-3 py-2 text-gray-200 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 flex-1 min-w-[130px]"
+            style={{ colorScheme: 'dark' }} />
           <button onClick={applyCustom} disabled={!customFrom || !customTo || customFrom > customTo}
             className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 rounded-xl text-white text-xs font-semibold transition-all active:scale-95 shrink-0">
             Appliquer
@@ -1155,9 +1164,9 @@ function DateRangePicker({ value, onChange }) {
         </div>
       )}
 
-      {/* Period label */}
+      {/* Date range label for preset selections */}
       {!isCustom && (
-        <p className="text-gray-600 text-[10px] mt-1.5">
+        <p className="text-gray-600 text-[10px] mt-2">
           Du {new Date(value.from + 'T00:00:00Z').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
           {' '}au {new Date(value.to + 'T00:00:00Z').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
         </p>

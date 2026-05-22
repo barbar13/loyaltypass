@@ -101,7 +101,7 @@ if (process.env.DATABASE_URL) {
   // This avoids ACCESS EXCLUSIVE locks on every startup (IF NOT EXISTS still locks).
   async function runPgMigrations() {
     const { rows } = await pool.query(
-      "SELECT table_name, column_name FROM information_schema.columns WHERE table_name IN ('merchants','customers')"
+      "SELECT table_name, column_name FROM information_schema.columns WHERE table_name IN ('merchants','customers','memberships','transactions','rewards')"
     );
     const has = (table, col) => rows.some(r => r.table_name === table && r.column_name === col);
 
@@ -117,20 +117,16 @@ if (process.env.DATABASE_URL) {
       ['business_type',          'TEXT'],
       ['loyalty_mechanic',       "TEXT NOT NULL DEFAULT 'points'"],
     ];
-    const customerMigrations = [
-      ['email', 'TEXT'],
-    ];
+    const customerMigrations    = [['email', 'TEXT']];
+    const membershipMigrations  = [['stamps_count', 'INTEGER NOT NULL DEFAULT 0']];
+    const transactionMigrations = [["type", "TEXT NOT NULL DEFAULT 'points'"]];
+    const rewardMigrations      = [["mechanic", "TEXT NOT NULL DEFAULT 'points'"]];
 
-    for (const [col, def] of merchantMigrations) {
-      if (!has('merchants', col)) {
-        await pool.query(`ALTER TABLE merchants ADD COLUMN ${col} ${def}`);
-      }
-    }
-    for (const [col, def] of customerMigrations) {
-      if (!has('customers', col)) {
-        await pool.query(`ALTER TABLE customers ADD COLUMN ${col} ${def}`);
-      }
-    }
+    for (const [col, def] of merchantMigrations)    if (!has('merchants', col))    await pool.query(`ALTER TABLE merchants    ADD COLUMN ${col} ${def}`);
+    for (const [col, def] of customerMigrations)    if (!has('customers', col))    await pool.query(`ALTER TABLE customers    ADD COLUMN ${col} ${def}`);
+    for (const [col, def] of membershipMigrations)  if (!has('memberships', col))  await pool.query(`ALTER TABLE memberships  ADD COLUMN ${col} ${def}`);
+    for (const [col, def] of transactionMigrations) if (!has('transactions', col)) await pool.query(`ALTER TABLE transactions ADD COLUMN ${col} ${def}`);
+    for (const [col, def] of rewardMigrations)      if (!has('rewards', col))      await pool.query(`ALTER TABLE rewards      ADD COLUMN ${col} ${def}`);
   }
 
   // ── Client factory (used for both pool and transaction clients) ────────────
@@ -271,6 +267,21 @@ if (process.env.DATABASE_URL) {
   mcAdd('trial_reminder_sent',    "TEXT NOT NULL DEFAULT ''");
   mcAdd('business_type',          'TEXT');
   mcAdd('loyalty_mechanic',       "TEXT NOT NULL DEFAULT 'points'");
+
+  // memberships extra columns
+  const mbCols = sqlite.prepare('PRAGMA table_info(memberships)').all();
+  const mbAdd  = (col, def) => { if (!mbCols.find(c => c.name === col)) sqlite.exec(`ALTER TABLE memberships ADD COLUMN ${col} ${def}`); };
+  mbAdd('stamps_count', 'INTEGER NOT NULL DEFAULT 0');
+
+  // transactions extra columns
+  const txCols2 = sqlite.prepare('PRAGMA table_info(transactions)').all();
+  const txAdd   = (col, def) => { if (!txCols2.find(c => c.name === col)) sqlite.exec(`ALTER TABLE transactions ADD COLUMN ${col} ${def}`); };
+  txAdd('type', "TEXT NOT NULL DEFAULT 'points'");
+
+  // rewards extra columns
+  const rwCols = sqlite.prepare('PRAGMA table_info(rewards)').all();
+  const rwAdd  = (col, def) => { if (!rwCols.find(c => c.name === col)) sqlite.exec(`ALTER TABLE rewards ADD COLUMN ${col} ${def}`); };
+  rwAdd('mechanic', "TEXT NOT NULL DEFAULT 'points'");
 
   const customerCols = sqlite.prepare('PRAGMA table_info(customers)').all();
   if (!customerCols.find(c => c.name === 'email'))

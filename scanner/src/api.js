@@ -33,9 +33,8 @@ export function lookupCustomer(customerQrCode, token) {
   });
 }
 
-export function scanCustomer(customerQrCode, points, token) {
-  const body = JSON.stringify({ customer_qr_code: customerQrCode, points });
-  console.log('[api] scanCustomer → body:', body);
+export function scanCustomer(customerQrCode, points, token, type = 'points') {
+  const body = JSON.stringify({ customer_qr_code: customerQrCode, points, type });
   return request('/scan', {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}` },
@@ -43,11 +42,11 @@ export function scanCustomer(customerQrCode, points, token) {
   });
 }
 
-export function addReward(description, pointsRequired, token) {
+export function addReward(description, pointsRequired, token, mechanic = 'points') {
   return request('/merchants/rewards', {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}` },
-    body: JSON.stringify({ description, points_required: pointsRequired }),
+    body: JSON.stringify({ description, points_required: pointsRequired, mechanic }),
   });
 }
 

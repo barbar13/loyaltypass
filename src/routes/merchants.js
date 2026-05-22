@@ -174,7 +174,7 @@ router.get('/dashboard', auth, async (req, res) => {
       db.all(`
         SELECT
           c.id, c.first_name, c.phone, c.email, c.qr_code,
-          mb.id AS membership_id, mb.points, mb.joined_at,
+          mb.id AS membership_id, mb.points, mb.stamps_count, mb.joined_at,
           (SELECT MAX(t.created_at) FROM transactions t
            WHERE t.merchant_id = $1 AND t.customer_id = c.id AND t.points > 0) AS last_visit,
           (SELECT COUNT(*) FROM transactions t
@@ -221,7 +221,7 @@ router.get('/dashboard', auth, async (req, res) => {
 // ─── Authenticated: rewards ───────────────────────────────────────────────────
 
 router.post('/rewards', auth, async (req, res) => {
-  const { description, points_required } = req.body;
+  const { description, points_required, mechanic = 'points' } = req.body;
   const merchantId = req.merchant.id;
 
   if (!description || !points_required) {
@@ -234,8 +234,8 @@ router.post('/rewards', auth, async (req, res) => {
 
   try {
     const id = await db.insert(
-      'INSERT INTO rewards (merchant_id, description, points_required) VALUES ($1, $2, $3)',
-      [merchantId, description.trim(), pts]
+      'INSERT INTO rewards (merchant_id, description, points_required, mechanic) VALUES ($1, $2, $3, $4)',
+      [merchantId, description.trim(), pts, ['points','stamps'].includes(mechanic) ? mechanic : 'points']
     );
     const reward = await db.one('SELECT * FROM rewards WHERE id = $1', [id]);
     res.status(201).json({ reward });

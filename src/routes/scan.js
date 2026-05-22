@@ -24,8 +24,9 @@ router.get('/lookup/:customer_qr_code', auth, async (req, res) => {
         'SELECT * FROM memberships WHERE merchant_id = $1 AND customer_id = $2',
         [merchantId, customer.id]
       ),
+      // Only count positive transactions (not redemptions) for anti-fraud
       db.one(
-        `SELECT COUNT(*) AS cnt FROM transactions WHERE merchant_id = $1 AND customer_id = $2 AND ${db.todayExpr}`,
+        `SELECT COUNT(*) AS cnt FROM transactions WHERE merchant_id = $1 AND customer_id = $2 AND points > 0 AND ${db.todayExpr}`,
         [merchantId, customer.id]
       ),
       db.all(
@@ -36,7 +37,7 @@ router.get('/lookup/:customer_qr_code', auth, async (req, res) => {
 
     res.json({
       customer: { id: customer.id, first_name: customer.first_name, phone: customer.phone },
-      membership: membership ?? { points: 0, joined_at: null },
+      membership: membership ?? { points: 0, stamps_count: 0, joined_at: null },
       is_new_customer:       !membership,
       already_scanned_today: Number(alreadyRow.cnt) > 0,
       rewards,
@@ -47,16 +48,17 @@ router.get('/lookup/:customer_qr_code', auth, async (req, res) => {
 });
 
 // POST /api/scan
-// Merchant scans customer QR → adds points (max 1 per customer per merchant per day)
+// Merchant scans customer QR → adds points or 1 stamp
 router.post('/', auth, async (req, res) => {
-  const { customer_qr_code, points } = req.body;
+  const { customer_qr_code, points, type = 'points' } = req.body;
   const merchantId = req.merchant.id;
 
   if (!customer_qr_code) {
     return res.status(400).json({ error: 'customer_qr_code est requis' });
   }
-  const pts = parseInt(points, 10);
-  if (!Number.isInteger(pts) || pts <= 0 || pts > 9999) {
+  const isStamps = type === 'stamps';
+  const pts = isStamps ? 1 : parseInt(points, 10);
+  if (!isStamps && (!Number.isInteger(pts) || pts <= 0 || pts > 9999)) {
     return res.status(400).json({ error: 'points doit être un entier entre 1 et 9999' });
   }
 
@@ -80,21 +82,14 @@ router.post('/', auth, async (req, res) => {
       return res.status(404).json({ error: 'Client introuvable — QR code invalide' });
     }
 
-    // Anti-fraud: max 1 point transaction per customer per merchant per calendar day
+    // Anti-fraud: max 1 positive transaction (points OR stamps) per customer per merchant per day
     const { cnt } = await db.one(
-      `SELECT COUNT(*) AS cnt FROM transactions WHERE merchant_id = $1 AND customer_id = $2 AND ${db.todayExpr}`,
+      `SELECT COUNT(*) AS cnt FROM transactions WHERE merchant_id = $1 AND customer_id = $2 AND points > 0 AND ${db.todayExpr}`,
       [merchantId, customer.id]
     );
     if (Number(cnt) > 0) {
-      // Log blocked attempt for fraud detection (fire-and-forget)
-      db.run(
-        'INSERT INTO scan_attempts (merchant_id, customer_id, points, blocked) VALUES ($1, $2, $3, 1)',
-        [merchantId, customer.id, pts]
-      ).catch(() => {});
-      return res.status(429).json({
-        error: "Ce client a déjà reçu des points aujourd'hui chez vous.",
-        already_scanned: true,
-      });
+      db.run('INSERT INTO scan_attempts (merchant_id, customer_id, points, blocked) VALUES ($1, $2, $3, 1)', [merchantId, customer.id, pts]).catch(() => {});
+      return res.status(429).json({ error: "Ce client a déjà reçu des points ou un tampon aujourd'hui.", already_scanned: true });
     }
 
     // Atomically upsert membership + log transaction
@@ -105,22 +100,25 @@ router.post('/', auth, async (req, res) => {
       );
 
       if (!membership) {
+        const initPts    = isStamps ? 0 : pts;
+        const initStamps = isStamps ? 1 : 0;
         const id = await tx.insert(
-          'INSERT INTO memberships (merchant_id, customer_id, points) VALUES ($1, $2, $3)',
-          [merchantId, customer.id, pts]
+          'INSERT INTO memberships (merchant_id, customer_id, points, stamps_count) VALUES ($1, $2, $3, $4)',
+          [merchantId, customer.id, initPts, initStamps]
         );
         membership = await tx.one('SELECT * FROM memberships WHERE id = $1', [id]);
       } else {
-        await tx.run(
-          'UPDATE memberships SET points = points + $1 WHERE id = $2',
-          [pts, membership.id]
-        );
+        if (isStamps) {
+          await tx.run('UPDATE memberships SET stamps_count = stamps_count + 1 WHERE id = $1', [membership.id]);
+        } else {
+          await tx.run('UPDATE memberships SET points = points + $1 WHERE id = $2', [pts, membership.id]);
+        }
         membership = await tx.one('SELECT * FROM memberships WHERE id = $1', [membership.id]);
       }
 
       await tx.run(
-        'INSERT INTO transactions (merchant_id, customer_id, points) VALUES ($1, $2, $3)',
-        [merchantId, customer.id, pts]
+        "INSERT INTO transactions (merchant_id, customer_id, points, type) VALUES ($1, $2, $3, $4)",
+        [merchantId, customer.id, pts, type]
       );
 
       return membership;
@@ -131,6 +129,10 @@ router.post('/', auth, async (req, res) => {
       [merchantId]
     );
 
+    // Check unlocked rewards for BOTH mechanics
+    const newPts    = Number(updatedMembership.points);
+    const newStamps = Number(updatedMembership.stamps_count ?? 0);
+
     // Fire-and-forget notifications
     (async () => {
       try {
@@ -138,18 +140,19 @@ router.post('/', auth, async (req, res) => {
         const baseUrl  = process.env.BASE_URL || 'https://fidelyzio.com';
         const cardUrl  = `${baseUrl}/card/${customer.qr_code}`;
 
-        if (customer.email) {
+        if (customer.email && !isStamps) {
           email.sendPointsEarned({
             to: customer.email, firstName: customer.first_name,
-            points: pts, totalPoints: updatedMembership.points,
+            points: pts, totalPoints: newPts,
             merchantName: merchant.name, cardUrl,
           }).catch(() => {});
         }
 
-        // Check if reward just became available
-        const newPts = Number(updatedMembership.points);
-        const oldPts = newPts - pts;
-        const unlockedReward = rewards.find(r => newPts >= r.points_required);
+        // Check if reward just became available (either type)
+        const unlockedReward = rewards.find(r =>
+          r.mechanic === 'stamps' ? newStamps >= r.points_required : newPts >= r.points_required
+        );
+        const oldPts = newPts - (isStamps ? 0 : pts);
 
         let pushTitle, pushBody;
         if (unlockedReward) {
@@ -176,9 +179,11 @@ router.post('/', auth, async (req, res) => {
     })();
 
     res.json({
-      customer:   { id: customer.id, first_name: customer.first_name, phone: customer.phone },
-      membership: updatedMembership,
-      points_added: pts,
+      customer:     { id: customer.id, first_name: customer.first_name, phone: customer.phone },
+      membership:   updatedMembership,
+      points_added: isStamps ? 0 : pts,
+      stamps_added: isStamps ? 1 : 0,
+      type,
       rewards,
     });
   } catch (err) {
@@ -204,19 +209,25 @@ router.post('/redeem', auth, async (req, res) => {
 
     if (!membership) return res.status(404).json({ error: 'Adhésion introuvable' });
     if (!reward)     return res.status(404).json({ error: 'Récompense introuvable ou inactive' });
-    if (membership.points < reward.points_required) {
-      return res.status(400).json({ error: 'Points insuffisants pour cette récompense' });
+
+    const rewardMechanic = reward.mechanic || 'points';
+    const currentBalance = rewardMechanic === 'stamps'
+      ? Number(membership.stamps_count ?? 0)
+      : Number(membership.points);
+    if (currentBalance < reward.points_required) {
+      return res.status(400).json({ error: rewardMechanic === 'stamps' ? 'Tampons insuffisants' : 'Points insuffisants pour cette récompense' });
     }
 
     await db.transaction(async (tx) => {
-      await tx.run(
-        'UPDATE memberships SET points = points - $1 WHERE id = $2',
-        [reward.points_required, membership.id]
-      );
-      await tx.run(
-        'INSERT INTO transactions (merchant_id, customer_id, points, note) VALUES ($1, $2, $3, $4)',
-        [merchantId, membership.customer_id, -reward.points_required, `Récompense : ${reward.description}`]
-      );
+      if (rewardMechanic === 'stamps') {
+        await tx.run('UPDATE memberships SET stamps_count = stamps_count - $1 WHERE id = $2', [reward.points_required, membership.id]);
+        await tx.run("INSERT INTO transactions (merchant_id, customer_id, points, type, note) VALUES ($1, $2, $3, 'stamps', $4)",
+          [merchantId, membership.customer_id, -reward.points_required, `Récompense : ${reward.description}`]);
+      } else {
+        await tx.run('UPDATE memberships SET points = points - $1 WHERE id = $2', [reward.points_required, membership.id]);
+        await tx.run("INSERT INTO transactions (merchant_id, customer_id, points, type, note) VALUES ($1, $2, $3, 'points', $4)",
+          [merchantId, membership.customer_id, -reward.points_required, `Récompense : ${reward.description}`]);
+      }
     });
 
     const [updated, customer] = await Promise.all([

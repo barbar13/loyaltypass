@@ -424,7 +424,9 @@ function ClientsTab({ customers, rewards, token, onRewardsChange }) {
 
   function openOffer(c, e) {
     e?.stopPropagation();
-    const available = activeRewards.filter(r => c.points >= r.points_required);
+    const available = activeRewards.filter(r =>
+      r.mechanic === 'stamps' ? (c.stamps_count ?? 0) >= r.points_required : c.points >= r.points_required
+    );
     if (!available.length) return;
     setOfferTarget({ customer: c, available }); setOfferErr('');
   }
@@ -475,7 +477,9 @@ function ClientsTab({ customers, rewards, token, onRewardsChange }) {
       {/* Client list — expandable */}
       <div className="space-y-2">
         {filtered.map(c => {
-          const available  = activeRewards.filter(r => c.points >= r.points_required);
+          const available  = activeRewards.filter(r =>
+            r.mechanic === 'stamps' ? (c.stamps_count ?? 0) >= r.points_required : c.points >= r.points_required
+          );
           const hasRewards = available.length > 0;
           const lastVisit  = c.last_visit ? fmtRelative(c.last_visit) : null;
           const isExpanded = expandedId === c.id;
@@ -660,73 +664,119 @@ function ClientsTab({ customers, rewards, token, onRewardsChange }) {
 
 // ── RewardsTab ────────────────────────────────────────────────────────────────
 
+function RewardCard({ r, token, onRewardsChange }) {
+  const isStamp = r.mechanic === 'stamps';
+  return (
+    <div className={`bg-[#0e0e18] border rounded-2xl px-4 py-4 flex items-center gap-3 ${isStamp ? 'border-amber-500/20' : 'border-white/5'}`}>
+      <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${isStamp ? 'bg-amber-500/15 border border-amber-500/25' : 'bg-indigo-500/15 border border-indigo-500/25'}`}>
+        {isStamp
+          ? <svg className="w-4 h-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+          : <svg className="w-4 h-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z"/></svg>}
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-white font-semibold text-sm truncate">{r.description}</p>
+        <p className={`text-xs ${isStamp ? 'text-amber-400/80' : 'text-indigo-400/80'}`}>
+          {r.points_required} {isStamp ? 'tampon' : 'point'}{r.points_required > 1 ? 's' : ''} requis
+        </p>
+      </div>
+      <button onClick={() => deleteReward(r.id, token).then(onRewardsChange).catch(() => {})}
+        className="w-8 h-8 rounded-xl bg-gray-800 hover:bg-red-500/20 hover:text-red-400 flex items-center justify-center text-gray-600 transition-all active:scale-90 shrink-0">
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+  );
+}
+
 function RewardsTab({ rewards, token, onRewardsChange }) {
-  const [desc, setDesc]     = useState('');
-  const [pts, setPts]       = useState('');
-  const [saving, setSaving] = useState(false);
-  const [err, setErr]       = useState('');
+  const [desc,     setDesc]     = useState('');
+  const [pts,      setPts]      = useState('');
+  const [mechanic, setMechanic] = useState('points');
+  const [saving,   setSaving]   = useState(false);
+  const [err,      setErr]      = useState('');
 
   async function handleAdd(e) {
     e.preventDefault();
     const p = parseInt(pts, 10);
     if (!desc.trim() || isNaN(p) || p <= 0) { setErr('Veuillez remplir tous les champs.'); return; }
     setSaving(true); setErr('');
-    try { await addReward(desc.trim(), p, token); setDesc(''); setPts(''); onRewardsChange(); }
+    try { await addReward(desc.trim(), p, token, mechanic); setDesc(''); setPts(''); onRewardsChange(); }
     catch (e) { setErr(e.message); }
     finally { setSaving(false); }
   }
 
   const active   = rewards.filter(r => r.active);
   const inactive = rewards.filter(r => !r.active);
+  const ptRewards = active.filter(r => (r.mechanic || 'points') === 'points');
+  const stRewards = active.filter(r => r.mechanic === 'stamps');
 
   return (
     <div className="px-5 md:px-6 pt-2 pb-6 md:grid md:grid-cols-2 md:gap-6 md:items-start">
-      <div>
-        <p className="text-gray-500 text-xs font-semibold uppercase tracking-widest mb-3">Récompenses actives {active.length > 0 ? `(${active.length})` : ''}</p>
+      <div className="space-y-4">
         {active.length === 0 && (
           <div className="text-center py-10 bg-[#0e0e18] border border-white/5 rounded-2xl">
             <div className="flex justify-center mb-2 text-gray-600"><IcoGift s={32} /></div>
             <p className="text-gray-500 text-sm">Aucune récompense configurée</p>
-            <p className="text-gray-600 text-xs mt-1">Ajoutez-en une pour motiver vos clients</p>
+            <p className="text-gray-600 text-xs mt-1">Ajoutez des récompenses en points ou en tampons</p>
           </div>
         )}
-        <div className="space-y-3">
-          {active.map(r => (
-            <div key={r.id} className="bg-[#0e0e18] border border-white/5 rounded-2xl px-4 py-4 flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-500/25 flex items-center justify-center shrink-0">
-                <svg className="w-4 h-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z"/></svg>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-white font-semibold text-sm truncate">{r.description}</p>
-                <p className="text-amber-400/80 text-xs">{r.points_required} points requis</p>
-              </div>
-              <button onClick={() => deleteReward(r.id, token).then(onRewardsChange).catch(() => {})}
-                className="w-8 h-8 rounded-xl bg-gray-800 hover:bg-red-500/20 hover:text-red-400 flex items-center justify-center text-gray-600 transition-all active:scale-90 shrink-0">
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
-              </button>
+        {ptRewards.length > 0 && (
+          <div>
+            <p className="text-gray-500 text-[10px] font-semibold uppercase tracking-widest mb-2 flex items-center gap-1.5">
+              <svg className="w-3 h-3 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25"/></svg>
+              Récompenses Points ({ptRewards.length})
+            </p>
+            <div className="space-y-2">
+              {ptRewards.map(r => <RewardCard key={r.id} r={r} token={token} onRewardsChange={onRewardsChange} />)}
             </div>
-          ))}
-        </div>
-        {inactive.length > 0 && <p className="text-gray-700 text-xs mt-3">{inactive.length} récompense{inactive.length > 1 ? 's' : ''} désactivée{inactive.length > 1 ? 's' : ''}</p>}
+          </div>
+        )}
+        {stRewards.length > 0 && (
+          <div>
+            <p className="text-gray-500 text-[10px] font-semibold uppercase tracking-widest mb-2 flex items-center gap-1.5">
+              <svg className="w-3 h-3 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+              Récompenses Tampons ({stRewards.length})
+            </p>
+            <div className="space-y-2">
+              {stRewards.map(r => <RewardCard key={r.id} r={r} token={token} onRewardsChange={onRewardsChange} />)}
+            </div>
+          </div>
+        )}
+        {inactive.length > 0 && <p className="text-gray-700 text-xs">{inactive.length} récompense{inactive.length > 1 ? 's' : ''} désactivée{inactive.length > 1 ? 's' : ''}</p>}
       </div>
 
       <div className="mt-4 md:mt-0 bg-[#0e0e18] border border-white/5 rounded-3xl p-5">
         <p className="text-gray-400 text-sm font-semibold mb-4">Ajouter une récompense</p>
         <form onSubmit={handleAdd} className="space-y-3">
+          {/* Mechanic selector */}
+          <div>
+            <label className="block text-xs text-gray-500 mb-1.5">Basé sur</label>
+            <div className="grid grid-cols-2 gap-2">
+              <button type="button" onClick={() => setMechanic('points')}
+                className={`py-2.5 rounded-xl border text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${mechanic === 'points' ? 'border-indigo-500 bg-indigo-500/10 text-indigo-300' : 'border-gray-700 bg-gray-800 text-gray-500 hover:border-gray-600'}`}>
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25M9 15h.008v.008H9V15Z"/></svg>
+                Les points
+              </button>
+              <button type="button" onClick={() => setMechanic('stamps')}
+                className={`py-2.5 rounded-xl border text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${mechanic === 'stamps' ? 'border-amber-500 bg-amber-500/10 text-amber-300' : 'border-gray-700 bg-gray-800 text-gray-500 hover:border-gray-600'}`}>
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+                Les tampons
+              </button>
+            </div>
+          </div>
           <div>
             <label className="block text-xs text-gray-500 mb-1.5">Description</label>
-            <input type="text" placeholder="ex : 1 café gratuit" value={desc} onChange={e => setDesc(e.target.value)}
+            <input type="text" placeholder={mechanic === 'stamps' ? 'ex : 10e café offert' : 'ex : Réduction 10%'} value={desc} onChange={e => setDesc(e.target.value)}
               className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-600 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 transition" />
           </div>
           <div>
-            <label className="block text-xs text-gray-500 mb-1.5">Points requis</label>
-            <input type="number" inputMode="numeric" min="1" placeholder="ex : 100" value={pts} onChange={e => setPts(e.target.value)}
+            <label className="block text-xs text-gray-500 mb-1.5">{mechanic === 'stamps' ? 'Tampons requis' : 'Points requis'}</label>
+            <input type="number" inputMode="numeric" min="1" placeholder={mechanic === 'stamps' ? 'ex : 10' : 'ex : 100'} value={pts} onChange={e => setPts(e.target.value)}
               className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-600 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 transition" />
           </div>
           {err && <p className="text-red-400 text-xs">{err}</p>}
           <button type="submit" disabled={saving}
-            className="w-full py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:scale-[0.98] disabled:opacity-60 text-white font-semibold text-sm transition-all">
-            {saving ? 'Ajout…' : '+ Ajouter la récompense'}
+            className={`w-full py-3.5 rounded-xl active:scale-[0.98] disabled:opacity-60 text-white font-semibold text-sm transition-all ${mechanic === 'stamps' ? 'bg-amber-600 hover:bg-amber-500' : 'bg-indigo-600 hover:bg-indigo-500'}`}>
+            {saving ? 'Ajout…' : `+ Ajouter ${mechanic === 'stamps' ? '(tampons)' : '(points)'}`}
           </button>
         </form>
       </div>
@@ -1821,8 +1871,6 @@ export default function DashboardPage({ auth, dashData, dashLoading, onLogout, o
           onClose={() => { setShowScan(false); onRefresh(); }}
           onRefresh={onRefresh}
           cameraStream={cameraStreamRef.current}
-          mechanic={merchant.loyalty_mechanic || 'points'}
-          stampThreshold={rewards.filter(r => r.active).reduce((min, r) => Math.min(min, r.points_required), 10)}
         />
       )}
     </div>

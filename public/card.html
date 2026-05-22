@@ -130,13 +130,13 @@
       <p class="text-gray-700 text-[10px]">Ce QR est votre identité Fidelyzio</p>
     </div>
 
-    <!-- Memberships section -->
+    <!-- Memberships section (accordion) -->
     <div class="mb-5 animate-fade-up delay-2">
       <div class="flex items-center justify-between mb-3">
-        <p class="text-gray-500 text-xs font-semibold uppercase tracking-widest">Mes points</p>
+        <p class="text-gray-500 text-xs font-semibold uppercase tracking-widest">Mes commerces</p>
         <p id="last-updated" class="text-gray-700 text-[10px]"></p>
       </div>
-      <div id="memberships-list" class="space-y-3"></div>
+      <div id="memberships-list" class="space-y-2"></div>
     </div>
 
     <!-- Empty state -->
@@ -199,7 +199,92 @@
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
-  // ── Render memberships (called on init + every refresh) ───────────────────
+  // ── Accordion state ───────────────────────────────────────────────────────
+  let expandedMbId = null;
+
+  function toggleMb(id) {
+    const body    = $('mb-body-' + id);
+    const chevron = $('mb-chev-' + id);
+    if (!body) return;
+    if (expandedMbId && expandedMbId !== id) {
+      const oldBody = $('mb-body-' + expandedMbId);
+      const oldChev = $('mb-chev-' + expandedMbId);
+      if (oldBody) oldBody.style.display = 'none';
+      if (oldChev) oldChev.style.transform = '';
+    }
+    const opening = body.style.display === 'none' || !body.style.display;
+    body.style.display = opening ? 'block' : 'none';
+    chevron.style.transform = opening ? 'rotate(180deg)' : '';
+    expandedMbId = opening ? id : null;
+  }
+
+  // Build progress bar HTML (points-based rewards)
+  function buildProgressBar(pts, ptRewards, color) {
+    if (!ptRewards.length) return '';
+    const maxPts = Math.max(...ptRewards.map(r => r.points_required), 1);
+    const curPct = Math.min(100, Math.round((pts / maxPts) * 100));
+    const ms = ptRewards.map(r => ({
+      ...r, pct: Math.min(100, Math.round((r.points_required / maxPts) * 100)),
+      unlocked: pts >= r.points_required,
+    }));
+    return `
+      <div style="margin-bottom:4px">
+        <div style="position:relative;height:28px;margin-bottom:6px">
+          <div style="position:absolute;inset:0;height:8px;border-radius:9999px;background:#1f2937;top:13px"></div>
+          <div style="position:absolute;left:0;height:8px;border-radius:9999px;top:13px;width:${curPct}%;background:${color};transition:width .6s ease"></div>
+          ${ms.map(m => `<div style="position:absolute;width:3px;border-radius:9999px;left:${m.pct}%;top:9px;height:18px;transform:translateX(-50%);background:${m.unlocked ? 'rgba(255,255,255,.75)' : '#374151'}"></div>`).join('')}
+          <div style="position:absolute;width:16px;height:16px;border-radius:50%;left:${curPct}%;top:11px;transform:translateX(-50%);background:white;box-shadow:0 0 0 2px #111827,0 2px 8px rgba(0,0,0,.5)"></div>
+        </div>
+        <div style="position:relative;height:14px;margin-bottom:8px">
+          ${ms.map(m => `<span style="position:absolute;font-size:9px;left:${m.pct}%;transform:translateX(-50%);color:${m.unlocked ? 'rgba(255,255,255,.35)' : '#374151'}">${m.points_required}</span>`).join('')}
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        ${ms.map(m => `
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:12px;${m.unlocked ? `background:${color}18;border:1px solid ${color}35` : 'background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05)'}">
+            <div style="width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;${m.unlocked ? `background:${color}25;border:1px solid ${color}50` : 'background:#1f2937;border:1px solid #374151'}">
+              ${m.unlocked ? `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>` : `<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#4b5563" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`}
+            </div>
+            <span style="flex:1;font-size:12px;${m.unlocked ? 'font-weight:600;color:#fde68a' : 'color:#6b7280'}">${esc(m.description)}</span>
+            <span style="font-size:10px;font-weight:700;${m.unlocked ? 'color:#fbbf24' : 'color:#374151'}">${m.points_required} pts</span>
+          </div>`).join('')}
+      </div>`;
+  }
+
+  // Build stamp grid HTML (stamps-based rewards)
+  function buildStampGrid(stamps, stRewards, color) {
+    if (!stRewards.length) return '';
+    const threshold = stRewards[0].points_required;
+    const total  = Math.max(threshold, 1);
+    const filled = Math.min(stamps, total);
+    const cols   = total <= 5 ? total : 5;
+    const size   = cols <= 5 ? 44 : 36;
+    const ms = stRewards.map(r => ({
+      ...r, pct: Math.min(100, Math.round((r.points_required / total) * 100)),
+      unlocked: stamps >= r.points_required,
+    }));
+    return `
+      <div style="display:grid;grid-template-columns:repeat(${cols},1fr);gap:8px;margin-bottom:10px">
+        ${Array.from({length: total}, (_, i) => {
+          const done = i < filled;
+          return `<div style="height:${size}px;border-radius:10px;display:flex;align-items:center;justify-content:center;${done ? `background:${color};` : 'background:#1f2937;border:2px solid #374151;'}">
+            ${done ? `<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>` : ''}
+          </div>`;
+        }).join('')}
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        ${ms.map(m => `
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:12px;${m.unlocked ? 'background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25)' : 'background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05)'}">
+            <div style="width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;${m.unlocked ? 'background:rgba(245,158,11,.2);border:1px solid rgba(245,158,11,.4)' : 'background:#1f2937;border:1px solid #374151'}">
+              ${m.unlocked ? '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>' : '<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#4b5563" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>'}
+            </div>
+            <span style="flex:1;font-size:12px;${m.unlocked ? 'font-weight:600;color:#fde68a' : 'color:#6b7280'}">${esc(m.description)}</span>
+            <span style="font-size:10px;font-weight:700;${m.unlocked ? 'color:#fbbf24' : 'color:#374151'}">${m.points_required} tamp.</span>
+          </div>`).join('')}
+      </div>`;
+  }
+
+  // ── Render memberships (accordion, called on init + every refresh) ─────────
   function renderMemberships(memberships) {
     if (memberships.length === 0) {
       $('no-memberships').style.display = 'block';
@@ -209,12 +294,15 @@
     $('no-memberships').style.display = 'none';
 
     $('memberships-list').innerHTML = memberships.map((mb, i) => {
-      const color     = mb.color || '#6366f1';
-      const initial   = (mb.merchant_name || '?').charAt(0).toUpperCase();
-      const lastVisit = mb.last_visit ? fmtDate(mb.last_visit) : null;
-      const unlocked  = mb.rewards.filter(r => mb.points >= r.points_required);
-      const isStamps  = mb.mechanic === 'stamps';
-      const threshold = mb.rewards.length > 0 ? mb.rewards[0].points_required : 10;
+      const color    = mb.color || '#6366f1';
+      const initial  = (mb.merchant_name || '?').charAt(0).toUpperCase();
+      const stamps   = Number(mb.stamps_count ?? 0);
+      const pts      = Number(mb.points ?? 0);
+      const ptRwds   = mb.rewards.filter(r => (r.mechanic || 'points') === 'points');
+      const stRwds   = mb.rewards.filter(r => r.mechanic === 'stamps');
+      const hasUnlockedPts = ptRwds.some(r => pts >= r.points_required);
+      const hasUnlockedSt  = stRwds.some(r => stamps >= r.points_required);
+      const hasAnyReward   = hasUnlockedPts || hasUnlockedSt;
 
       // ── Stamp card display (for tampons mechanic) ──────────────────────────
       let progressHtml = '';
@@ -292,32 +380,54 @@
           </div>`;
       } // end else (points mechanic)
 
-      // Card with optional reward banner at top
-      const hasReward = unlocked.length > 0;
+      // Summary line for collapsed header
+      const parts = [];
+      if (pts > 0 || ptRwds.length > 0) parts.push(`${pts} pt${pts !== 1 ? 's' : ''}`);
+      if (stamps > 0 || stRwds.length > 0) parts.push(`${stamps} tampon${stamps !== 1 ? 's' : ''}`);
+      const summary = parts.join(' · ') || 'Aucune activité';
+
       return `
-        <div class="rounded-2xl overflow-hidden ${hasReward ? 'ring-1 ring-amber-400/30' : ''} animate-fade-up" style="animation-delay:${0.06 * i}s">
-          ${hasReward ? `
-            <div class="bg-gradient-to-r from-amber-500/20 to-yellow-400/8 border-b border-amber-400/20 px-4 py-3 flex items-center gap-2.5">
-              <svg class="w-5 h-5 text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z"/></svg>
-              <div class="flex-1 min-w-0">
-                <p class="text-amber-300 font-bold text-sm leading-none">Récompense disponible !</p>
-                ${unlocked.map(r => `<p class="text-amber-400/70 text-xs mt-0.5 truncate">${esc(r.description)}</p>`).join('')}
-              </div>
-            </div>` : ''}
-          <div class="bg-gray-900 border ${hasReward ? 'border-amber-400/15 border-t-0' : 'border-white/5'} p-4">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm shrink-0"
-                   style="background:${color}">${initial}</div>
-              <div class="flex-1 min-w-0">
-                <p class="text-white font-semibold text-sm truncate">${esc(mb.merchant_name)}</p>
-                ${lastVisit ? `<p class="text-gray-600 text-xs">Dernière visite : ${lastVisit}</p>` : ''}
-              </div>
-              <div class="text-right shrink-0">
-                <p class="text-2xl font-black text-white leading-none">${mb.points}</p>
-                <p class="text-gray-600 text-[10px] uppercase tracking-wide">points</p>
-              </div>
+        <div class="rounded-2xl overflow-hidden border ${hasAnyReward ? 'border-amber-400/20' : 'border-white/5'} animate-fade-up" style="animation-delay:${0.06 * i}s">
+
+          <!-- Collapsed header — tap to expand -->
+          <div class="bg-gray-900 px-4 py-4 flex items-center gap-3 cursor-pointer select-none"
+               onclick="toggleMb(${mb.id})" style="${hasAnyReward ? 'background:rgba(245,158,11,0.04)' : ''}">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm shrink-0"
+                 style="background:${color}">${initial}</div>
+            <div class="flex-1 min-w-0">
+              <p class="text-white font-semibold text-sm truncate">${esc(mb.merchant_name)}</p>
+              <p class="text-gray-600 text-xs mt-0.5">${summary}${hasAnyReward ? ' · <span style="color:#fbbf24">récompense dispo</span>' : ''}</p>
             </div>
-            ${progressHtml}
+            <svg id="mb-chev-${mb.id}" style="width:16px;height:16px;color:#4b5563;flex-shrink:0;transition:transform .2s" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/>
+            </svg>
+          </div>
+
+          <!-- Expandable body -->
+          <div id="mb-body-${mb.id}" style="display:none;background:#111827;border-top:1px solid rgba(255,255,255,0.05);padding:16px">
+
+            ${ptRwds.length > 0 ? `
+            <!-- Points section -->
+            <div style="margin-bottom:${stRwds.length ? '20px' : '0'}">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+                <span style="color:#6b7280;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em">Points</span>
+                <span style="font-size:18px;font-weight:900;color:#ffffff">${pts}<span style="font-size:11px;color:#4b5563;font-weight:500"> pts</span></span>
+              </div>
+              ${buildProgressBar(pts, ptRwds, color)}
+            </div>` : ''}
+
+            ${stRwds.length > 0 ? `
+            <!-- Stamps section -->
+            <div>
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+                <span style="color:#6b7280;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em">Tampons</span>
+                <span style="font-size:18px;font-weight:900;color:#fbbf24">${stamps}<span style="font-size:11px;color:#4b5563;font-weight:500"> / ${stRwds[0].points_required}</span></span>
+              </div>
+              ${buildStampGrid(stamps, stRwds, color)}
+            </div>` : ''}
+
+            ${ptRwds.length === 0 && stRwds.length === 0 ? `
+            <p style="color:#4b5563;font-size:13px;text-align:center;padding:12px 0">Aucune récompense configurée</p>` : ''}
           </div>
         </div>`;
     }).join('');

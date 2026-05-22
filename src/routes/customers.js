@@ -96,19 +96,53 @@ router.get('/lookup', async (req, res) => {
 
 // POST /api/customers/join — create standalone customer card (no merchant required)
 router.post('/join', async (req, res) => {
-  const { first_name, phone } = req.body;
+  const { first_name, phone, email: customerEmail } = req.body;
   if (!first_name || !phone) return res.status(400).json({ error: 'first_name et phone sont requis' });
-  const { v4: uuidv4 } = require('uuid');
   try {
     let customer = await db.one('SELECT * FROM customers WHERE phone = $1', [phone.trim()]);
+    const isNew = !customer;
     if (!customer) {
       const id = await db.insert(
-        'INSERT INTO customers (first_name, phone, qr_code) VALUES ($1, $2, $3)',
-        [first_name.trim(), phone.trim(), uuidv4()]
+        'INSERT INTO customers (first_name, phone, email, qr_code) VALUES ($1, $2, $3, $4)',
+        [first_name.trim(), phone.trim(), customerEmail ? customerEmail.trim().toLowerCase() : null, uuidv4()]
       );
-      customer = await db.one('SELECT id, first_name, phone, qr_code FROM customers WHERE id = $1', [id]);
+      customer = await db.one('SELECT id, first_name, phone, email, qr_code FROM customers WHERE id = $1', [id]);
+    }
+    const baseUrl = process.env.BASE_URL || 'https://fidelyzio.com';
+    const cardUrl = `${baseUrl}/card/${customer.qr_code}`;
+    if (isNew && customer.email) {
+      email.sendCustomerWelcome({ to: customer.email, firstName: customer.first_name, cardUrl }).catch(() => {});
     }
     res.json({ customer: { id: customer.id, first_name: customer.first_name, phone: customer.phone, qr_code: customer.qr_code } });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/customers/recover — send card link to email on file
+router.post('/recover', async (req, res) => {
+  const { email: queryEmail, phone } = req.body;
+  if (!queryEmail && !phone)
+    return res.status(400).json({ error: 'email ou phone requis' });
+
+  try {
+    let customer;
+    if (queryEmail) {
+      customer = await db.one(
+        'SELECT * FROM customers WHERE LOWER(email) = $1',
+        [queryEmail.trim().toLowerCase()]
+      );
+    } else {
+      customer = await db.one('SELECT * FROM customers WHERE phone = $1', [phone.trim()]);
+    }
+
+    if (customer?.email) {
+      const baseUrl = process.env.BASE_URL || 'https://fidelyzio.com';
+      const cardUrl = `${baseUrl}/card/${customer.qr_code}`;
+      email.sendCardRecovery({ to: customer.email, firstName: customer.first_name, cardUrl }).catch(() => {});
+    }
+
+    res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

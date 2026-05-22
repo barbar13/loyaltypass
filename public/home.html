@@ -80,6 +80,19 @@
       transition: color 0.15s, background 0.15s;
     }
     .btn-nav-ghost:hover { color: var(--navy); background: var(--cream2); }
+    .btn-nav-indigo {
+      color: #4f46e5; font-size: 14px; font-weight: 600;
+      text-decoration: none; padding: 8px 14px; border-radius: 8px;
+      border: 1.5px solid rgba(99,102,241,.35);
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .btn-nav-indigo:hover { background: rgba(99,102,241,.08); border-color: #6366f1; }
+    .btn-nav-amber {
+      background: var(--gold); color: var(--navy); font-size: 14px; font-weight: 700;
+      text-decoration: none; padding: 8px 16px; border-radius: 8px; border: none;
+      transition: background 0.15s;
+    }
+    .btn-nav-amber:hover { background: #e8a81e; }
 
     /* ── Buttons ───────────────────────────────────────────────────────────── */
     .btn-navy {
@@ -319,9 +332,8 @@
       Fidelyzio
     </a>
     <div class="nav-actions">
-      <a href="#tarifs" class="btn-nav-ghost" style="display:none">Tarifs</a>
-      <a href="/login"    class="btn-nav-ghost">Se connecter</a>
-      <a href="/register" class="btn-navy btn-navy-sm">Essayer gratuitement</a>
+      <a href="/register" class="btn-nav-indigo">Espace commerçant</a>
+      <a href="/join"     class="btn-nav-amber">Ma carte</a>
     </div>
   </div>
 </nav>
@@ -702,6 +714,43 @@
         Commencer mon essai gratuit →
       </a>
       <p style="text-align:center;color:rgba(250,250,248,.3);font-size:12px;margin-top:14px">Résiliable à tout moment · Données hébergées en France</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════ VOUS ÊTES ? ══════════════════════════════════════ -->
+<section class="section-pad-sm" style="background:var(--cream2)">
+  <div class="wrap" style="max-width:720px">
+    <div style="text-align:center;margin-bottom:40px">
+      <p style="color:var(--muted);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px">À chacun son espace</p>
+      <h2 class="section-h2">Vous êtes ?</h2>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <a href="/register" style="display:flex;flex-direction:column;gap:16px;padding:28px;border-radius:20px;background:#0d1420;border:1.5px solid rgba(99,102,241,.3);text-decoration:none;transition:border-color .2s,transform .1s" onmouseover="this.style.borderColor='#6366f1';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='rgba(99,102,241,.3)';this.style.transform='translateY(0)'">
+        <div style="width:44px;height:44px;border-radius:14px;background:rgba(99,102,241,.15);display:flex;align-items:center;justify-content:center">
+          <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#6366f1" stroke-width="1.8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016 2.993 2.993 0 0 0 2.25-1.016 3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72M6.75 18h3.75a.75.75 0 0 0 .75-.75V13.5a.75.75 0 0 0-.75-.75H6.75a.75.75 0 0 0-.75.75v3.75c0 .414.336.75.75.75Z"/>
+          </svg>
+        </div>
+        <div>
+          <p style="color:#fafaf8;font-size:16px;font-weight:800;margin-bottom:6px">Commerçant</p>
+          <p style="color:rgba(250,250,248,.45);font-size:13px;line-height:1.6">Créez votre programme de fidélité en 2 minutes. Essai gratuit 14 jours.</p>
+        </div>
+        <span style="color:#6366f1;font-size:14px;font-weight:700;margin-top:auto">Espace commerçant →</span>
+      </a>
+
+      <a href="/join" style="display:flex;flex-direction:column;gap:16px;padding:28px;border-radius:20px;background:rgba(240,180,41,.06);border:1.5px solid rgba(240,180,41,.25);text-decoration:none;transition:border-color .2s,transform .1s" onmouseover="this.style.borderColor='#f0b429';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='rgba(240,180,41,.25)';this.style.transform='translateY(0)'">
+        <div style="width:44px;height:44px;border-radius:14px;background:rgba(240,180,41,.15);display:flex;align-items:center;justify-content:center">
+          <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#f0b429" stroke-width="1.8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z"/>
+          </svg>
+        </div>
+        <div>
+          <p style="color:#fafaf8;font-size:16px;font-weight:800;margin-bottom:6px">Client</p>
+          <p style="color:rgba(250,250,248,.45);font-size:13px;line-height:1.6">Retrouvez ou créez votre carte de fidélité Fidelyzio. Gratuit.</p>
+        </div>
+        <span style="color:#f0b429;font-size:14px;font-weight:700;margin-top:auto">Ma carte →</span>
+      </a>
     </div>
   </div>
 </section>

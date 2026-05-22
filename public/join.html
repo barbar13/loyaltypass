@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#0d1420">
-  <title>Trouver ma carte — Fidelyzio</title>
+  <title>Ma carte Fidelyzio</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="apple-touch-icon" href="/favicon.svg">
   <script>
@@ -23,6 +23,7 @@
     input { font-size: 16px !important; }
 
     @keyframes fade-up { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes spin    { to { transform: rotate(360deg); } }
     .au  { animation: fade-up .45s cubic-bezier(.16,1,.3,1) both; }
     .d1  { animation-delay:.06s; }
     .d2  { animation-delay:.12s; }
@@ -47,6 +48,33 @@
     .btn-gold:hover:not(:disabled) { opacity: .9; transform: translateY(-1px); }
     .btn-gold:disabled { opacity: .5; cursor: not-allowed; }
 
+    .btn-navy {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%; background: #1a2640; border: 1px solid rgba(138,154,176,.2);
+      color: white; font-weight: 700; border-radius: 14px;
+      padding: 16px; font-size: 15px; cursor: pointer;
+      transition: background .15s, border-color .15s;
+    }
+    .btn-navy:hover { background: #1e2e4a; border-color: rgba(138,154,176,.35); }
+
+    .choice-card {
+      display: flex; flex-direction: column; align-items: flex-start;
+      padding: 22px; border-radius: 20px; cursor: pointer; text-align: left;
+      border: 1.5px solid transparent; transition: border-color .2s, transform .1s, box-shadow .2s;
+      text-decoration: none; gap: 10px;
+    }
+    .choice-card:hover { transform: translateY(-2px); box-shadow: 0 16px 48px rgba(0,0,0,.3); }
+    .choice-card-gold {
+      background: linear-gradient(135deg, rgba(240,180,41,.12), rgba(212,146,14,.08));
+      border-color: rgba(240,180,41,.3);
+    }
+    .choice-card-gold:hover { border-color: rgba(240,180,41,.6); }
+    .choice-card-navy {
+      background: rgba(255,255,255,.04);
+      border-color: rgba(138,154,176,.15);
+    }
+    .choice-card-navy:hover { border-color: rgba(138,154,176,.35); }
+
     .step { display: none; }
     .step.active { display: block; }
   </style>
@@ -65,58 +93,132 @@
       </div>
       <div>
         <p style="color:white;font-weight:900;font-size:20px;letter-spacing:-.03em">Fidelyzio</p>
-        <p style="color:rgba(138,154,176,.6);font-size:13px;margin-top:2px">Trouver ma carte de fidélité</p>
+        <p style="color:rgba(138,154,176,.6);font-size:13px;margin-top:2px">Carte de fidélité digitale</p>
       </div>
     </a>
   </div>
 
   <!-- Card container -->
   <div class="w-full max-w-sm au d1">
-    <div style="background:#141f30;border:1px solid rgba(240,180,41,.12);border-radius:24px;padding:28px">
+    <div style="background:#141f30;border:1px solid rgba(255,255,255,.07);border-radius:24px;padding:28px">
 
-      <!-- ── STEP 1: Phone lookup ─────────────────────────────────────────── -->
-      <div id="step-phone" class="step active">
-        <h1 style="color:white;font-weight:800;font-size:18px;margin-bottom:6px">Entrez votre numéro</h1>
-        <p style="color:rgba(138,154,176,.7);font-size:13px;line-height:1.6;margin-bottom:22px">
-          Nous allons retrouver votre carte ou en créer une nouvelle.
+      <!-- ── STEP 0: Choice ──────────────────────────────────────────────────── -->
+      <div id="step-choice" class="step active">
+        <h1 style="color:white;font-weight:800;font-size:18px;margin-bottom:6px">Vous avez déjà une carte ?</h1>
+        <p style="color:rgba(138,154,176,.7);font-size:13px;line-height:1.6;margin-bottom:24px">
+          Choisissez une option pour retrouver ou créer votre carte de fidélité.
         </p>
 
-        <label style="display:block;color:rgba(138,154,176,.8);font-size:13px;font-weight:600;margin-bottom:8px">Numéro de téléphone</label>
-        <input id="inp-phone" type="tel" autocomplete="tel" inputmode="tel"
-               placeholder="06 12 34 56 78" class="field" style="margin-bottom:16px"
-               onkeydown="if(event.key==='Enter')lookupPhone()">
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <!-- Has a card -->
+          <button class="choice-card choice-card-gold" onclick="showStep('recover')">
+            <div style="width:40px;height:40px;border-radius:12px;background:rgba(240,180,41,.15);display:flex;align-items:center;justify-content:center">
+              <svg style="width:20px;height:20px" fill="none" viewBox="0 0 24 24" stroke="#f0b429" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z"/>
+              </svg>
+            </div>
+            <div>
+              <p style="color:white;font-weight:700;font-size:15px;margin-bottom:3px">J'ai déjà une carte</p>
+              <p style="color:rgba(138,154,176,.65);font-size:13px">Recevoir le lien de ma carte par e-mail</p>
+            </div>
+            <svg style="width:16px;height:16px;color:rgba(240,180,41,.6);margin-left:auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/>
+            </svg>
+          </button>
 
-        <div id="phone-error" style="display:none;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:12px;padding:12px 14px;color:rgb(248,113,113);font-size:13px;margin-bottom:14px"></div>
+          <!-- No card yet -->
+          <button class="choice-card choice-card-navy" onclick="showStep('create')">
+            <div style="width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center">
+              <svg style="width:20px;height:20px" fill="none" viewBox="0 0 24 24" stroke="rgba(138,154,176,.8)" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+              </svg>
+            </div>
+            <div>
+              <p style="color:white;font-weight:700;font-size:15px;margin-bottom:3px">Je n'ai pas encore de carte</p>
+              <p style="color:rgba(138,154,176,.65);font-size:13px">Créer ma carte gratuitement</p>
+            </div>
+            <svg style="width:16px;height:16px;color:rgba(138,154,176,.4);margin-left:auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/>
+            </svg>
+          </button>
+        </div>
+      </div>
 
-        <button id="btn-lookup" class="btn-gold" onclick="lookupPhone()">
-          Trouver ma carte →
+      <!-- ── STEP recover: Enter email ─────────────────────────────────────── -->
+      <div id="step-recover" class="step">
+        <button onclick="showStep('choice')" style="display:flex;align-items:center;gap:6px;background:none;border:none;color:rgba(138,154,176,.6);font-size:13px;cursor:pointer;padding:0;margin-bottom:18px">
+          <svg style="width:14px;height:14px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/>
+          </svg>
+          Retour
+        </button>
+        <h1 style="color:white;font-weight:800;font-size:18px;margin-bottom:6px">Retrouver ma carte</h1>
+        <p style="color:rgba(138,154,176,.7);font-size:13px;line-height:1.6;margin-bottom:22px">
+          Entrez votre adresse e-mail. Nous vous enverrons un lien pour accéder à votre carte.
+        </p>
+
+        <label style="display:block;color:rgba(138,154,176,.8);font-size:13px;font-weight:600;margin-bottom:8px">Adresse e-mail</label>
+        <input id="inp-recover-email" type="email" autocomplete="email" inputmode="email"
+               placeholder="votre@email.com" class="field" style="margin-bottom:16px"
+               onkeydown="if(event.key==='Enter')sendRecovery()">
+
+        <div id="recover-error" style="display:none;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:12px;padding:12px 14px;color:rgb(248,113,113);font-size:13px;margin-bottom:14px"></div>
+
+        <button id="btn-recover" class="btn-gold" onclick="sendRecovery()">
+          Envoyer le lien →
         </button>
       </div>
 
-      <!-- ── STEP 2: Not found — create account ────────────────────────────── -->
+      <!-- ── STEP sent: Email sent confirmation ──────────────────────────────── -->
+      <div id="step-sent" class="step" style="text-align:center;padding:24px 0">
+        <div style="width:60px;height:60px;border-radius:50%;background:rgba(240,180,41,.12);border:2px solid rgba(240,180,41,.3);display:flex;align-items:center;justify-content:center;margin:0 auto 18px">
+          <svg style="width:28px;height:28px;color:#f0b429" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"/>
+          </svg>
+        </div>
+        <h2 style="color:white;font-weight:800;font-size:18px;margin-bottom:8px">E-mail envoyé !</h2>
+        <p style="color:rgba(138,154,176,.7);font-size:14px;line-height:1.6;margin-bottom:24px">
+          Vérifiez votre boîte de réception. Le lien vers votre carte est en route.
+        </p>
+        <button onclick="showStep('choice')" class="btn-navy" style="font-size:14px;padding:12px">
+          Retour à l'accueil
+        </button>
+      </div>
+
+      <!-- ── STEP create: Signup form ────────────────────────────────────────── -->
       <div id="step-create" class="step">
-        <div style="margin-bottom:20px">
-          <button onclick="goBack()" style="display:flex;align-items:center;gap:6px;background:none;border:none;color:rgba(138,154,176,.6);font-size:13px;cursor:pointer;padding:0;margin-bottom:14px">
-            <svg style="width:14px;height:14px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/>
-            </svg>
-            Modifier le numéro
-          </button>
-          <h1 style="color:white;font-weight:800;font-size:18px;margin-bottom:6px">Créer ma carte</h1>
-          <p style="color:rgba(138,154,176,.7);font-size:13px;line-height:1.6">
-            Aucune carte trouvée pour ce numéro. Entrez votre prénom pour en créer une gratuite.
-          </p>
-        </div>
+        <button onclick="showStep('choice')" style="display:flex;align-items:center;gap:6px;background:none;border:none;color:rgba(138,154,176,.6);font-size:13px;cursor:pointer;padding:0;margin-bottom:18px">
+          <svg style="width:14px;height:14px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/>
+          </svg>
+          Retour
+        </button>
+        <h1 style="color:white;font-weight:800;font-size:18px;margin-bottom:6px">Créer ma carte</h1>
+        <p style="color:rgba(138,154,176,.7);font-size:13px;line-height:1.6;margin-bottom:22px">
+          Votre carte de fidélité universelle, gratuite, sans application.
+        </p>
 
-        <div style="background:rgba(240,180,41,.06);border:1px solid rgba(240,180,41,.15);border-radius:12px;padding:12px 14px;margin-bottom:20px">
-          <p style="color:rgba(240,180,41,.7);font-size:12px;font-weight:700;margin-bottom:2px">Numéro</p>
-          <p id="display-phone" style="color:white;font-size:14px;font-weight:600"></p>
+        <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:16px">
+          <div>
+            <label style="display:block;color:rgba(138,154,176,.8);font-size:13px;font-weight:600;margin-bottom:8px">Votre prénom <span style="color:#f0b429">*</span></label>
+            <input id="inp-name" type="text" autocomplete="given-name"
+                   placeholder="ex : Marie" class="field">
+          </div>
+          <div>
+            <label style="display:block;color:rgba(138,154,176,.8);font-size:13px;font-weight:600;margin-bottom:8px">Numéro de téléphone <span style="color:#f0b429">*</span></label>
+            <input id="inp-phone" type="tel" autocomplete="tel" inputmode="tel"
+                   placeholder="06 12 34 56 78" class="field">
+          </div>
+          <div>
+            <label style="display:block;color:rgba(138,154,176,.8);font-size:13px;font-weight:600;margin-bottom:8px">
+              E-mail
+              <span style="color:rgba(138,154,176,.4);font-weight:400;font-size:12px">(optionnel — pour retrouver votre carte)</span>
+            </label>
+            <input id="inp-email" type="email" autocomplete="email" inputmode="email"
+                   placeholder="votre@email.com" class="field"
+                   onkeydown="if(event.key==='Enter')createCard()">
+          </div>
         </div>
-
-        <label style="display:block;color:rgba(138,154,176,.8);font-size:13px;font-weight:600;margin-bottom:8px">Votre prénom</label>
-        <input id="inp-name" type="text" autocomplete="given-name"
-               placeholder="ex : Marie" class="field" style="margin-bottom:16px"
-               onkeydown="if(event.key==='Enter')createCard()">
 
         <div id="create-error" style="display:none;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:12px;padding:12px 14px;color:rgb(248,113,113);font-size:13px;margin-bottom:14px"></div>
 
@@ -125,21 +227,21 @@
         </button>
       </div>
 
-      <!-- ── STEP 3: Loading ────────────────────────────────────────────────── -->
+      <!-- ── STEP loading ─────────────────────────────────────────────────────── -->
       <div id="step-loading" class="step" style="text-align:center;padding:32px 0">
         <div style="width:48px;height:48px;border:3px solid rgba(240,180,41,.2);border-top-color:#f0b429;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px"></div>
-        <p id="loading-msg" style="color:rgba(138,154,176,.7);font-size:14px">Recherche en cours…</p>
+        <p id="loading-msg" style="color:rgba(138,154,176,.7);font-size:14px">Chargement…</p>
       </div>
 
-      <!-- ── STEP 4: Success ────────────────────────────────────────────────── -->
+      <!-- ── STEP success ─────────────────────────────────────────────────────── -->
       <div id="step-success" class="step" style="text-align:center;padding:24px 0">
         <div style="width:60px;height:60px;border-radius:50%;background:rgba(240,180,41,.12);border:2px solid rgba(240,180,41,.3);display:flex;align-items:center;justify-content:center;margin:0 auto 18px">
           <svg style="width:28px;height:28px;color:#f0b429" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
           </svg>
         </div>
-        <h2 id="success-title" style="color:white;font-weight:800;font-size:18px;margin-bottom:8px">Carte trouvée !</h2>
-        <p id="success-msg" style="color:rgba(138,154,176,.7);font-size:14px;line-height:1.6;margin-bottom:24px"></p>
+        <h2 id="success-title" style="color:white;font-weight:800;font-size:18px;margin-bottom:8px">Carte créée !</h2>
+        <p id="success-msg" style="color:rgba(138,154,176,.7);font-size:14px;line-height:1.6;margin-bottom:12px"></p>
         <p style="color:rgba(138,154,176,.4);font-size:12px">Redirection automatique…</p>
       </div>
 
@@ -148,89 +250,66 @@
 
   <!-- Footer link -->
   <p class="au d2" style="margin-top:24px;color:rgba(138,154,176,.4);font-size:13px">
-    Commerçant ? <a href="/login" style="color:rgba(240,180,41,.7);text-decoration:none">Se connecter →</a>
+    Commerçant ? <a href="/register" style="color:rgba(240,180,41,.7);text-decoration:none">Créer un programme →</a>
   </p>
 
 </div>
 
-<style>
-  @keyframes spin { to { transform: rotate(360deg); } }
-</style>
-
 <script>
-  let phone = '';
-
   function showStep(id) {
     document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
     document.getElementById('step-' + id).classList.add('active');
   }
 
-  function showPhoneError(msg) {
-    const el = document.getElementById('phone-error');
-    el.textContent = msg;
-    el.style.display = 'block';
+  function showRecoverError(msg) {
+    const el = document.getElementById('recover-error');
+    el.textContent = msg; el.style.display = 'block';
   }
-  function hidePhoneError() { document.getElementById('phone-error').style.display = 'none'; }
+  function hideRecoverError() { document.getElementById('recover-error').style.display = 'none'; }
 
   function showCreateError(msg) {
     const el = document.getElementById('create-error');
-    el.textContent = msg;
-    el.style.display = 'block';
+    el.textContent = msg; el.style.display = 'block';
   }
   function hideCreateError() { document.getElementById('create-error').style.display = 'none'; }
 
-  function goBack() {
-    document.getElementById('inp-phone').value = phone;
-    showStep('phone');
+  async function sendRecovery() {
+    hideRecoverError();
+    const emailVal = document.getElementById('inp-recover-email').value.trim();
+    if (!emailVal || !emailVal.includes('@')) {
+      showRecoverError('Veuillez entrer une adresse e-mail valide.');
+      return;
+    }
+    const btn = document.getElementById('btn-recover');
+    btn.disabled = true;
+    document.getElementById('loading-msg').textContent = 'Envoi en cours…';
+    showStep('loading');
+    try {
+      await fetch('/api/customers/recover', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: emailVal }),
+      });
+      showStep('sent');
+    } catch (_) {
+      showStep('recover');
+      btn.disabled = false;
+      showRecoverError('Impossible de contacter le serveur. Vérifiez votre connexion.');
+    }
   }
 
   function normalizePhone(raw) {
     return raw.replace(/[\s\-\.\(\)]/g, '').trim();
   }
 
-  async function lookupPhone() {
-    hidePhoneError();
-    const raw = document.getElementById('inp-phone').value;
-    phone = normalizePhone(raw);
-    if (!phone || phone.length < 8) {
-      showPhoneError('Veuillez entrer un numéro valide.');
-      return;
-    }
-
-    document.getElementById('loading-msg').textContent = 'Recherche en cours…';
-    showStep('loading');
-
-    try {
-      const r = await fetch(`/api/customers/lookup?phone=${encodeURIComponent(phone)}`);
-      const data = await r.json();
-
-      if (r.ok && data.qr_code) {
-        // Found → redirect to card
-        const cardUrl = `/card/${data.qr_code}`;
-        try { localStorage.setItem('fidelyzio_card_url', cardUrl); } catch (_) {}
-        document.getElementById('success-title').textContent = 'Carte trouvée !';
-        document.getElementById('success-msg').textContent =
-          `Bonjour ${data.first_name} 👋 Redirection vers votre carte…`;
-        showStep('success');
-        setTimeout(() => window.location.replace(cardUrl), 1400);
-      } else if (r.status === 404) {
-        // Not found → create
-        document.getElementById('display-phone').textContent = raw;
-        showStep('create');
-      } else {
-        showStep('phone');
-        showPhoneError(data.error || 'Une erreur est survenue. Réessayez.');
-      }
-    } catch (_) {
-      showStep('phone');
-      showPhoneError('Impossible de contacter le serveur. Vérifiez votre connexion.');
-    }
-  }
-
   async function createCard() {
     hideCreateError();
-    const name = document.getElementById('inp-name').value.trim();
-    if (!name) { showCreateError('Veuillez entrer votre prénom.'); return; }
+    const name  = document.getElementById('inp-name').value.trim();
+    const phone = normalizePhone(document.getElementById('inp-phone').value);
+    const email = document.getElementById('inp-email').value.trim();
+
+    if (!name)              { showCreateError('Veuillez entrer votre prénom.'); return; }
+    if (!phone || phone.length < 8) { showCreateError('Veuillez entrer un numéro de téléphone valide.'); return; }
 
     const btn = document.getElementById('btn-create');
     btn.disabled = true;
@@ -241,7 +320,7 @@
       const r = await fetch('/api/customers/join', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ first_name: name, phone }),
+        body: JSON.stringify({ first_name: name, phone, email: email || undefined }),
       });
       const data = await r.json();
 
@@ -250,7 +329,7 @@
         try { localStorage.setItem('fidelyzio_card_url', cardUrl); } catch (_) {}
         document.getElementById('success-title').textContent = 'Carte créée !';
         document.getElementById('success-msg').textContent =
-          `Bienvenue ${data.customer.first_name} ! Votre carte Fidelyzio est prête. Scannez un QR en caisse pour commencer à accumuler des points.`;
+          `Bienvenue ${data.customer.first_name} ! Votre carte est prête. Scannez un QR en caisse pour commencer à accumuler des points.`;
         showStep('success');
         setTimeout(() => window.location.replace(cardUrl), 2200);
       } else {

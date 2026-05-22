@@ -797,8 +797,9 @@ function HistoryTab({ token }) {
 // ── SettingsTab ───────────────────────────────────────────────────────────────
 
 function SettingsTab({ merchant, token, onRefresh }) {
-  const [name,   setName]   = useState(merchant.name);
-  const [color,  setColor]  = useState(merchant.color || '#6366f1');
+  const [name,     setName]     = useState(merchant.name);
+  const [color,    setColor]    = useState(merchant.color || '#6366f1');
+  const [mechanic, setMechanic] = useState(merchant.loyalty_mechanic || 'points');
   const [pwd,    setPwd]    = useState('');
   const [pwd2,   setPwd2]   = useState('');
   const [saving, setSaving] = useState(false);
@@ -811,7 +812,7 @@ function SettingsTab({ merchant, token, onRefresh }) {
     if (pwd && pwd.length < 6) { setErr('Minimum 6 caractères.'); return; }
     setSaving(true); setErr(''); setMsg('');
     try {
-      const payload = { name: name.trim(), color };
+      const payload = { name: name.trim(), color, loyalty_mechanic: mechanic };
       if (pwd) payload.password = pwd;
       await updateProfile(payload, token);
       setPwd(''); setPwd2(''); setMsg('Profil mis à jour !'); onRefresh();
@@ -834,6 +835,28 @@ function SettingsTab({ merchant, token, onRefresh }) {
             <div className="flex items-center gap-3">
               <input type="color" value={color} onChange={e => setColor(e.target.value)} className="w-12 h-12 rounded-xl cursor-pointer border-0 bg-transparent" />
               <div className="flex-1 bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white text-sm font-mono">{color}</div>
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs text-gray-500 mb-1.5">Mécanique de fidélité</label>
+            <div className="grid grid-cols-2 gap-2">
+              <button type="button" onClick={() => setMechanic('points')}
+                className={`flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl border text-center transition-all ${mechanic === 'points' ? 'border-indigo-500 bg-indigo-500/10 text-white' : 'border-gray-700 bg-gray-800 text-gray-500 hover:border-gray-600'}`}>
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25"/>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 9h18M9 15h.008v.008H9V15Zm3 0h.008v.008H12V15Zm3 0h.008v.008H15V15Z"/>
+                </svg>
+                <span className="text-xs font-semibold">Points</span>
+                <span className="text-[10px] text-gray-500 leading-tight">Montant libre par scan</span>
+              </button>
+              <button type="button" onClick={() => setMechanic('stamps')}
+                className={`flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl border text-center transition-all ${mechanic === 'stamps' ? 'border-amber-500 bg-amber-500/10 text-white' : 'border-gray-700 bg-gray-800 text-gray-500 hover:border-gray-600'}`}>
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                </svg>
+                <span className="text-xs font-semibold">Tampons</span>
+                <span className="text-[10px] text-gray-500 leading-tight">1 scan = 1 tampon</span>
+              </button>
             </div>
           </div>
         </div>
@@ -1793,7 +1816,14 @@ export default function DashboardPage({ auth, dashData, dashLoading, onLogout, o
       </div>
 
       {showScan && (
-        <ScanModal token={auth.token} onClose={() => { setShowScan(false); onRefresh(); }} onRefresh={onRefresh} cameraStream={cameraStreamRef.current} />
+        <ScanModal
+          token={auth.token}
+          onClose={() => { setShowScan(false); onRefresh(); }}
+          onRefresh={onRefresh}
+          cameraStream={cameraStreamRef.current}
+          mechanic={merchant.loyalty_mechanic || 'points'}
+          stampThreshold={rewards.filter(r => r.active).reduce((min, r) => Math.min(min, r.points_required), 10)}
+        />
       )}
     </div>
   );

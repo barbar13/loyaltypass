@@ -212,11 +212,39 @@
       const color     = mb.color || '#6366f1';
       const initial   = (mb.merchant_name || '?').charAt(0).toUpperCase();
       const lastVisit = mb.last_visit ? fmtDate(mb.last_visit) : null;
-      const unlocked = mb.rewards.filter(r => mb.points >= r.points_required);
+      const unlocked  = mb.rewards.filter(r => mb.points >= r.points_required);
+      const isStamps  = mb.mechanic === 'stamps';
+      const threshold = mb.rewards.length > 0 ? mb.rewards[0].points_required : 10;
 
-      // Full multi-milestone progress bar (all rewards on one bar)
+      // ── Stamp card display (for tampons mechanic) ──────────────────────────
       let progressHtml = '';
-      if (mb.rewards && mb.rewards.length > 0) {
+      if (isStamps && threshold > 0) {
+        const total  = threshold;
+        const filled = Math.min(mb.points, total);
+        const cols   = total <= 5 ? total : 5;
+        const slotSize = cols <= 5 ? 44 : 36;
+        progressHtml = `
+          <div class="border-t border-white/5 pt-4 mt-3">
+            <div class="flex items-center justify-between text-xs mb-3">
+              <span class="text-gray-500">Mes tampons</span>
+              <span class="font-bold" style="color:${color}">${filled} / ${total}</span>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(${cols},1fr);gap:8px;margin-bottom:12px">
+              ${Array.from({length: total}, (_, i) => {
+                const done = i < filled;
+                return `<div style="height:${slotSize}px;border-radius:10px;display:flex;align-items:center;justify-content:center;${done ? `background:${color};` : 'background:#1f2937;border:2px solid #374151;'}">
+                  ${done ? `<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>` : ''}
+                </div>`;
+              }).join('')}
+            </div>
+            ${filled >= total ? `<div style="background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.25);border-radius:12px;padding:10px 14px;display:flex;align-items:center;gap:8px">
+              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#fbbf24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z"/></svg>
+              <span style="color:#fbbf24;font-size:13px;font-weight:700">Récompense disponible !</span>
+            </div>` : ''}
+          </div>`;
+      } else if (mb.rewards && mb.rewards.length > 0) {
+        // Full multi-milestone progress bar (for points mechanic)
+
         const maxPts = Math.max(...mb.rewards.map(r => r.points_required), 1);
         const curPct = Math.min(100, Math.round((mb.points / maxPts) * 100));
         const milestones = mb.rewards.map(r => ({
@@ -262,7 +290,7 @@
               `).join('')}
             </div>
           </div>`;
-      }
+      } // end else (points mechanic)
 
       // Card with optional reward banner at top
       const hasReward = unlocked.length > 0;

@@ -65,9 +65,11 @@ router.post('/register', async (req, res) => {
 
     const hashed = await bcrypt.hash(password, SALT_ROUNDS);
     const trialEndsAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString();
+    // Stamps mechanic for café/epicerie types; points for everything else
+    const defaultMechanic = ['cafe', 'epicerie'].includes(business_type) ? 'stamps' : 'points';
     const id = await db.insert(
-      'INSERT INTO merchants (name, email, password, logo_url, color, plan, business_type, trial_ends_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
-      [name, merchantEmail, hashed, logo_url || null, color || '#6366f1', plan || 'free', business_type || null, trialEndsAt]
+      'INSERT INTO merchants (name, email, password, logo_url, color, plan, business_type, loyalty_mechanic, trial_ends_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)',
+      [name, merchantEmail, hashed, logo_url || null, color || '#6366f1', plan || 'free', business_type || null, defaultMechanic, trialEndsAt]
     );
 
     const merchant = await db.one(
@@ -135,7 +137,7 @@ router.get('/dashboard', auth, async (req, res) => {
     const merchant = await db.one(
       `SELECT id, name, email, logo_url, color, plan,
               subscription_status, trial_ends_at, trial_reminder_sent,
-              stripe_customer_id
+              stripe_customer_id, business_type, loyalty_mechanic
        FROM merchants WHERE id = $1`,
       [merchantId]
     );
@@ -200,7 +202,8 @@ router.get('/dashboard', auth, async (req, res) => {
         subscription_status: merchant.subscription_status,
         trial_days_left: trialDaysLeft,
         has_stripe: !!merchant.stripe_customer_id,
-        business_type: merchant.business_type || null,
+        business_type:    merchant.business_type    || null,
+        loyalty_mechanic: merchant.loyalty_mechanic || 'points',
       },
       stats: {
         total_customers: Number(total_customers),
@@ -308,13 +311,17 @@ router.post('/reset-password', async (req, res) => {
 // ─── Profile edit ─────────────────────────────────────────────────────────────
 
 router.post('/profile', auth, async (req, res) => {
-  const { name, color, password } = req.body;
+  const { name, color, password, loyalty_mechanic } = req.body;
   const merchantId = req.merchant.id;
   try {
     const sets   = [];
     const params = [];
     if (name)  { params.push(name.trim());  sets.push(`name  = $${params.length}`); }
     if (color) { params.push(color);        sets.push(`color = $${params.length}`); }
+    if (loyalty_mechanic && ['points', 'stamps'].includes(loyalty_mechanic)) {
+      params.push(loyalty_mechanic);
+      sets.push(`loyalty_mechanic = $${params.length}`);
+    }
     if (password) {
       if (password.length < 6) return res.status(400).json({ error: 'Minimum 6 caractères' });
       params.push(await bcrypt.hash(password, SALT_ROUNDS));

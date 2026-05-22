@@ -127,10 +127,11 @@ router.get('/:qr_code', async (req, res) => {
     const memberships = await db.all(`
       SELECT
         mb.id, mb.points, mb.joined_at,
-        me.id       AS merchant_id,
-        me.name     AS merchant_name,
+        me.id                AS merchant_id,
+        me.name              AS merchant_name,
         me.color,
         me.logo_url,
+        me.loyalty_mechanic  AS mechanic,
         (SELECT MAX(t.created_at) FROM transactions t
          WHERE t.merchant_id = me.id AND t.customer_id = mb.customer_id) AS last_visit
       FROM memberships mb

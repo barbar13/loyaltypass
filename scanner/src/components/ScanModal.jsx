@@ -86,7 +86,7 @@ function StampPanel({ onStamp, onBack, stamping }) {
 // phases: scanning → loading → choice → (keypad|stamp) → confirming
 //         → success | reward → redeeming → redeemed
 //         | fraud | error
-export default function ScanModal({ token, onClose, onRefresh, cameraStream }) {
+export default function ScanModal({ token, onClose, onRefresh }) {
   const [phase,        setPhase]        = useState('scanning');
   const [inputMode,    setInputMode]    = useState(null);   // 'points' | 'stamps'
   const [previewData,  setPreview]      = useState(null);
@@ -181,7 +181,7 @@ export default function ScanModal({ token, onClose, onRefresh, cameraStream }) {
       {/* Camera — always mounted for iOS stream persistence */}
       <div className={`flex-1 flex flex-col px-5 ${(inReward || phase === 'redeemed') ? 'hidden' : ''}`}>
         <div className="relative">
-          <QrReader active={camActive} onScan={handleScan} stream={cameraStream} />
+          <QrReader active={camActive} onScan={handleScan} />
           {phase === 'loading' && (
             <div className="absolute inset-0 flex items-center justify-center bg-black/60 rounded-2xl backdrop-blur-sm">
               <div className="flex flex-col items-center gap-3">

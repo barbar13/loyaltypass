@@ -1,14 +1,28 @@
 import { useEffect, useRef, useState } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
 
-const STATE_SCANNING = 1;
-const STATE_PAUSED   = 2;
+// Module-level: survives component unmount/remount within the same page session.
+// getUserMedia is called at most once per page load (or once ever if permission
+// is already granted, in which case the browser re-activates silently).
+let globalStream = null;
 
-// stream prop: a persistent MediaStream from DashboardPage.
-// We CLONE it before passing to html5-qrcode so that scanner.stop()
-// stops the clone's tracks, not the original — preventing iOS Safari
-// from requiring a new permission prompt on the next modal open.
-export default function QrReader({ active, onScan, stream: externalStream }) {
+async function ensureStream() {
+  if (globalStream?.active) return globalStream;
+  try {
+    globalStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: 'environment' } },
+      audio: false,
+    });
+  } catch {
+    // Fallback: any camera
+    globalStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+  }
+  return globalStream;
+}
+
+const STATE_PAUSED = 2;
+
+export default function QrReader({ active, onScan }) {
   const scannerRef = useRef(null);
   const onScanRef  = useRef(onScan);
   const activeRef  = useRef(active);
@@ -24,58 +38,60 @@ export default function QrReader({ active, onScan, stream: externalStream }) {
     const timer = setTimeout(async () => {
       if (cancelled) return;
 
+      // Acquire (or reuse) the global stream — no getUserMedia if already active
+      let stream;
+      try {
+        stream = await ensureStream();
+      } catch {
+        if (!cancelled) setCamError('Impossible d\'accéder à la caméra. Vérifiez les permissions dans les réglages.');
+        return;
+      }
+      if (cancelled) return;
+
       const scanner = new Html5Qrcode('qr-viewport');
       scannerRef.current = scanner;
 
-      const config = { fps: 15, qrbox: { width: 220, height: 220 } };
+      const config  = { fps: 15, qrbox: { width: 220, height: 220 } };
       const onSuccess = (text) => {
         try { scanner.pause(false); } catch {}
         onScanRef.current(text);
       };
 
-      let started = false;
-
-      // Try reusing the persistent stream first (no permission dialog)
-      if (externalStream?.active) {
-        try {
-          const clone = externalStream.clone(); // clone so stop() doesn't kill original
-          await scanner.startWithStream(clone, config, onSuccess, () => {});
-          started = true;
-        } catch { /* fall through to normal start */ }
+      // startWithStream sets video.srcObject = globalStream — no getUserMedia call.
+      try {
+        await scanner.startWithStream(stream, config, onSuccess, () => {});
+      } catch (err) {
+        if (!cancelled) setCamError('Impossible d\'accéder à la caméra. Vérifiez les permissions dans les réglages.');
+        return;
       }
 
-      // Fall back: request camera normally (first use or stream expired)
-      if (!started) {
-        try {
-          await scanner.start({ facingMode: 'environment' }, config, onSuccess, () => {});
-          started = true;
-        } catch {
-          try {
-            await scanner.start({ facingMode: 'user' }, config, onSuccess, () => {});
-            started = true;
-          } catch {
-            if (!cancelled) setCamError('Impossible d\'accéder à la caméra. Vérifiez les permissions dans les réglages.');
-            return;
-          }
-        }
-      }
-
-      // Apply initial active state (may have changed while camera was starting)
       if (!activeRef.current) {
         try { scanner.pause(false); } catch {}
       }
-    }, 150);
+    }, 100);
 
     return () => {
       cancelled = true;
       clearTimeout(timer);
       const s = scannerRef.current;
       scannerRef.current = null;
-      if (s) s.stop().catch(() => {});
+      if (!s) return;
+
+      // Prevent Html5Qrcode.stop() from killing globalStream's tracks.
+      // We neutralise track.stop before calling stop(), then restore it.
+      const tracks   = globalStream?.getVideoTracks() ?? [];
+      const origStop = tracks.map(t => t.stop.bind(t));
+      tracks.forEach(t => { t.stop = () => {}; });
+
+      s.stop()
+        .catch(() => {})
+        .finally(() => {
+          tracks.forEach((t, i) => { t.stop = origStop[i]; });
+        });
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Resume or pause scanning when active prop changes (stream stays alive)
+  // Pause/resume when active prop changes (never stops the stream)
   useEffect(() => {
     const s = scannerRef.current;
     if (!s) return;
@@ -83,7 +99,7 @@ export default function QrReader({ active, onScan, stream: externalStream }) {
       const state = s.getState?.();
       if (active && state === STATE_PAUSED) {
         s.resume();
-      } else if (!active && state === STATE_SCANNING) {
+      } else if (!active && state !== STATE_PAUSED) {
         s.pause(false);
       }
     } catch {}

@@ -114,6 +114,7 @@ if (process.env.DATABASE_URL) {
       ['stripe_customer_id',     'TEXT'],
       ['stripe_subscription_id', 'TEXT'],
       ['trial_reminder_sent',    "TEXT        NOT NULL DEFAULT ''"],
+      ['business_type',          'TEXT'],
     ];
     const customerMigrations = [
       ['email', 'TEXT'],
@@ -267,6 +268,7 @@ if (process.env.DATABASE_URL) {
   mcAdd('stripe_customer_id',     'TEXT');
   mcAdd('stripe_subscription_id', 'TEXT');
   mcAdd('trial_reminder_sent',    "TEXT NOT NULL DEFAULT ''");
+  mcAdd('business_type',          'TEXT');
 
   const customerCols = sqlite.prepare('PRAGMA table_info(customers)').all();
   if (!customerCols.find(c => c.name === 'email'))

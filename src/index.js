@@ -88,6 +88,14 @@ app.use('/api/billing',       billing.router);
 app.use('/api/notifications', notifRouter);
 app.get('/api/google-wallet/:qr_code', generateWalletPass);
 
+// ── Contact / lead form ───────────────────────────────────────────────────────
+app.post('/api/contact', (req, res) => {
+  const { name, email, commerce, phone, type, objective } = req.body || {};
+  if (!name || !email) return res.status(400).json({ error: 'Nom et email requis' });
+  console.log('[Lead]', { name, email, commerce, phone, type, objective, ts: new Date().toISOString() });
+  res.json({ success: true });
+});
+
 // ── Root → landing page ───────────────────────────────────────────────────────
 app.get('/', (_req, res) => res.redirect('/home'));
 

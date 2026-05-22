@@ -53,7 +53,7 @@ router.get('/:id/enroll-qr', async (req, res) => {
 
 router.post('/register', async (req, res) => {
   // Rename destructured `email` to `merchantEmail` to avoid shadowing the email module
-  const { name, email: merchantEmail, password, logo_url, color, plan } = req.body;
+  const { name, email: merchantEmail, password, logo_url, color, plan, business_type } = req.body;
 
   if (!name || !merchantEmail || !password) {
     return res.status(400).json({ error: 'name, email et password sont requis' });
@@ -66,8 +66,8 @@ router.post('/register', async (req, res) => {
     const hashed = await bcrypt.hash(password, SALT_ROUNDS);
     const trialEndsAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString();
     const id = await db.insert(
-      'INSERT INTO merchants (name, email, password, logo_url, color, plan, trial_ends_at) VALUES ($1, $2, $3, $4, $5, $6, $7)',
-      [name, merchantEmail, hashed, logo_url || null, color || '#6366f1', plan || 'free', trialEndsAt]
+      'INSERT INTO merchants (name, email, password, logo_url, color, plan, business_type, trial_ends_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
+      [name, merchantEmail, hashed, logo_url || null, color || '#6366f1', plan || 'free', business_type || null, trialEndsAt]
     );
 
     const merchant = await db.one(
@@ -200,6 +200,7 @@ router.get('/dashboard', auth, async (req, res) => {
         subscription_status: merchant.subscription_status,
         trial_days_left: trialDaysLeft,
         has_stripe: !!merchant.stripe_customer_id,
+        business_type: merchant.business_type || null,
       },
       stats: {
         total_customers: Number(total_customers),

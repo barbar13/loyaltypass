@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#0d1420">
-  <meta name="description" content="Fidelyzio — La carte de fidélité digitale pour tous les commerces. Sans application, gratuit pour vos clients.">
+  <meta name="theme-color" content="#fafaf8">
+  <meta name="description" content="Fidelyzio — Carte de fidélité digitale, notifications push et analytics pour augmenter les ventes des commerces de proximité.">
   <meta name="google-site-verification" content="68psevtNqtX1OW8h_jyvK51o5Jy9j2Tpyh5ZrJ9Ef4c" />
-  <title>Fidelyzio — La fidélité digitale pour votre commerce</title>
+  <title>Fidelyzio — Faites revenir vos clients</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="apple-touch-icon" href="/favicon.svg">
   <script src="https://cdn.tailwindcss.com"></script>
@@ -14,360 +14,593 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; }
     html { scroll-behavior: smooth; }
     body {
-      background: #0d1420;
-      color: #e2d9c8;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #fafaf8;
+      color: #0f0f0f;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
       overflow-x: hidden;
     }
 
-    /* ── Colors ─────────────────────────────────────────────────────────────── */
-    :root {
-      --navy:    #0d1420;
-      --navy2:   #141f30;
-      --navy3:   #1a2a40;
-      --gold:    #f0b429;
-      --gold2:   #d4920e;
-      --text:    #e2d9c8;
-      --muted:   #8a9ab0;
-      --border:  rgba(240,180,41,0.12);
+    /* ── Typography ─────────────────────────────────────────────────────────── */
+    .h1-hero {
+      font-size: clamp(2.6rem, 6vw, 4.8rem);
+      font-weight: 900;
+      line-height: 1.06;
+      letter-spacing: -0.035em;
+      color: #0f0f0f;
+    }
+    .h2-section {
+      font-size: clamp(1.8rem, 3.8vw, 2.8rem);
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -0.025em;
+    }
+    .h3-card {
+      font-size: 1.2rem;
+      font-weight: 700;
+      letter-spacing: -0.015em;
+    }
+    .tag {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: #f0ece0; border: 1px solid #ddd5c2;
+      border-radius: 100px; padding: 5px 14px;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: #7a6a50;
     }
 
-    /* ── Typography ─────────────────────────────────────────────────────────── */
-    .gold-text {
-      background: linear-gradient(135deg, #f0b429 0%, #e8a21a 60%, #d4920e 100%);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    /* ── Layout ─────────────────────────────────────────────────────────────── */
+    .container { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+    section { padding: 96px 0; }
+    @media(max-width:640px) { section { padding: 64px 0; } }
+
+    /* ── Navbar ─────────────────────────────────────────────────────────────── */
+    .navbar {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(250,250,248,0.94); backdrop-filter: blur(14px);
+      border-bottom: 1px solid #ede6d8;
     }
 
     /* ── Buttons ─────────────────────────────────────────────────────────────── */
-    .btn-gold {
+    .btn-primary {
       display: inline-flex; align-items: center; gap: 8px;
-      background: linear-gradient(135deg, #f0b429, #d4920e);
-      color: #0d1420; font-weight: 800; border-radius: 12px;
-      padding: 15px 28px; font-size: 15px; text-decoration: none;
-      transition: opacity .15s, transform .1s, box-shadow .15s;
-      box-shadow: 0 12px 32px rgba(240,180,41,.3);
-      letter-spacing: -.01em;
+      background: #0f0f0f; color: #fafaf8; border: none;
+      border-radius: 10px; padding: 14px 28px;
+      font-size: 15px; font-weight: 700;
+      text-decoration: none; cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
     }
-    .btn-gold:hover { opacity: .92; transform: translateY(-1px); box-shadow: 0 18px 40px rgba(240,180,41,.4); }
-    .btn-ghost {
+    .btn-primary:hover { background: #2a2a2a; transform: translateY(-1px); }
+    .btn-outline {
       display: inline-flex; align-items: center; gap: 8px;
-      background: rgba(255,255,255,.06); color: var(--text); font-weight: 600; border-radius: 12px;
-      padding: 14px 28px; font-size: 15px; text-decoration: none;
-      border: 1px solid rgba(255,255,255,.1);
-      transition: background .15s, transform .1s;
+      background: transparent; color: #0f0f0f;
+      border: 1px solid #c0b8a8; border-radius: 10px;
+      padding: 12px 22px; font-size: 14px; font-weight: 600;
+      text-decoration: none; transition: all 0.15s;
     }
-    .btn-ghost:hover { background: rgba(255,255,255,.1); transform: translateY(-1px); }
-
-    /* ── Cards ───────────────────────────────────────────────────────────────── */
-    .card { background: var(--navy2); border: 1px solid var(--border); border-radius: 18px; }
-
-    /* ── Animations ─────────────────────────────────────────────────────────── */
-    @keyframes fade-up { from{opacity:0;transform:translateY(22px)} to{opacity:1;transform:translateY(0)} }
-    .au { opacity: 0; animation: fade-up .65s cubic-bezier(.16,1,.3,1) forwards; }
-    .d1{animation-delay:.08s} .d2{animation-delay:.18s} .d3{animation-delay:.28s} .d4{animation-delay:.38s} .d5{animation-delay:.48s}
-
-    /* ── Layout ──────────────────────────────────────────────────────────────── */
-    section { padding: 96px 0; }
-    @media(max-width:640px) { section { padding: 72px 0; } }
-    .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
-
-    /* ── Divider ─────────────────────────────────────────────────────────────── */
-    .section-alt { background: rgba(255,255,255,.018); border-top: 1px solid rgba(255,255,255,.05); border-bottom: 1px solid rgba(255,255,255,.05); }
-
-    /* ── Business type card ──────────────────────────────────────────────────── */
-    .biz-card {
-      background: var(--navy2); border: 1px solid rgba(240,180,41,.08);
-      border-radius: 16px; padding: 24px 16px; text-align: center;
-      transition: border-color .2s, background .2s;
+    .btn-outline:hover { background: #f0ece0; border-color: #a89880; }
+    .btn-light {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,0.12); color: #fafaf8;
+      border: 1px solid rgba(255,255,255,0.2); border-radius: 10px;
+      padding: 12px 22px; font-size: 14px; font-weight: 600;
+      text-decoration: none; transition: background 0.15s;
     }
-    .biz-card:hover { border-color: rgba(240,180,41,.22); background: rgba(240,180,41,.04); }
-    .biz-icon { display: flex; align-items: center; justify-content: center; margin-bottom: 12px; color: #f0b429; }
-    .biz-label { color: var(--text); font-size: 14px; font-weight: 700; }
+    .btn-light:hover { background: rgba(255,255,255,0.2); }
 
-    /* ── Feature check ───────────────────────────────────────────────────────── */
-    .check { color: #f0b429; flex-shrink: 0; }
+    /* ── Hero phone mockup ───────────────────────────────────────────────────── */
+    .phone-outer {
+      width: 260px; height: 520px;
+      background: #1c1c1e; border-radius: 42px;
+      padding: 10px;
+      box-shadow: 0 48px 96px rgba(0,0,0,0.22), 0 0 0 1px rgba(255,255,255,0.07);
+      position: relative;
+    }
+    .phone-inner {
+      background: #0f0f14; border-radius: 34px;
+      height: 100%; overflow: hidden;
+      display: flex; flex-direction: column;
+    }
+    .phone-notch {
+      width: 88px; height: 24px;
+      background: #1c1c1e; border-radius: 0 0 16px 16px;
+      margin: 0 auto; flex-shrink: 0;
+    }
 
-    /* ── Pricing card ────────────────────────────────────────────────────────── */
+    /* ── Stats strip ─────────────────────────────────────────────────────────── */
+    .stats-strip { background: #0f0f0f; }
+
+    /* ── Problem cards ───────────────────────────────────────────────────────── */
+    .big-stat {
+      font-size: clamp(3.5rem, 7vw, 5.5rem);
+      font-weight: 900; line-height: 1;
+      letter-spacing: -0.04em; color: #0f0f0f;
+    }
+    .problem-card {
+      background: #fff; border: 1px solid #e8e0d0;
+      border-radius: 20px; padding: 36px 32px;
+      display: flex; flex-direction: column; gap: 12px;
+    }
+
+    /* ── Step connector ─────────────────────────────────────────────────────── */
+    .step-num {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: #0f0f0f; color: #fafaf8;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px; font-weight: 900; flex-shrink: 0;
+    }
+
+    /* ── Type cards ──────────────────────────────────────────────────────────── */
+    .type-card {
+      background: #fff; border: 1px solid #e8e0d0; border-radius: 18px;
+      padding: 28px 22px; transition: box-shadow 0.2s, border-color 0.2s;
+    }
+    .type-card:hover { border-color: #c0b8a8; box-shadow: 0 6px 28px rgba(0,0,0,0.07); }
+    .mechanic-pill {
+      display: inline-block; background: #f3ede0;
+      border-radius: 6px; padding: 3px 10px;
+      font-size: 11px; font-weight: 700; color: #6b5a3e; letter-spacing: 0.04em;
+    }
+
+    /* ── Pricing ─────────────────────────────────────────────────────────────── */
     .pricing-card {
-      background: linear-gradient(145deg, #141f30, #1a2840);
-      border: 1px solid rgba(240,180,41,.25);
-      border-radius: 24px; padding: 48px 40px;
+      background: #fff; border: 1px solid #e8e0d0; border-radius: 24px;
+      padding: 52px 44px; max-width: 520px; margin: 0 auto;
+      box-shadow: 0 4px 32px rgba(0,0,0,0.06);
+    }
+    .check-item { display: flex; align-items: center; gap: 10px; }
+
+    /* ── Contact form ─────────────────────────────────────────────────────────── */
+    .contact-section { background: #0f0f0f; }
+    .form-field {
+      width: 100%; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px; padding: 14px 16px; font-size: 15px; color: #fafaf8;
+      transition: border-color 0.15s; outline: none; appearance: none;
+    }
+    .form-field:focus { border-color: rgba(255,255,255,0.35); }
+    .form-field::placeholder { color: rgba(255,255,255,0.28); }
+    .form-field option { background: #1a1a1a; color: #fff; }
+
+    /* ── Animations ──────────────────────────────────────────────────────────── */
+    @keyframes fade-up { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+    .au { opacity:0; animation: fade-up 0.6s cubic-bezier(.16,1,.3,1) forwards; }
+    .d1{animation-delay:.06s} .d2{animation-delay:.14s} .d3{animation-delay:.22s} .d4{animation-delay:.30s}
+
+    /* ── Responsive ──────────────────────────────────────────────────────────── */
+    @media(max-width:900px) { .phone-wrap { display:none; } }
+    @media(max-width:640px) {
+      .stats-grid { grid-template-columns: 1fr 1fr !important; }
+      .type-grid  { grid-template-columns: 1fr 1fr !important; }
+      .problem-grid { grid-template-columns: 1fr !important; }
+      .pricing-card { padding: 36px 24px; }
+    }
+    @media(max-width:480px) {
+      .type-grid { grid-template-columns: 1fr !important; }
     }
   </style>
 </head>
 <body>
 
 <!-- ── NAV ──────────────────────────────────────────────────────────────────── -->
-<nav style="position:sticky;top:0;z-index:50;background:rgba(13,20,32,.95);backdrop-filter:blur(14px);border-bottom:1px solid rgba(240,180,41,.07)">
-  <div class="container" style="height:64px;display:flex;align-items:center;justify-content:space-between">
-    <a href="/home" style="font-size:19px;font-weight:900;color:white;text-decoration:none;letter-spacing:-.5px;display:flex;align-items:center;gap:8px">
-      <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#f0b429" stroke-width="2" style="flex-shrink:0"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75ZM6.75 16.5h.75v.75h-.75V16.5ZM16.5 6.75h.75v.75h-.75v-.75Z"/></svg>
-      Fidelyzio
+<nav class="navbar">
+  <div class="container" style="height:64px;display:flex;align-items:center;justify-content:space-between;gap:16px">
+    <a href="/home" style="display:flex;align-items:center;gap:9px;text-decoration:none">
+      <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#0f0f0f" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5Z"/>
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75ZM6.75 16.5h.75v.75h-.75V16.5ZM16.5 6.75h.75v.75h-.75v-.75Z"/>
+      </svg>
+      <span style="font-size:18px;font-weight:900;letter-spacing:-.4px;color:#0f0f0f">Fidelyzio</span>
     </a>
-    <div style="display:flex;align-items:center;gap:12px">
-      <a href="/login" style="color:var(--muted);text-decoration:none;font-size:14px;font-weight:500;transition:color .15s" onmouseover="this.style.color='white'" onmouseout="this.style.color='var(--muted)'">Se connecter</a>
-      <a href="/register" class="btn-gold" style="padding:9px 18px;font-size:14px">Essai gratuit →</a>
+    <div style="display:flex;align-items:center;gap:10px">
+      <a href="#tarifs" style="color:#5a5a5a;font-size:14px;font-weight:500;text-decoration:none;display:none" class="md:inline">Tarifs</a>
+      <a href="/login" style="color:#5a5a5a;text-decoration:none;font-size:14px;font-weight:500;padding:8px 14px;border-radius:8px;transition:color .15s" onmouseover="this.style.color='#0f0f0f'" onmouseout="this.style.color='#5a5a5a'">Se connecter</a>
+      <a href="/register" class="btn-primary" style="padding:9px 18px;font-size:14px">Essai gratuit →</a>
     </div>
   </div>
 </nav>
 
 <!-- ── HERO ──────────────────────────────────────────────────────────────────── -->
-<section style="padding:108px 0 80px;text-align:center;position:relative;overflow:hidden">
-  <div style="position:absolute;inset:0;background:radial-gradient(ellipse 70% 55% at 50% 0%,rgba(240,180,41,.09) 0%,transparent 70%);pointer-events:none"></div>
+<section style="padding:80px 0 64px">
+  <div class="container">
+    <div style="display:flex;align-items:center;gap:64px">
 
-  <div class="container" style="position:relative">
-    <!-- Badge -->
-    <div class="au" style="display:inline-flex;align-items:center;gap:8px;background:rgba(240,180,41,.1);border:1px solid rgba(240,180,41,.25);border-radius:100px;padding:6px 16px;font-size:13px;font-weight:700;color:#f0b429;margin-bottom:28px;letter-spacing:.02em">
-      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016 2.993 2.993 0 0 0 2.25-1.016 3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72M6.75 18h3.75a.75.75 0 0 0 .75-.75V13.5a.75.75 0 0 0-.75-.75H6.75a.75.75 0 0 0-.75.75v3.75c0 .414.336.75.75.75Z"/></svg>
-      <span>La fidélité digitale — sans app</span>
-    </div>
-
-    <!-- H1 -->
-    <h1 class="au d1" style="font-size:clamp(2.4rem,5.5vw,3.8rem);font-weight:900;line-height:1.08;color:white;letter-spacing:-.03em;margin-bottom:22px;max-width:780px;margin-left:auto;margin-right:auto">
-      La carte de fidélité<br>
-      <span class="gold-text">qu'ils utiliseront vraiment</span>
-    </h1>
-
-    <!-- Sub -->
-    <p class="au d2" style="font-size:clamp(1rem,2.2vw,1.2rem);color:var(--muted);line-height:1.65;max-width:520px;margin:0 auto 40px">
-      Un QR code en caisse. Vos clients s'inscrivent en 30 secondes, accumulent des points et reviennent. Zéro app, zéro friction.
-    </p>
-
-    <!-- CTAs -->
-    <div class="au d3" style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
-      <a href="/register" class="btn-gold">Essayer gratuitement →</a>
-      <a href="/join" class="btn-ghost">Trouver ma carte</a>
-    </div>
-    <p class="au d4" style="color:rgba(138,154,176,.6);font-size:13px;margin-top:16px">14 jours gratuits · Sans carte bancaire</p>
-
-    <!-- Card mockup -->
-    <div class="au d5" style="max-width:300px;margin:64px auto 0;padding:0 24px">
-      <div style="background:linear-gradient(145deg,#1a2a45,#0f1929);border:1px solid rgba(240,180,41,.2);border-radius:22px;padding:26px;box-shadow:0 32px 80px rgba(0,0,0,.5),0 0 0 1px rgba(240,180,41,.06)">
-        <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:22px">
-          <span style="color:#f0b429;font-size:10px;font-weight:800;letter-spacing:.18em">FIDELYZIO</span>
-          <span style="color:rgba(226,217,200,.5);font-size:11px;font-weight:600">Café Lumière</span>
+      <!-- Left: Text -->
+      <div style="flex:1;min-width:0">
+        <div class="au" style="margin-bottom:24px">
+          <span class="tag">Commerces de proximité · 2026</span>
         </div>
-        <div style="text-align:center;margin:10px 0 22px">
-          <p style="font-size:58px;font-weight:900;color:white;line-height:1;letter-spacing:-.04em">75</p>
-          <p style="color:rgba(240,180,41,.6);font-size:10px;letter-spacing:.25em;font-weight:700;margin-top:4px">POINTS</p>
+        <h1 class="h1-hero au d1" style="margin-bottom:24px">
+          Faites revenir vos<br>clients dans votre<br>commerce.
+        </h1>
+        <p class="au d2" style="font-size:clamp(1rem,2vw,1.2rem);color:#5a5a5a;line-height:1.7;max-width:480px;margin-bottom:36px">
+          Carte de fidélité digitale, notifications push et analytics pour augmenter vos ventes. Sans application, en 5 minutes.
+        </p>
+        <div class="au d3" style="margin-bottom:40px">
+          <a href="/register" class="btn-primary" style="font-size:16px;padding:16px 32px">Lancer mon programme gratuit →</a>
+          <p style="color:#9a9a9a;font-size:12px;margin-top:12px">14 jours gratuits · Sans carte bancaire</p>
         </div>
-        <div style="display:flex;justify-content:space-between;align-items:end">
-          <div>
-            <p style="color:rgba(138,154,176,.5);font-size:9px;text-transform:uppercase;letter-spacing:.12em">Titulaire</p>
-            <p style="color:white;font-weight:700;font-size:13px;margin-top:2px">Marie D.</p>
+        <!-- Mini stats row -->
+        <div class="au d4" style="display:flex;flex-wrap:wrap;gap:0;border-top:1px solid #e8e0d0;padding-top:28px">
+          <div style="padding:0 24px 0 0;border-right:1px solid #e8e0d0;margin-right:24px">
+            <p style="font-size:20px;font-weight:900;color:#0f0f0f;letter-spacing:-.02em">+18%</p>
+            <p style="font-size:11px;color:#9a9a9a;margin-top:2px">de visites</p>
           </div>
-          <div style="width:42px;height:42px;background:rgba(240,180,41,.12);border:1px solid rgba(240,180,41,.25);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:22px;color:#f0b429">▩</div>
+          <div style="padding:0 24px 0 0;border-right:1px solid #e8e0d0;margin-right:24px">
+            <p style="font-size:20px;font-weight:900;color:#0f0f0f;letter-spacing:-.02em">5 min</p>
+            <p style="font-size:11px;color:#9a9a9a;margin-top:2px">de setup</p>
+          </div>
+          <div style="padding:0 24px 0 0;border-right:1px solid #e8e0d0;margin-right:24px">
+            <p style="font-size:20px;font-weight:900;color:#0f0f0f;letter-spacing:-.02em">0%</p>
+            <p style="font-size:11px;color:#9a9a9a;margin-top:2px">commission</p>
+          </div>
+          <div>
+            <p style="font-size:20px;font-weight:900;color:#0f0f0f;letter-spacing:-.02em">RGPD</p>
+            <p style="font-size:11px;color:#9a9a9a;margin-top:2px">conforme</p>
+          </div>
         </div>
+      </div>
+
+      <!-- Right: Phone mockup -->
+      <div class="phone-wrap" style="flex-shrink:0">
+        <div class="phone-outer">
+          <div class="phone-inner">
+            <div class="phone-notch"></div>
+            <div style="padding:16px 14px;flex:1;overflow:hidden">
+              <!-- Header -->
+              <p style="color:rgba(255,255,255,.35);font-size:9px;font-weight:700;letter-spacing:.14em;text-align:center;margin-bottom:14px">FIDELYZIO · MA CARTE</p>
+              <!-- Points card -->
+              <div style="background:linear-gradient(135deg,#6366f1,#4f46e5);border-radius:16px;padding:20px 18px;margin-bottom:12px;position:relative;overflow:hidden">
+                <div style="position:absolute;top:-20px;right:-20px;width:80px;height:80px;background:rgba(255,255,255,.08);border-radius:50%"></div>
+                <p style="color:rgba(255,255,255,.6);font-size:9px;font-weight:700;letter-spacing:.1em;margin-bottom:10px">CAFÉ LUMIÈRE</p>
+                <p style="color:#fff;font-size:38px;font-weight:900;line-height:1;letter-spacing:-.04em">75</p>
+                <p style="color:rgba(255,255,255,.55);font-size:9px;letter-spacing:.18em;font-weight:700;margin-top:4px">POINTS</p>
+                <div style="margin-top:18px;display:flex;justify-content:space-between;align-items:flex-end">
+                  <div>
+                    <p style="color:rgba(255,255,255,.45);font-size:8px;text-transform:uppercase;letter-spacing:.1em">Titulaire</p>
+                    <p style="color:#fff;font-weight:700;font-size:11px;margin-top:2px">Marie D.</p>
+                  </div>
+                  <div style="width:32px;height:32px;background:rgba(255,255,255,.15);border-radius:6px;display:flex;align-items:center;justify-content:center">
+                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5Z"/>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+              <!-- Progress bar -->
+              <div style="background:rgba(255,255,255,.06);border-radius:12px;padding:14px;margin-bottom:10px">
+                <div style="display:flex;justify-content:space-between;font-size:9px;color:rgba(255,255,255,.4);margin-bottom:8px">
+                  <span>Prochain café offert</span><span>75/100 pts</span>
+                </div>
+                <div style="height:5px;background:rgba(255,255,255,.08);border-radius:10px;overflow:hidden">
+                  <div style="width:75%;height:100%;background:#6366f1;border-radius:10px"></div>
+                </div>
+              </div>
+              <!-- Scan button -->
+              <div style="background:#6366f1;border-radius:12px;padding:12px;text-align:center">
+                <p style="color:#fff;font-size:10px;font-weight:700">Montrer à la caisse</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── LE CONSTAT ─────────────────────────────────────────────────────────────── -->
+<section style="background:#f5f0e6;border-top:1px solid #e8e0d0;border-bottom:1px solid #e8e0d0">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:56px">
+      <p style="color:#9a7a50;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px">Le constat</p>
+      <h2 class="h2-section">Les commerces indépendants<br>perdent leur clientèle.</h2>
+      <p style="color:#6a6a6a;font-size:16px;margin-top:16px;max-width:520px;margin-left:auto;margin-right:auto;line-height:1.7">
+        Pendant que les grandes enseignes investissent des millions en fidélisation, vos clients fidèles vous oublient.
+      </p>
+    </div>
+    <div class="problem-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px">
+      <div class="problem-card">
+        <p class="big-stat">68<span style="font-size:2rem">%</span></p>
+        <p style="color:#5a5a5a;font-size:15px;line-height:1.6;font-weight:500">de vos clients ne reviennent jamais après leur première visite.</p>
+      </div>
+      <div class="problem-card">
+        <p class="big-stat">80<span style="font-size:2rem">%</span></p>
+        <p style="color:#5a5a5a;font-size:15px;line-height:1.6;font-weight:500">des achats récurrents fuient vers les grandes enseignes qui relancent leurs clients.</p>
+      </div>
+      <div class="problem-card">
+        <p class="big-stat">5<span style="font-size:2rem">×</span></p>
+        <p style="color:#5a5a5a;font-size:15px;line-height:1.6;font-weight:500">c'est ce que coûte l'acquisition d'un nouveau client versus faire revenir un fidèle.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ── HOW IT WORKS ───────────────────────────────────────────────────────────── -->
-<section class="section-alt">
-  <div class="container" style="max-width:900px">
-    <div style="text-align:center;margin-bottom:56px">
-      <h2 style="font-size:clamp(1.6rem,4vw,2.3rem);font-weight:900;color:white;margin-bottom:12px">Comment ça marche ?</h2>
-      <p style="color:var(--muted);font-size:15px">Opérationnel en moins de 2 minutes</p>
+<!-- ── COMMENT ÇA MARCHE ──────────────────────────────────────────────────────── -->
+<section>
+  <div class="container" style="max-width:860px">
+    <div style="text-align:center;margin-bottom:64px">
+      <p style="color:#9a7a50;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px">Simple par design</p>
+      <h2 class="h2-section">Comment ça marche ?</h2>
+      <p style="color:#6a6a6a;font-size:16px;margin-top:14px">Opérationnel en moins de 5 minutes. Vraiment.</p>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:32px">
+    <div style="display:flex;flex-direction:column;gap:20px">
       <!-- Step 1 -->
-      <div style="display:flex;flex-direction:column;align-items:flex-start;gap:16px">
-        <div style="width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#f0b429,#d4920e);display:flex;align-items:center;justify-content:center;font-weight:900;color:#0d1420;font-size:20px;flex-shrink:0;box-shadow:0 8px 24px rgba(240,180,41,.3)">1</div>
+      <div style="display:flex;align-items:flex-start;gap:24px;background:#fff;border:1px solid #e8e0d0;border-radius:20px;padding:32px">
+        <div class="step-num">1</div>
         <div>
-          <h3 style="color:white;font-weight:800;font-size:16px;margin-bottom:8px">Créez votre programme</h3>
-          <p style="color:var(--muted);font-size:14px;line-height:1.65">Inscription en 2 min. Personnalisez vos couleurs, définissez vos récompenses et générez votre QR d'inscription.</p>
+          <h3 class="h3-card" style="margin-bottom:8px">Créez votre programme en 5 minutes</h3>
+          <p style="color:#6a6a6a;font-size:15px;line-height:1.7">Inscrivez-vous, choisissez vos couleurs, définissez vos récompenses. Un QR code d'inscription est généré instantanément — prêt à être affiché en caisse.</p>
         </div>
       </div>
       <!-- Step 2 -->
-      <div style="display:flex;flex-direction:column;align-items:flex-start;gap:16px">
-        <div style="width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#e8a21a,#c47f0a);display:flex;align-items:center;justify-content:center;font-weight:900;color:#0d1420;font-size:20px;flex-shrink:0;box-shadow:0 8px 24px rgba(240,180,41,.25)">2</div>
+      <div style="display:flex;align-items:flex-start;gap:24px;background:#fff;border:1px solid #e8e0d0;border-radius:20px;padding:32px">
+        <div class="step-num">2</div>
         <div>
-          <h3 style="color:white;font-weight:800;font-size:16px;margin-bottom:8px">Vos clients s'inscrivent</h3>
-          <p style="color:var(--muted);font-size:14px;line-height:1.65">Ils scannent le QR en caisse, entrent leur prénom et téléphone. Leur carte universelle Fidelyzio est créée instantanément.</p>
+          <h3 class="h3-card" style="margin-bottom:8px">Vos clients s'inscrivent via QR code</h3>
+          <p style="color:#6a6a6a;font-size:15px;line-height:1.7">Un simple scan depuis l'appareil photo. Prénom + téléphone et c'est fait — en 30 secondes. Pas d'app, pas de friction. Leur carte fonctionne dans tous vos commerces partenaires Fidelyzio.</p>
         </div>
       </div>
       <!-- Step 3 -->
-      <div style="display:flex;flex-direction:column;align-items:flex-start;gap:16px">
-        <div style="width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#d4920e,#b87a0a);display:flex;align-items:center;justify-content:center;font-weight:900;color:#0d1420;font-size:20px;flex-shrink:0;box-shadow:0 8px 24px rgba(240,180,41,.2)">3</div>
+      <div style="display:flex;align-items:flex-start;gap:24px;background:#fff;border:1px solid #e8e0d0;border-radius:20px;padding:32px">
+        <div class="step-num">3</div>
         <div>
-          <h3 style="color:white;font-weight:800;font-size:16px;margin-bottom:8px">Points et récompenses</h3>
-          <p style="color:var(--muted);font-size:14px;line-height:1.65">À chaque visite, scannez leur carte. Les points s'accumulent, les récompenses débloquent. Ils reviennent.</p>
+          <h3 class="h3-card" style="margin-bottom:8px">Points, récompenses et notifications push</h3>
+          <p style="color:#6a6a6a;font-size:15px;line-height:1.7">À chaque visite, scannez leur carte depuis votre téléphone. Les points s'accumulent, les récompenses se débloquent. Envoyez des notifications push pour les faire revenir, consultez vos analytics en temps réel.</p>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ── FOR MERCHANTS ─────────────────────────────────────────────────────────── -->
-<section>
+<!-- ── COMMERCE TYPES ─────────────────────────────────────────────────────────── -->
+<section style="background:#f5f0e6;border-top:1px solid #e8e0d0;border-bottom:1px solid #e8e0d0">
   <div class="container">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:center" class="merch-grid">
-      <!-- Left: pitch -->
-      <div>
-        <p style="color:#f0b429;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.15em;margin-bottom:14px">Pour les commerçants</p>
-        <h2 style="font-size:clamp(1.6rem,3.5vw,2.2rem);font-weight:900;color:white;line-height:1.2;margin-bottom:20px">Fidélisez sans effort,<br>mesurez tout</h2>
-        <ul style="list-style:none;padding:0;display:flex;flex-direction:column;gap:13px;margin-bottom:36px">
-          <li style="display:flex;gap:11px;color:var(--muted);font-size:14.5px">
-            <svg class="check" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0;margin-top:1px"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg><span>QR d'inscription prêt en 2 min à afficher en caisse</span>
-          </li>
-          <li style="display:flex;gap:11px;color:var(--muted);font-size:14.5px">
-            <svg class="check" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0;margin-top:1px"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg><span>Tableau de bord : clients, points, analytics en temps réel</span>
-          </li>
-          <li style="display:flex;gap:11px;color:var(--muted);font-size:14.5px">
-            <svg class="check" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0;margin-top:1px"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg><span>Anti-fraude intégré — 1 scan par client et par jour</span>
-          </li>
-          <li style="display:flex;gap:11px;color:var(--muted);font-size:14.5px">
-            <svg class="check" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0;margin-top:1px"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg><span>Export CSV de votre base clients</span>
-          </li>
-          <li style="display:flex;gap:11px;color:var(--muted);font-size:14.5px">
-            <svg class="check" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0;margin-top:1px"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg><span>Aucune app à installer — ni pour vous, ni pour vos clients</span>
-          </li>
-        </ul>
-        <a href="/register" class="btn-gold">Créer mon programme →</a>
-      </div>
-      <!-- Right: feature cards -->
-      <div style="display:flex;flex-direction:column;gap:14px">
-        <div class="card" style="padding:20px;display:flex;align-items:center;gap:16px">
-          <div style="width:46px;height:46px;border-radius:13px;background:rgba(240,180,41,.12);border:1px solid rgba(240,180,41,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#f0b429">
-            <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z"/></svg>
-          </div>
-          <div>
-            <p style="color:white;font-weight:700;font-size:14px;margin-bottom:3px">Statistiques en temps réel</p>
-            <p style="color:var(--muted);font-size:13px">Scans, points distribués, clients actifs</p>
-          </div>
-        </div>
-        <div class="card" style="padding:20px;display:flex;align-items:center;gap:16px">
-          <div style="width:46px;height:46px;border-radius:13px;background:rgba(240,180,41,.12);border:1px solid rgba(240,180,41,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#f0b429">
-            <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z"/></svg>
-          </div>
-          <div>
-            <p style="color:white;font-weight:700;font-size:14px;margin-bottom:3px">Récompenses personnalisées</p>
-            <p style="color:var(--muted);font-size:13px">Définissez vos propres paliers de fidélité</p>
-          </div>
-        </div>
-        <div class="card" style="padding:20px;display:flex;align-items:center;gap:16px">
-          <div style="width:46px;height:46px;border-radius:13px;background:rgba(240,180,41,.12);border:1px solid rgba(240,180,41,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#f0b429">
-            <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z"/></svg>
-          </div>
-          <div>
-            <p style="color:white;font-weight:700;font-size:14px;margin-bottom:3px">RGPD & Sécurité</p>
-            <p style="color:var(--muted);font-size:13px">Données hébergées en Europe, conformité garantie</p>
-          </div>
-        </div>
-      </div>
+    <div style="text-align:center;margin-bottom:56px">
+      <p style="color:#9a7a50;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px">Pour tous les commerces</p>
+      <h2 class="h2-section">Quel que soit votre métier,<br>Fidelyzio s'adapte.</h2>
+      <p style="color:#6a6a6a;font-size:16px;margin-top:14px">Chaque type de commerce a son mécanisme de fidélité recommandé.</p>
     </div>
-  </div>
-</section>
+    <div class="type-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
 
-<!-- ── FOR ALL BUSINESSES ─────────────────────────────────────────────────────── -->
-<section class="section-alt">
-  <div class="container" style="max-width:900px">
-    <div style="text-align:center;margin-bottom:48px">
-      <h2 style="font-size:clamp(1.6rem,4vw,2.3rem);font-weight:900;color:white;margin-bottom:12px">Fait pour tous les commerces de proximité</h2>
-      <p style="color:var(--muted);font-size:15px">Si vous avez des clients réguliers, Fidelyzio est fait pour vous</p>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
-      <div class="biz-card">
-        <span class="biz-icon">
-          <!-- Bread / bakery -->
-          <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3c-1.2 5.4-6 6.9-6 12a6 6 0 0 0 12 0c0-5.1-4.8-6.6-6-12Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 3c1.2 5.4 6 6.9 6 12"/></svg>
-        </span>
-        <p class="biz-label">Boulangerie</p>
+      <!-- Restaurant -->
+      <div class="type-card">
+        <div style="width:44px;height:44px;background:#fff5e8;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px">
+          <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#c07030" stroke-width="1.8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8.25v-1.5m0 1.5c-1.355 0-2.697.056-4.024.166C6.845 8.51 6 9.473 6 10.608v2.513m6-4.87c1.355 0 2.697.055 4.024.165C17.155 8.51 18 9.473 18 10.608v2.513M15 8.25v-1.5M6 10.608v6.5a.75.75 0 0 0 .75.75h10.5a.75.75 0 0 0 .75-.75v-6.5"/>
+          </svg>
+        </div>
+        <h3 class="h3-card" style="margin-bottom:6px">Restaurant / Brasserie</h3>
+        <p style="color:#6a6a6a;font-size:13px;line-height:1.6;margin-bottom:12px">Points par visite, récompenses sur les plats ou formules.</p>
+        <span class="mechanic-pill">Points par visite</span>
+        <p style="color:#9a9a9a;font-size:12px;margin-top:8px;font-style:italic">ex : 50 pts → apéro offert</p>
       </div>
-      <div class="biz-card">
-        <span class="biz-icon">
-          <!-- Coffee cup -->
-          <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 8.25h1.5a2.25 2.25 0 0 1 0 4.5h-1.5"/><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 8.25h11.25v9a3.75 3.75 0 0 1-3.75 3.75H8.25A3.75 3.75 0 0 1 4.5 17.25V8.25Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 5.25c0-.414.336-.75.75-.75h9a.75.75 0 0 1 0 1.5H7.5a.75.75 0 0 1-.75-.75Z"/></svg>
-        </span>
-        <p class="biz-label">Café</p>
+
+      <!-- Café -->
+      <div class="type-card">
+        <div style="width:44px;height:44px;background:#fef3e2;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px">
+          <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#b07820" stroke-width="1.8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 8.25h1.5a2.25 2.25 0 0 1 0 4.5h-1.5M4.5 8.25h11.25v9a3.75 3.75 0 0 1-3.75 3.75H8.25A3.75 3.75 0 0 1 4.5 17.25V8.25Z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 5.25c0-.414.336-.75.75-.75h9a.75.75 0 0 1 0 1.5H7.5a.75.75 0 0 1-.75-.75Z"/>
+          </svg>
+        </div>
+        <h3 class="h3-card" style="margin-bottom:6px">Café / Boulangerie</h3>
+        <p style="color:#6a6a6a;font-size:13px;line-height:1.6;margin-bottom:12px">Le classique des tampons digitalisé — fidèle, simple, efficace.</p>
+        <span class="mechanic-pill">Tampons</span>
+        <p style="color:#9a9a9a;font-size:12px;margin-top:8px;font-style:italic">ex : 10e café offert</p>
       </div>
-      <div class="biz-card">
-        <span class="biz-icon">
-          <!-- Fork and knife -->
-          <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8.25v-1.5m0 1.5c-1.355 0-2.697.056-4.024.166C6.845 8.51 6 9.473 6 10.608v2.513m6-4.87c1.355 0 2.697.055 4.024.165C17.155 8.51 18 9.473 18 10.608v2.513M15 8.25v-1.5M6 10.608v6.5a.75.75 0 0 0 .75.75h10.5a.75.75 0 0 0 .75-.75v-6.5"/></svg>
-        </span>
-        <p class="biz-label">Restaurant</p>
+
+      <!-- Boutique -->
+      <div class="type-card">
+        <div style="width:44px;height:44px;background:#f0f7ff;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px">
+          <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#2563eb" stroke-width="1.8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007Z"/>
+          </svg>
+        </div>
+        <h3 class="h3-card" style="margin-bottom:6px">Boutique / Retail</h3>
+        <p style="color:#6a6a6a;font-size:13px;line-height:1.6;margin-bottom:12px">Points proportionnels aux achats, réductions et avantages VIP.</p>
+        <span class="mechanic-pill">Points par achat</span>
+        <p style="color:#9a9a9a;font-size:12px;margin-top:8px;font-style:italic">ex : 200 pts → bon de réduction</p>
       </div>
-      <div class="biz-card">
-        <span class="biz-icon">
-          <!-- Scissors -->
-          <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path stroke-linecap="round" stroke-linejoin="round" d="m7.848 8.25 1.536.887M7.848 8.25a3 3 0 1 1-5.196-3 3 3 0 0 1 5.196 3Zm1.536.887 1.544 8.9m-1.544-8.9 5.28 3.049M7.384 17.15a3 3 0 1 1-5.196 3 3 3 0 0 1 5.196-3Zm7.032-9.013 3.584 2.07M14.416 8.137l.952 5.506M14.416 8.137a3.752 3.752 0 0 0 1.12 4.79m-4.488 4.126-1.088 6.27m0 0a3 3 0 1 1-5.196 3"/></svg>
-        </span>
-        <p class="biz-label">Coiffeur</p>
+
+      <!-- Salon -->
+      <div class="type-card">
+        <div style="width:44px;height:44px;background:#fdf2f8;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px">
+          <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#9d174d" stroke-width="1.8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m7.848 8.25 1.536.887M7.848 8.25a3 3 0 1 1-5.196-3 3 3 0 0 1 5.196 3Zm1.536.887 1.544 8.9m-1.544-8.9 5.28 3.049M7.384 17.15a3 3 0 1 1-5.196 3 3 3 0 0 1 5.196-3Zm7.032-9.013 3.584 2.07"/>
+          </svg>
+        </div>
+        <h3 class="h3-card" style="margin-bottom:6px">Salon de beauté / Coiffeur</h3>
+        <p style="color:#6a6a6a;font-size:13px;line-height:1.6;margin-bottom:12px">Fidélisez vos clients réguliers avec une prestation offerte.</p>
+        <span class="mechanic-pill">Points par prestation</span>
+        <p style="color:#9a9a9a;font-size:12px;margin-top:8px;font-style:italic">ex : 5 coupes → 1 offerte</p>
       </div>
-      <div class="biz-card">
-        <span class="biz-icon">
-          <!-- Music note -->
-          <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path stroke-linecap="round" stroke-linejoin="round" d="M9 9l10.5-3m0 6.553v3.75a2.25 2.25 0 0 1-1.632 2.163l-1.32.377a1.803 1.803 0 1 1-.99-3.467l2.31-.66a2.25 2.25 0 0 0 1.632-2.163Zm0 0V2.25L9 5.25v10.303m0 0v3.75a2.25 2.25 0 0 1-1.632 2.163l-1.32.377a1.803 1.803 0 0 1-.99-3.467l2.31-.66A2.25 2.25 0 0 0 9 15.553Z"/></svg>
-        </span>
-        <p class="biz-label">Boîte de nuit</p>
+
+      <!-- Boîte de nuit -->
+      <div class="type-card">
+        <div style="width:44px;height:44px;background:#f5f0ff;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px">
+          <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#7c3aed" stroke-width="1.8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 9l10.5-3m0 6.553v3.75a2.25 2.25 0 0 1-1.632 2.163l-1.32.377a1.803 1.803 0 1 1-.99-3.467l2.31-.66a2.25 2.25 0 0 0 1.632-2.163Zm0 0V2.25L9 5.25v10.303m0 0v3.75a2.25 2.25 0 0 1-1.632 2.163l-1.32.377a1.803 1.803 0 0 1-.99-3.467l2.31-.66A2.25 2.25 0 0 0 9 15.553Z"/>
+          </svg>
+        </div>
+        <h3 class="h3-card" style="margin-bottom:6px">Boîte de nuit / Bar</h3>
+        <p style="color:#6a6a6a;font-size:13px;line-height:1.6;margin-bottom:12px">Entrées VIP, consommations offertes, accès prioritaire.</p>
+        <span class="mechanic-pill">Points par entrée</span>
+        <p style="color:#9a9a9a;font-size:12px;margin-top:8px;font-style:italic">ex : 10 entrées → 1 gratuite</p>
       </div>
-      <div class="biz-card">
-        <span class="biz-icon">
-          <!-- Shopping cart -->
-          <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"/></svg>
-        </span>
-        <p class="biz-label">Épicerie</p>
+
+      <!-- Sport -->
+      <div class="type-card">
+        <div style="width:44px;height:44px;background:#f0fdf4;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px">
+          <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#15803d" stroke-width="1.8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12.75 3.03v.568c0 .334.148.65.405.864l1.068.89c.442.369.535 1.01.216 1.49l-.51.766a2.25 2.25 0 0 1-1.161.886l-.143.048a1.107 1.107 0 0 0-.57 1.664c.369.555.169 1.307-.427 1.605L9 13.125l.423 1.059a.956.956 0 0 1-1.652.928l-.679-.906a1.125 1.125 0 0 0-1.906.172L4.5 15.75l-.612.153M12.75 3.031a9 9 0 0 0-8.862 12.872M12.75 3.031a9 9 0 0 1 6.69 14.036m0 0-.177-.529A2.249 2.249 0 0 0 17.5 15H16.5a.75.75 0 0 1-.75-.75v-1.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .668 1.095"/>
+          </svg>
+        </div>
+        <h3 class="h3-card" style="margin-bottom:6px">Sport & Loisirs</h3>
+        <p style="color:#6a6a6a;font-size:13px;line-height:1.6;margin-bottom:12px">Sessions, abonnements, cours — récompensez la régularité.</p>
+        <span class="mechanic-pill">Points par session</span>
+        <p style="color:#9a9a9a;font-size:12px;margin-top:8px;font-style:italic">ex : 10 sessions → 1 offerte</p>
       </div>
+
     </div>
   </div>
 </section>
 
 <!-- ── PRICING ────────────────────────────────────────────────────────────────── -->
-<section>
-  <div class="container" style="max-width:600px;text-align:center">
-    <p style="color:#f0b429;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.15em;margin-bottom:14px">Tarif simple</p>
-    <h2 style="font-size:clamp(1.6rem,4vw,2.3rem);font-weight:900;color:white;margin-bottom:40px">Commencez gratuitement,<br>sans engagement</h2>
-
-    <div class="pricing-card" style="text-align:left">
-      <!-- Price -->
-      <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:6px">
-        <span style="font-size:48px;font-weight:900;color:white;letter-spacing:-.04em">19<span style="font-size:28px">€</span></span>
-        <span style="color:var(--muted);font-size:15px">/mois</span>
+<section id="tarifs">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:52px">
+      <p style="color:#9a7a50;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px">Tarif simple</p>
+      <h2 class="h2-section">Un seul plan.<br>Tout inclus.</h2>
+      <p style="color:#6a6a6a;font-size:16px;margin-top:14px">Sans engagement, résiliable à tout moment.</p>
+    </div>
+    <div class="pricing-card">
+      <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:4px">
+        <span style="font-size:60px;font-weight:900;letter-spacing:-.04em;line-height:1">19</span>
+        <span style="font-size:28px;font-weight:700;letter-spacing:-.02em">€</span>
+        <span style="color:#9a9a9a;font-size:16px">/mois</span>
       </div>
-      <p style="color:#f0b429;font-size:13px;font-weight:700;margin-bottom:28px">14 jours d'essai gratuit — sans carte bancaire requise</p>
+      <p style="color:#c07030;font-size:14px;font-weight:700;margin-bottom:36px">14 jours d'essai gratuit — aucune carte bancaire requise</p>
+      <div style="display:flex;flex-direction:column;gap:13px;margin-bottom:36px">
+        <!-- Feature items -->
+        <div class="check-item"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#0f0f0f" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg><span style="font-size:15px">Clients et scans illimités</span></div>
+        <div class="check-item"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#0f0f0f" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg><span style="font-size:15px">Notifications push manuelles et automatiques</span></div>
+        <div class="check-item"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#0f0f0f" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg><span style="font-size:15px">Récompenses personnalisables</span></div>
+        <div class="check-item"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#0f0f0f" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg><span style="font-size:15px">Analytics et tableau de bord complets</span></div>
+        <div class="check-item"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#0f0f0f" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg><span style="font-size:15px">Export CSV de votre base clients</span></div>
+        <div class="check-item"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#0f0f0f" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg><span style="font-size:15px">QR code d'inscription prêt en 5 min</span></div>
+        <div class="check-item"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#0f0f0f" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg><span style="font-size:15px">Aucune app à télécharger (ni vous, ni vos clients)</span></div>
+        <div class="check-item"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#0f0f0f" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg><span style="font-size:15px">Support par email inclus</span></div>
+      </div>
+      <a href="/register" class="btn-primary" style="width:100%;justify-content:center;font-size:16px;padding:17px">Commencer l'essai gratuit →</a>
+      <p style="text-align:center;color:#9a9a9a;font-size:13px;margin-top:14px">Résiliable à tout moment · Sans engagement</p>
+    </div>
+  </div>
+</section>
 
-      <ul style="list-style:none;padding:0;display:flex;flex-direction:column;gap:11px;margin-bottom:32px">
-        <li style="display:flex;gap:10px;color:var(--text);font-size:14px"><svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#f0b429" stroke-width="2.5" style="flex-shrink:0;margin-top:1px"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Clients illimités</li>
-        <li style="display:flex;gap:10px;color:var(--text);font-size:14px"><svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#f0b429" stroke-width="2.5" style="flex-shrink:0;margin-top:1px"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Scans illimités</li>
-        <li style="display:flex;gap:10px;color:var(--text);font-size:14px"><svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#f0b429" stroke-width="2.5" style="flex-shrink:0;margin-top:1px"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Récompenses personnalisables</li>
-        <li style="display:flex;gap:10px;color:var(--text);font-size:14px"><svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#f0b429" stroke-width="2.5" style="flex-shrink:0;margin-top:1px"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Tableau de bord & analytics complets</li>
-        <li style="display:flex;gap:10px;color:var(--text);font-size:14px"><svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#f0b429" stroke-width="2.5" style="flex-shrink:0;margin-top:1px"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Export CSV clients</li>
-        <li style="display:flex;gap:10px;color:var(--text);font-size:14px"><svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#f0b429" stroke-width="2.5" style="flex-shrink:0;margin-top:1px"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Support par email</li>
-        <li style="display:flex;gap:10px;color:var(--text);font-size:14px"><svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#f0b429" stroke-width="2.5" style="flex-shrink:0;margin-top:1px"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Aucune app à télécharger</li>
-      </ul>
+<!-- ── CONTACT / DEMO FORM ────────────────────────────────────────────────────── -->
+<section class="contact-section">
+  <div class="container" style="max-width:800px">
+    <div style="text-align:center;margin-bottom:56px">
+      <p style="color:#9a8a70;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px">Commencer maintenant</p>
+      <h2 class="h2-section" style="color:#fafaf8">Lancez votre programme<br>de fidélité aujourd'hui.</h2>
+      <p style="color:rgba(250,250,248,.5);font-size:16px;margin-top:16px">Répondez à quelques questions pour démarrer votre essai gratuit.</p>
+    </div>
 
-      <a href="/register" class="btn-gold" style="display:flex;justify-content:center;font-size:16px;padding:17px 28px">
-        Commencer l'essai gratuit →
-      </a>
-      <p style="text-align:center;color:rgba(138,154,176,.5);font-size:12px;margin-top:14px">Résiliable à tout moment</p>
+    <div id="contact-form-wrap">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div>
+          <label style="display:block;color:rgba(255,255,255,.5);font-size:12px;font-weight:600;margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em">Nom complet</label>
+          <input type="text" id="cf-name" class="form-field" placeholder="Marie Dupont">
+        </div>
+        <div>
+          <label style="display:block;color:rgba(255,255,255,.5);font-size:12px;font-weight:600;margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em">Nom du commerce</label>
+          <input type="text" id="cf-commerce" class="form-field" placeholder="Café de la Paix">
+        </div>
+        <div>
+          <label style="display:block;color:rgba(255,255,255,.5);font-size:12px;font-weight:600;margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em">Email</label>
+          <input type="email" id="cf-email" class="form-field" placeholder="contact@moncommerce.fr">
+        </div>
+        <div>
+          <label style="display:block;color:rgba(255,255,255,.5);font-size:12px;font-weight:600;margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em">Téléphone</label>
+          <input type="tel" id="cf-phone" class="form-field" placeholder="06 12 34 56 78">
+        </div>
+        <div>
+          <label style="display:block;color:rgba(255,255,255,.5);font-size:12px;font-weight:600;margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em">Type de commerce</label>
+          <select id="cf-type" class="form-field">
+            <option value="">Choisissez…</option>
+            <option value="restaurant">Restaurant / Brasserie</option>
+            <option value="cafe">Café / Boulangerie / Snack</option>
+            <option value="boutique">Boutique / Retail</option>
+            <option value="salon">Salon de beauté / Coiffeur</option>
+            <option value="nightclub">Boîte de nuit / Bar</option>
+            <option value="sport">Sport & Loisirs</option>
+            <option value="epicerie">Épicerie / Alimentation</option>
+            <option value="other">Autre</option>
+          </select>
+        </div>
+        <div>
+          <label style="display:block;color:rgba(255,255,255,.5);font-size:12px;font-weight:600;margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em">Objectif principal</label>
+          <select id="cf-objective" class="form-field">
+            <option value="">Choisissez…</option>
+            <option value="visits">Augmenter les visites répétées</option>
+            <option value="loyalty">Fidéliser mes clients existants</option>
+            <option value="data">Collecter des données clients</option>
+            <option value="compete">Rivaliser avec les grandes enseignes</option>
+            <option value="other">Autre</option>
+          </select>
+        </div>
+      </div>
+      <div id="cf-error" style="display:none;margin-top:16px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.25);border-radius:12px;padding:12px 16px;color:#f87171;font-size:14px"></div>
+      <div id="cf-success" style="display:none;margin-top:16px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);border-radius:12px;padding:20px;text-align:center">
+        <p style="color:#6ee7b7;font-size:16px;font-weight:700;margin-bottom:4px">Parfait ! Votre essai gratuit vous attend.</p>
+        <p style="color:rgba(250,250,248,.5);font-size:13px">Créez votre compte en 2 minutes pour accéder au dashboard.</p>
+        <a href="/register" style="display:inline-block;margin-top:14px;padding:12px 24px;background:#fafaf8;color:#0f0f0f;border-radius:10px;font-weight:700;font-size:14px;text-decoration:none">Créer mon compte →</a>
+      </div>
+      <button onclick="submitContact()" style="margin-top:20px;width:100%;padding:17px;background:#fafaf8;color:#0f0f0f;border:none;border-radius:12px;font-size:16px;font-weight:800;cursor:pointer;transition:background .15s" onmouseover="this.style.background='#f0ece0'" onmouseout="this.style.background='#fafaf8'">
+        Démarrer mon essai gratuit →
+      </button>
+      <p style="text-align:center;color:rgba(255,255,255,.25);font-size:12px;margin-top:14px">14 jours gratuits · Aucune carte bancaire · RGPD</p>
     </div>
   </div>
 </section>
 
 <!-- ── FOOTER ─────────────────────────────────────────────────────────────────── -->
-<footer style="border-top:1px solid rgba(240,180,41,.08);padding:48px 24px 36px;text-align:center">
-  <p style="font-weight:900;font-size:18px;color:white;margin-bottom:6px;display:flex;align-items:center;justify-content:center;gap:8px">
-    <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#f0b429" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75ZM6.75 16.5h.75v.75h-.75V16.5ZM16.5 6.75h.75v.75h-.75v-.75Z"/></svg>
-    Fidelyzio
-  </p>
-  <p style="color:rgba(138,154,176,.5);font-size:13px;margin-bottom:24px">La fidélité digitale pour tous les commerces</p>
-  <div style="display:flex;gap:24px;justify-content:center;flex-wrap:wrap;margin-bottom:24px">
-    <a href="/cgu" style="color:var(--muted);font-size:13px;text-decoration:none" onmouseover="this.style.color='white'" onmouseout="this.style.color='var(--muted)'">Conditions d'utilisation</a>
-    <a href="/privacy" style="color:var(--muted);font-size:13px;text-decoration:none" onmouseover="this.style.color='white'" onmouseout="this.style.color='var(--muted)'">Politique de confidentialité</a>
-    <a href="/login" style="color:var(--muted);font-size:13px;text-decoration:none" onmouseover="this.style.color='white'" onmouseout="this.style.color='var(--muted)'">Connexion marchand</a>
-    <a href="/join" style="color:var(--muted);font-size:13px;text-decoration:none" onmouseover="this.style.color='white'" onmouseout="this.style.color='var(--muted)'">Trouver ma carte</a>
-    <a href="mailto:contact@fidelyzio.com" style="color:var(--muted);font-size:13px;text-decoration:none" onmouseover="this.style.color='white'" onmouseout="this.style.color='var(--muted)'">contact@fidelyzio.com</a>
+<footer style="background:#0a0a0a;padding:48px 24px 36px">
+  <div class="container" style="text-align:center">
+    <div style="display:flex;align-items:center;justify-content:center;gap:9px;margin-bottom:6px">
+      <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#f0b429" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5Z"/>
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75ZM6.75 16.5h.75v.75h-.75V16.5ZM16.5 6.75h.75v.75h-.75v-.75Z"/>
+      </svg>
+      <span style="color:#fafaf8;font-size:18px;font-weight:900;letter-spacing:-.3px">Fidelyzio</span>
+    </div>
+    <p style="color:rgba(250,250,248,.35);font-size:13px;margin-bottom:24px">La fidélité digitale pour tous les commerces de proximité</p>
+    <div style="display:flex;gap:24px;justify-content:center;flex-wrap:wrap;margin-bottom:24px">
+      <a href="/cgu" style="color:rgba(250,250,248,.35);font-size:13px;text-decoration:none" onmouseover="this.style.color='#fafaf8'" onmouseout="this.style.color='rgba(250,250,248,.35)'">CGU</a>
+      <a href="/privacy" style="color:rgba(250,250,248,.35);font-size:13px;text-decoration:none" onmouseover="this.style.color='#fafaf8'" onmouseout="this.style.color='rgba(250,250,248,.35)'">Confidentialité</a>
+      <a href="/login" style="color:rgba(250,250,248,.35);font-size:13px;text-decoration:none" onmouseover="this.style.color='#fafaf8'" onmouseout="this.style.color='rgba(250,250,248,.35)'">Connexion marchand</a>
+      <a href="/join" style="color:rgba(250,250,248,.35);font-size:13px;text-decoration:none" onmouseover="this.style.color='#fafaf8'" onmouseout="this.style.color='rgba(250,250,248,.35)'">Trouver ma carte</a>
+      <a href="mailto:contact@fidelyzio.com" style="color:rgba(250,250,248,.35);font-size:13px;text-decoration:none" onmouseover="this.style.color='#fafaf8'" onmouseout="this.style.color='rgba(250,250,248,.35)'">Contact</a>
+    </div>
+    <p style="color:rgba(250,250,248,.18);font-size:12px">© 2026 Fidelyzio · Fait avec soin pour les commerces indépendants</p>
   </div>
-  <p style="color:rgba(138,154,176,.3);font-size:12px">© 2025 Fidelyzio</p>
 </footer>
 
-<style>
-  @media(max-width:768px) {
-    .merch-grid { grid-template-columns: 1fr !important; gap: 40px !important; }
+<script>
+  // Contact form
+  async function submitContact() {
+    const name     = document.getElementById('cf-name').value.trim();
+    const email    = document.getElementById('cf-email').value.trim();
+    const commerce = document.getElementById('cf-commerce').value.trim();
+    const phone    = document.getElementById('cf-phone').value.trim();
+    const type     = document.getElementById('cf-type').value;
+    const objective= document.getElementById('cf-objective').value;
+    const errEl    = document.getElementById('cf-error');
+    const sucEl    = document.getElementById('cf-success');
+
+    errEl.style.display = 'none';
+
+    if (!name || !email) { errEl.textContent = 'Nom et email requis.'; errEl.style.display = 'block'; return; }
+    if (!email.includes('@')) { errEl.textContent = 'Email invalide.'; errEl.style.display = 'block'; return; }
+
+    try {
+      await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, commerce, phone, type, objective }),
+      });
+      sucEl.style.display = 'block';
+      document.querySelector('button[onclick="submitContact()"]').style.display = 'none';
+    } catch { sucEl.style.display = 'block'; }
   }
-</style>
+
+  // Responsive: 2-col → 1-col on small screens
+  function applyFormLayout() {
+    const grid = document.querySelector('#contact-form-wrap > div');
+    if (!grid) return;
+    grid.style.gridTemplateColumns = window.innerWidth < 640 ? '1fr' : '1fr 1fr';
+  }
+  applyFormLayout();
+  window.addEventListener('resize', applyFormLayout);
+</script>
 
 </body>
 </html>

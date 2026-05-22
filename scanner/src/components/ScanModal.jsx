@@ -15,7 +15,7 @@ const IcoGift = ({ s = 24 }) => (
 //        | 'reward'    (reward available — merchant must act)
 //        | 'redeeming' | 'redeemed' (auto-resets after 2.5s)
 //        | 'fraud' (auto-resets after 2s) | 'error'
-export default function ScanModal({ token, onClose, onRefresh }) {
+export default function ScanModal({ token, onClose, onRefresh, cameraStream }) {
   const [phase,        setPhase]        = useState('scanning');
   const [previewData,  setPreview]      = useState(null);
   const [points,       setPoints]       = useState(10);
@@ -117,7 +117,7 @@ export default function ScanModal({ token, onClose, onRefresh }) {
       <div className={`flex-1 flex flex-col px-5 ${(inReward || phase === 'redeemed') ? 'hidden' : ''}`}>
         <div className="relative">
           {/* QrReader is always rendered so the camera stream is never killed */}
-          <QrReader active={camActive} onScan={handleScan} />
+          <QrReader active={camActive} onScan={handleScan} stream={cameraStream} />
 
           {/* Loading overlay on camera */}
           {phase === 'loading' && (

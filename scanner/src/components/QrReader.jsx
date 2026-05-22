@@ -1,22 +1,22 @@
 import { useEffect, useRef, useState } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
 
-// Html5Qrcode scanner states
 const STATE_SCANNING = 1;
 const STATE_PAUSED   = 2;
 
-export default function QrReader({ active, onScan }) {
+// stream prop: a persistent MediaStream from DashboardPage.
+// We CLONE it before passing to html5-qrcode so that scanner.stop()
+// stops the clone's tracks, not the original — preventing iOS Safari
+// from requiring a new permission prompt on the next modal open.
+export default function QrReader({ active, onScan, stream: externalStream }) {
   const scannerRef = useRef(null);
   const onScanRef  = useRef(onScan);
   const activeRef  = useRef(active);
   const [camError, setCamError] = useState(null);
 
-  onScanRef.current  = onScan;
-  activeRef.current  = active;
+  onScanRef.current = onScan;
+  activeRef.current = active;
 
-  // Start camera ONCE on mount, stop only on unmount.
-  // This keeps the MediaStream alive the whole time the modal is open,
-  // which prevents iOS Safari from re-requesting camera permission.
   useEffect(() => {
     let cancelled = false;
     setCamError(null);
@@ -27,26 +27,40 @@ export default function QrReader({ active, onScan }) {
       const scanner = new Html5Qrcode('qr-viewport');
       scannerRef.current = scanner;
 
-      const config = { fps: 15, qrbox: { width: 220, height: 220 }, aspectRatio: 1 };
-
+      const config = { fps: 15, qrbox: { width: 220, height: 220 } };
       const onSuccess = (text) => {
-        // Pause QR scanning but keep camera feed running
         try { scanner.pause(false); } catch {}
         onScanRef.current(text);
       };
 
-      try {
-        await scanner.start({ facingMode: 'environment' }, config, onSuccess, () => {});
-      } catch {
+      let started = false;
+
+      // Try reusing the persistent stream first (no permission dialog)
+      if (externalStream?.active) {
         try {
-          await scanner.start({ facingMode: 'user' }, config, onSuccess, () => {});
+          const clone = externalStream.clone(); // clone so stop() doesn't kill original
+          await scanner.startWithStream(clone, config, onSuccess, () => {});
+          started = true;
+        } catch { /* fall through to normal start */ }
+      }
+
+      // Fall back: request camera normally (first use or stream expired)
+      if (!started) {
+        try {
+          await scanner.start({ facingMode: 'environment' }, config, onSuccess, () => {});
+          started = true;
         } catch {
-          if (!cancelled) setCamError('Impossible d\'accéder à la caméra. Vérifiez les permissions dans les réglages.');
-          return;
+          try {
+            await scanner.start({ facingMode: 'user' }, config, onSuccess, () => {});
+            started = true;
+          } catch {
+            if (!cancelled) setCamError('Impossible d\'accéder à la caméra. Vérifiez les permissions dans les réglages.');
+            return;
+          }
         }
       }
 
-      // Apply initial active state in case it changed while camera was starting
+      // Apply initial active state (may have changed while camera was starting)
       if (!activeRef.current) {
         try { scanner.pause(false); } catch {}
       }
@@ -61,7 +75,7 @@ export default function QrReader({ active, onScan }) {
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Resume or pause when active prop changes (never stop the stream)
+  // Resume or pause scanning when active prop changes (stream stays alive)
   useEffect(() => {
     const s = scannerRef.current;
     if (!s) return;
@@ -70,17 +84,15 @@ export default function QrReader({ active, onScan }) {
       if (active && state === STATE_PAUSED) {
         s.resume();
       } else if (!active && state === STATE_SCANNING) {
-        s.pause(false); // false = keep video tracks running
+        s.pause(false);
       }
     } catch {}
   }, [active]);
 
   return (
     <div className="relative w-full aspect-square max-w-sm mx-auto">
-      {/* Camera feed injected here by html5-qrcode */}
       <div id="qr-viewport" className="w-full h-full rounded-2xl overflow-hidden bg-gray-900" />
 
-      {/* Corner guide overlay */}
       {!camError && active && (
         <div className="absolute inset-0 pointer-events-none" aria-hidden>
           <div className="absolute inset-8">
@@ -96,7 +108,6 @@ export default function QrReader({ active, onScan }) {
         </div>
       )}
 
-      {/* Camera permission error */}
       {camError && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-900 rounded-2xl px-6 text-center animate-fade-in">
           <svg className="w-12 h-12 text-gray-600 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">

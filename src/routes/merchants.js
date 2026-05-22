@@ -334,12 +334,13 @@ router.post('/profile', auth, async (req, res) => {
 
 router.get('/scans', auth, async (req, res) => {
   const merchantId = req.merchant.id;
-  const { date_from, date_to } = req.query;
+  const { date_from, date_to, customer_id } = req.query;
   try {
     const params = [merchantId];
     let where = 'WHERE t.merchant_id = $1';
-    if (date_from) { params.push(date_from); where += ` AND DATE(t.created_at) >= $${params.length}`; }
-    if (date_to)   { params.push(date_to);   where += ` AND DATE(t.created_at) <= $${params.length}`; }
+    if (date_from)   { params.push(date_from);              where += ` AND DATE(t.created_at) >= $${params.length}`; }
+    if (date_to)     { params.push(date_to);                where += ` AND DATE(t.created_at) <= $${params.length}`; }
+    if (customer_id) { params.push(parseInt(customer_id, 10)); where += ` AND t.customer_id = $${params.length}`; }
 
     const scans = await db.all(`
       SELECT t.id, t.points, t.note, t.created_at,

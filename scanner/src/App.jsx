@@ -19,8 +19,8 @@ export default function App() {
       const data = await getDashboard(token);
       setDashData(data);
     } catch (err) {
-      // JWT expired
-      if (err.message.toLowerCase().includes('token')) {
+      // Only clear session on definitive auth failure (401), not network errors or 500s
+      if (err.status === 401) {
         localStorage.removeItem(STORAGE_KEY);
         setAuth(null);
         setDashData(null);

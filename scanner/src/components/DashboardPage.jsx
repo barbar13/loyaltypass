@@ -375,16 +375,39 @@ function HomeTab({ merchant, stats, rewards, token, onScanClick }) {
 // ── ClientsTab ────────────────────────────────────────────────────────────────
 
 function ClientsTab({ customers, rewards, token, onRewardsChange }) {
-  const [search, setSearch]           = useState('');
-  const [offerTarget, setOfferTarget] = useState(null);
-  const [offering, setOffering]       = useState(false);
-  const [offerErr, setOfferErr]       = useState('');
+  const [search, setSearch]             = useState('');
+  const [offerTarget, setOfferTarget]   = useState(null);
+  const [offering, setOffering]         = useState(false);
+  const [offerErr, setOfferErr]         = useState('');
+  const [expandedId, setExpandedId]     = useState(null);
+  const [clientScansCache, setCache]    = useState({}); // { [id]: 'loading' | scan[] }
+  const [recentScans, setRecentScans]   = useState(null);
+
   const activeRewards = (rewards || []).filter(r => r.active);
   const filtered = search.trim()
     ? customers.filter(c => c.first_name.toLowerCase().includes(search.toLowerCase()) || (c.phone || '').includes(search))
     : customers;
 
-  function openOffer(c) {
+  // Load global recent scans once
+  useEffect(() => {
+    getScans(token, {})
+      .then(d => setRecentScans((d.scans || []).slice(0, 25)))
+      .catch(() => setRecentScans([]));
+  }, [token]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  function toggleClient(id) {
+    if (expandedId === id) { setExpandedId(null); return; }
+    setExpandedId(id);
+    if (clientScansCache[id] === undefined) {
+      setCache(prev => ({ ...prev, [id]: 'loading' }));
+      getScans(token, { customerId: id })
+        .then(d => setCache(prev => ({ ...prev, [id]: d.scans || [] })))
+        .catch(() => setCache(prev => ({ ...prev, [id]: [] })));
+    }
+  }
+
+  function openOffer(c, e) {
+    e?.stopPropagation();
     const available = activeRewards.filter(r => c.points >= r.points_required);
     if (!available.length) return;
     setOfferTarget({ customer: c, available }); setOfferErr('');
@@ -392,13 +415,19 @@ function ClientsTab({ customers, rewards, token, onRewardsChange }) {
 
   async function handleOffer(reward) {
     setOffering(true); setOfferErr('');
-    try { await redeemReward(offerTarget.customer.membership_id, reward.id, token); setOfferTarget(null); onRewardsChange(); }
-    catch (err) { setOfferErr(err.message); }
+    try {
+      await redeemReward(offerTarget.customer.membership_id, reward.id, token);
+      // Clear cached scans for this customer so history refreshes on next expand
+      setCache(prev => { const n = { ...prev }; delete n[offerTarget.customer.id]; return n; });
+      setOfferTarget(null);
+      onRewardsChange();
+    } catch (err) { setOfferErr(err.message); }
     finally { setOffering(false); }
   }
 
   return (
-    <div className="px-5 md:px-6 pt-2 pb-6">
+    <div className="px-5 md:px-6 pt-2 pb-8">
+      {/* Search + CSV */}
       <div className="flex gap-2 mb-4">
         <div className="relative flex-1">
           <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -415,6 +444,7 @@ function ClientsTab({ customers, rewards, token, onRewardsChange }) {
         )}
       </div>
 
+      {/* Empty state */}
       {customers.length === 0 && (
         <div className="text-center py-16 bg-[#0e0e18] border border-white/5 rounded-2xl">
           <div className="flex justify-center mb-3 text-gray-600"><IcoPeople s={36} /></div>
@@ -426,38 +456,151 @@ function ClientsTab({ customers, rewards, token, onRewardsChange }) {
         <p className="text-center text-gray-600 text-sm py-8">Aucun résultat pour « {search} »</p>
       )}
 
-      <div className="space-y-3">
+      {/* Client list — expandable */}
+      <div className="space-y-2">
         {filtered.map(c => {
-          const available = activeRewards.filter(r => c.points >= r.points_required);
+          const available  = activeRewards.filter(r => c.points >= r.points_required);
           const hasRewards = available.length > 0;
           const lastVisit  = c.last_visit ? fmtRelative(c.last_visit) : null;
+          const isExpanded = expandedId === c.id;
+          const scans      = clientScansCache[c.id];
+
           return (
-            <div key={c.id}
-              className={`bg-gray-900 rounded-2xl overflow-hidden border ${hasRewards ? 'border-amber-400/25 cursor-pointer active:scale-[0.99] transition-transform' : 'border-white/5'}`}
-              onClick={() => hasRewards && openOffer(c)}>
+            <div key={c.id} className={`bg-gray-900 rounded-2xl overflow-hidden border transition-all ${hasRewards ? 'border-amber-400/20' : 'border-white/5'}`}>
+              {/* Reward banner — tap to open offer sheet */}
               {hasRewards && (
-                <div className="bg-amber-500/10 border-b border-amber-400/15 px-4 py-2 flex items-center gap-2">
-                  <span className="text-amber-400 shrink-0"><IcoGift s={16} /></span>
-                  <p className="text-amber-300 text-xs font-semibold flex-1">{available.length === 1 ? '1 récompense disponible' : `${available.length} récompenses disponibles`}</p>
-                  <span className="text-amber-400/60 text-[10px]">Appuyer →</span>
+                <div className="bg-amber-500/10 border-b border-amber-400/15 px-4 py-2 flex items-center gap-2 cursor-pointer"
+                     onClick={e => openOffer(c, e)}>
+                  <span className="text-amber-400 shrink-0"><IcoGift s={14} /></span>
+                  <p className="text-amber-300 text-xs font-semibold flex-1">
+                    {available.length === 1 ? '1 récompense disponible' : `${available.length} récompenses disponibles`}
+                  </p>
+                  <span className="text-amber-400/60 text-[10px]">Offrir →</span>
                 </div>
               )}
-              <div className="px-4 py-4 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gray-800 flex items-center justify-center text-white font-bold text-sm shrink-0">{c.first_name.charAt(0).toUpperCase()}</div>
+
+              {/* Main row — tap to expand/collapse */}
+              <div className="px-4 py-3.5 flex items-center gap-3 cursor-pointer select-none" onClick={() => toggleClient(c.id)}>
+                <div className="w-10 h-10 rounded-xl bg-gray-800 flex items-center justify-center text-white font-bold text-sm shrink-0">
+                  {c.first_name.charAt(0).toUpperCase()}
+                </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-white font-semibold text-sm truncate">{c.first_name}</p>
                   <p className="text-gray-600 text-xs truncate">{c.phone || '—'}{lastVisit ? ` · ${lastVisit}` : ''}</p>
                 </div>
-                <div className="text-right shrink-0">
-                  <p className="text-white font-black text-lg leading-none">{c.points}</p>
-                  <p className="text-gray-600 text-[10px] uppercase tracking-wide">pts</p>
+                <div className="flex items-center gap-2 shrink-0">
+                  <div className="text-right">
+                    <p className="text-white font-black text-lg leading-none">{c.points}</p>
+                    <p className="text-gray-600 text-[10px] uppercase tracking-wide">pts</p>
+                  </div>
+                  <svg className={`w-4 h-4 text-gray-600 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+                       fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                  </svg>
                 </div>
               </div>
+
+              {/* Expanded detail panel */}
+              {isExpanded && (
+                <div className="border-t border-white/5 bg-[#080810]">
+                  {/* Client metadata */}
+                  {(c.email || c.visit_count != null || c.joined_at) && (
+                    <div className="px-4 py-2.5 flex flex-wrap gap-x-4 gap-y-0.5 border-b border-white/[0.04]">
+                      {c.email && <span className="text-gray-500 text-xs">{c.email}</span>}
+                      {c.visit_count != null && (
+                        <span className="text-gray-500 text-xs">{Number(c.visit_count)} visite{Number(c.visit_count) > 1 ? 's' : ''}</span>
+                      )}
+                      {c.joined_at && (
+                        <span className="text-gray-500 text-xs">Inscrit le {new Date(c.joined_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Transaction history */}
+                  <div className="px-4 pt-3 pb-4">
+                    <p className="text-gray-600 text-[10px] uppercase tracking-wider mb-2.5">Historique des scans</p>
+                    {scans === 'loading' && (
+                      <div className="space-y-2">
+                        {[1,2,3].map(i => <div key={i} className="h-7 bg-white/[0.04] rounded-xl animate-pulse" />)}
+                      </div>
+                    )}
+                    {Array.isArray(scans) && scans.length === 0 && (
+                      <p className="text-gray-700 text-xs text-center py-3">Aucune transaction enregistrée</p>
+                    )}
+                    {Array.isArray(scans) && scans.length > 0 && (
+                      <div className="space-y-1.5">
+                        {scans.slice(0, 20).map(s => {
+                          const isRedeem = s.points < 0;
+                          return (
+                            <div key={s.id} className="flex items-center gap-2.5">
+                              <div className={`w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 ${isRedeem ? 'bg-amber-500/15 text-amber-400' : 'bg-emerald-500/10 text-emerald-400'}`}>
+                                {isRedeem ? <IcoGift s={12} /> : '+'}
+                              </div>
+                              <span className="flex-1 text-gray-500 text-xs">{fmtRelative(s.created_at)}</span>
+                              <span className={`text-xs font-semibold shrink-0 ${isRedeem ? 'text-amber-400' : 'text-emerald-400'}`}>
+                                {isRedeem ? 'Récompense' : `+${s.points} pts`}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    {/* Offer reward button */}
+                    {hasRewards && (
+                      <button onClick={e => openOffer(c, e)}
+                        className="mt-3.5 w-full py-2.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-400/20 text-amber-300 text-xs font-semibold transition-all active:scale-[0.98] flex items-center justify-center gap-1.5">
+                        <IcoGift s={14} /> Offrir une récompense
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           );
         })}
       </div>
 
+      {/* Global recent scans */}
+      {customers.length > 0 && (
+        <div className="mt-7">
+          <p className="text-gray-500 text-xs font-semibold uppercase tracking-widest mb-3">Scans récents</p>
+          {recentScans === null && (
+            <div className="space-y-2">
+              {[1,2,3,4].map(i => <div key={i} className="h-12 bg-[#0e0e18] border border-white/5 rounded-xl animate-pulse" />)}
+            </div>
+          )}
+          {recentScans !== null && recentScans.length === 0 && (
+            <div className="bg-[#0e0e18] border border-white/5 rounded-2xl py-8 text-center">
+              <div className="flex justify-center mb-2 text-gray-600"><IcoInbox s={28} /></div>
+              <p className="text-gray-600 text-sm">Aucun scan encore</p>
+            </div>
+          )}
+          {recentScans !== null && recentScans.length > 0 && (
+            <div className="space-y-2">
+              {recentScans.map(s => {
+                const isRedeem = s.points < 0;
+                return (
+                  <div key={s.id} className="bg-[#0e0e18] border border-white/5 rounded-xl px-4 py-3 flex items-center gap-3">
+                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-sm font-bold shrink-0 ${isRedeem ? 'bg-amber-500/15 text-amber-400' : 'bg-emerald-500/10 text-white'}`}>
+                      {isRedeem ? <IcoGift s={14} /> : s.first_name.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white text-sm font-semibold truncate">{s.first_name}</p>
+                      <p className="text-gray-600 text-xs">{fmtRelative(s.created_at)}</p>
+                    </div>
+                    <p className={`text-sm font-bold shrink-0 ${isRedeem ? 'text-amber-400' : 'text-emerald-400'}`}>
+                      {isRedeem ? 'Récompense' : `+${s.points} pts`}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Reward offer bottom sheet */}
       {offerTarget && (
         <>
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40" onClick={() => setOfferTarget(null)} />
@@ -1289,6 +1432,21 @@ function AnalyticsTab({ token, color }) {
 export default function DashboardPage({ auth, dashData, dashLoading, onLogout, onRefresh }) {
   const [tab, setTab]           = useState('home');
   const [showScan, setShowScan] = useState(false);
+  const cameraStreamRef         = useRef(null);
+
+  // Pre-acquire camera stream so iOS Safari only asks permission once per session.
+  // The stream stays alive in cameraStreamRef; QrReader clones it for each scan session.
+  async function openScanner() {
+    if (!cameraStreamRef.current?.active && navigator.mediaDevices?.getUserMedia) {
+      try {
+        cameraStreamRef.current = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: 'environment' } },
+          audio: false,
+        });
+      } catch { /* QrReader will request its own permission as fallback */ }
+    }
+    setShowScan(true);
+  }
 
   const merchant  = dashData?.merchant ?? auth.merchant;
   const color     = merchant.color || '#6366f1';
@@ -1297,17 +1455,16 @@ export default function DashboardPage({ auth, dashData, dashLoading, onLogout, o
   const rewards   = dashData?.rewards   ?? [];
 
   const TABS = [
-    { id: 'home',      label: 'Accueil',      short: 'Accueil',  Icon: IconHome     },
-    { id: 'clients',   label: 'Clients',      short: 'Clients',  Icon: IconUsers    },
-    { id: 'rewards',   label: 'Récompenses',  short: 'Récomp.',  Icon: IconGift     },
-    { id: 'analytics', label: 'Statistiques', short: 'Stats',    Icon: IconChart    },
-    { id: 'history',   label: 'Historique',   short: 'Scans',    Icon: IconHistory  },
-    { id: 'settings',  label: 'Paramètres',   short: 'Compte',   Icon: IconSettings },
+    { id: 'home',      label: 'Accueil',      short: 'Accueil', Icon: IconHome     },
+    { id: 'clients',   label: 'Clients',      short: 'Clients', Icon: IconUsers    },
+    { id: 'rewards',   label: 'Récompenses',  short: 'Récomp.', Icon: IconGift     },
+    { id: 'analytics', label: 'Statistiques', short: 'Stats',   Icon: IconChart    },
+    { id: 'settings',  label: 'Paramètres',   short: 'Compte',  Icon: IconSettings },
   ];
 
   const TAB_TITLES = {
     home: 'Tableau de bord', clients: 'Clients', rewards: 'Récompenses',
-    analytics: 'Statistiques', history: 'Historique', settings: 'Paramètres',
+    analytics: 'Statistiques', settings: 'Paramètres',
   };
 
   return (
@@ -1400,11 +1557,10 @@ export default function DashboardPage({ auth, dashData, dashLoading, onLogout, o
           {tab === 'home' && merchant.subscription_status !== 'suspended' && (
             <OnboardingChecklist merchant={merchant} stats={stats} rewards={rewards} />
           )}
-          {tab === 'home'      && <HomeTab merchant={merchant} stats={stats} rewards={rewards} token={auth.token} onScanClick={() => setShowScan(true)} />}
+          {tab === 'home'      && <HomeTab merchant={merchant} stats={stats} rewards={rewards} token={auth.token} onScanClick={openScanner} />}
           {tab === 'clients'   && <ClientsTab customers={customers} rewards={rewards} token={auth.token} onRewardsChange={onRefresh} />}
           {tab === 'rewards'   && <RewardsTab rewards={rewards} token={auth.token} onRewardsChange={onRefresh} />}
           {tab === 'analytics' && <AnalyticsTab token={auth.token} color={color} />}
-          {tab === 'history'   && <HistoryTab token={auth.token} />}
           {tab === 'settings'  && <SettingsTab merchant={merchant} token={auth.token} onRefresh={onRefresh} />}
         </main>
 
@@ -1427,7 +1583,7 @@ export default function DashboardPage({ auth, dashData, dashLoading, onLogout, o
       </div>
 
       {showScan && (
-        <ScanModal token={auth.token} onClose={() => { setShowScan(false); onRefresh(); }} onRefresh={onRefresh} />
+        <ScanModal token={auth.token} onClose={() => { setShowScan(false); onRefresh(); }} onRefresh={onRefresh} cameraStream={cameraStreamRef.current} />
       )}
     </div>
   );

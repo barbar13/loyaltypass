@@ -6,7 +6,11 @@ async function request(path, options = {}) {
     headers: { 'Content-Type': 'application/json', ...options.headers },
   });
   const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'Erreur serveur');
+  if (!res.ok) {
+    const err = new Error(data.error || 'Erreur serveur');
+    err.status = res.status;
+    throw err;
+  }
   return data;
 }
 
@@ -70,10 +74,11 @@ export function updateProfile(data, token) {
   });
 }
 
-export function getScans(token, { dateFrom, dateTo } = {}) {
+export function getScans(token, { dateFrom, dateTo, customerId } = {}) {
   const p = new URLSearchParams();
-  if (dateFrom) p.set('date_from', dateFrom);
-  if (dateTo)   p.set('date_to', dateTo);
+  if (dateFrom)   p.set('date_from', dateFrom);
+  if (dateTo)     p.set('date_to', dateTo);
+  if (customerId) p.set('customer_id', customerId);
   const qs = p.toString();
   return request(`/merchants/scans${qs ? '?' + qs : ''}`, {
     headers: { Authorization: `Bearer ${token}` },

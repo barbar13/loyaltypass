@@ -95,10 +95,12 @@ export default function ScanModal({ token, onClose, onRefresh, cameraStream }) {
   const [errMsg,       setErrMsg]       = useState('');
 
   const scannedQrRef = useRef('');
+  const forceRef     = useRef(false);
   const camActive    = phase === 'scanning';
 
   function reset() {
     scannedQrRef.current = '';
+    forceRef.current = false;
     setPhase('scanning');
     setInputMode(null);
     setPreview(null);
@@ -112,12 +114,10 @@ export default function ScanModal({ token, onClose, onRefresh, cameraStream }) {
     setPhase('loading');
     try {
       const data = await lookupCustomer(qrCode, token);
+      setPreview(data);
       if (data.already_scanned_today) {
-        setPreview(data);
         setPhase('fraud');
-        setTimeout(() => reset(), 2500);
       } else {
-        setPreview(data);
         setPhase('choice');
       }
     } catch (err) {
@@ -129,7 +129,7 @@ export default function ScanModal({ token, onClose, onRefresh, cameraStream }) {
   async function handleConfirm(type, pts) {
     setPhase('confirming');
     try {
-      const data = await scanCustomer(scannedQrRef.current, pts, token, type);
+      const data = await scanCustomer(scannedQrRef.current, pts, token, type, forceRef.current);
       setResult(data);
       const unlocked = (data.rewards || []).filter(r => {
         if (r.mechanic === 'stamps') return (data.membership.stamps_count ?? 0) >= r.points_required;
@@ -216,9 +216,9 @@ export default function ScanModal({ token, onClose, onRefresh, cameraStream }) {
           </div>
         )}
 
-        {/* Fraud */}
+        {/* Fraud — avertissement + possibilité de forcer */}
         {phase === 'fraud' && previewData && (
-          <div className="flex-1 flex flex-col items-center justify-center mt-6 gap-5 animate-fade-in">
+          <div className="flex-1 flex flex-col items-center justify-center mt-6 gap-5 px-2 animate-fade-in">
             <div className="w-20 h-20 rounded-full bg-amber-500/15 flex items-center justify-center">
               <svg className="w-10 h-10 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"/>
@@ -226,9 +226,22 @@ export default function ScanModal({ token, onClose, onRefresh, cameraStream }) {
             </div>
             <div className="text-center">
               <p className="text-amber-400 font-semibold text-base">Déjà scanné aujourd'hui</p>
-              <p className="text-gray-400 text-sm mt-1">{previewData.customer.first_name} a déjà reçu des points ou un tampon chez vous.</p>
+              <p className="text-gray-400 text-sm mt-1">
+                {previewData.customer.first_name} a déjà reçu des points ou un tampon chez vous aujourd'hui.
+              </p>
             </div>
-            <p className="text-gray-600 text-xs">Scanner suivant…</p>
+            <div className="w-full flex flex-col gap-2.5">
+              <button
+                onClick={() => { forceRef.current = true; setPhase('choice'); }}
+                className="w-full py-4 rounded-2xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-400/30 text-amber-300 font-semibold text-sm active:scale-[0.98] transition-all">
+                Scanner quand même
+              </button>
+              <button
+                onClick={reset}
+                className="w-full py-3 rounded-2xl bg-gray-800 hover:bg-gray-700 text-gray-400 font-semibold text-sm active:scale-[0.98] transition-all">
+                Annuler
+              </button>
+            </div>
           </div>
         )}
 

@@ -33,8 +33,8 @@ export function lookupCustomer(customerQrCode, token) {
   });
 }
 
-export function scanCustomer(customerQrCode, points, token, type = 'points') {
-  const body = JSON.stringify({ customer_qr_code: customerQrCode, points, type });
+export function scanCustomer(customerQrCode, points, token, type = 'points', force = false) {
+  const body = JSON.stringify({ customer_qr_code: customerQrCode, points, type, force });
   return request('/scan', {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}` },

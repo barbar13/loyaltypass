@@ -50,7 +50,7 @@ router.get('/lookup/:customer_qr_code', auth, async (req, res) => {
 // POST /api/scan
 // Merchant scans customer QR → adds points or 1 stamp
 router.post('/', auth, async (req, res) => {
-  const { customer_qr_code, points, type = 'points' } = req.body;
+  const { customer_qr_code, points, type = 'points', force = false } = req.body;
   const merchantId = req.merchant.id;
 
   if (!customer_qr_code) {
@@ -82,14 +82,16 @@ router.post('/', auth, async (req, res) => {
       return res.status(404).json({ error: 'Client introuvable — QR code invalide' });
     }
 
-    // Anti-fraud: max 1 positive transaction (points OR stamps) per customer per merchant per day
-    const { cnt } = await db.one(
-      `SELECT COUNT(*) AS cnt FROM transactions WHERE merchant_id = $1 AND customer_id = $2 AND points > 0 AND ${db.todayExpr}`,
-      [merchantId, customer.id]
-    );
-    if (Number(cnt) > 0) {
-      db.run('INSERT INTO scan_attempts (merchant_id, customer_id, points, blocked) VALUES ($1, $2, $3, 1)', [merchantId, customer.id, pts]).catch(() => {});
-      return res.status(429).json({ error: "Ce client a déjà reçu des points ou un tampon aujourd'hui.", already_scanned: true });
+    // Anti-fraud: avertir si déjà scanné aujourd'hui, mais autoriser si force=true
+    if (!force) {
+      const { cnt } = await db.one(
+        `SELECT COUNT(*) AS cnt FROM transactions WHERE merchant_id = $1 AND customer_id = $2 AND points > 0 AND ${db.todayExpr}`,
+        [merchantId, customer.id]
+      );
+      if (Number(cnt) > 0) {
+        db.run('INSERT INTO scan_attempts (merchant_id, customer_id, points, blocked) VALUES ($1, $2, $3, 1)', [merchantId, customer.id, pts]).catch(() => {});
+        return res.status(429).json({ error: "Ce client a déjà reçu des points ou un tampon aujourd'hui.", already_scanned: true });
+      }
     }
 
     // Atomically upsert membership + log transaction

@@ -195,13 +195,12 @@
         <span id="form-error-msg"></span>
       </div>
 
-      <!-- RGPD -->
-      <div class="flex items-start gap-3 animate-fade-up delay-5">
-        <input type="checkbox" id="inp-rgpd" required
+      <!-- CGU -->
+      <div class="flex items-start gap-3 animate-fade-up delay-5 mb-5">
+        <input type="checkbox" id="inp-rgpd"
                class="mt-0.5 w-4 h-4 accent-indigo-500 cursor-pointer shrink-0">
         <label for="inp-rgpd" class="text-gray-500 text-xs leading-relaxed cursor-pointer">
-          J'accepte la <a href="/privacy" target="_blank" class="text-indigo-400 underline underline-offset-1">politique de confidentialité</a>
-          et les <a href="/cgu" target="_blank" class="text-indigo-400 underline underline-offset-1">CGU</a> de Fidelyzio.
+          J'ai lu et j'accepte les <a href="/cgu" target="_blank" class="text-indigo-400 underline underline-offset-1">Conditions Générales d'Utilisation</a> et la <a href="/privacy" target="_blank" class="text-indigo-400 underline underline-offset-1">Politique de Confidentialité</a>
         </label>
       </div>
 
@@ -403,6 +402,7 @@
     if (!name)               return showError('Veuillez saisir le nom de votre établissement.');
     if (!email)              return showError('Veuillez saisir votre adresse e-mail.');
     if (password.length < 6) return showError('Le mot de passe doit contenir au moins 6 caractères.');
+    if (!document.getElementById('inp-rgpd').checked) return showError('Vous devez accepter les CGU pour continuer.');
 
     const btn = document.getElementById('submit-btn');
     btn.disabled = true;

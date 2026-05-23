@@ -120,7 +120,7 @@ if (process.env.DATABASE_URL) {
       ['lat',                    'DOUBLE PRECISION'],
       ['lng',                    'DOUBLE PRECISION'],
     ];
-    const customerMigrations    = [['email', 'TEXT']];
+    const customerMigrations    = [['email', 'TEXT'], ['cgu_accepted_at', 'TIMESTAMPTZ']];
     const membershipMigrations  = [['stamps_count', 'INTEGER NOT NULL DEFAULT 0']];
     const transactionMigrations = [["type", "TEXT NOT NULL DEFAULT 'points'"]];
     const rewardMigrations      = [["mechanic", "TEXT NOT NULL DEFAULT 'points'"]];
@@ -292,6 +292,8 @@ if (process.env.DATABASE_URL) {
   const customerCols = sqlite.prepare('PRAGMA table_info(customers)').all();
   if (!customerCols.find(c => c.name === 'email'))
     sqlite.exec('ALTER TABLE customers ADD COLUMN email TEXT');
+  if (!customerCols.find(c => c.name === 'cgu_accepted_at'))
+    sqlite.exec('ALTER TABLE customers ADD COLUMN cgu_accepted_at DATETIME');
 
   sqlite.exec(`CREATE TABLE IF NOT EXISTS push_subscriptions (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,

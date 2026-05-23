@@ -213,13 +213,19 @@
           </div>
           <div>
             <label style="display:block;color:rgba(138,154,176,.8);font-size:13px;font-weight:600;margin-bottom:8px">
-              E-mail
-              <span style="color:rgba(138,154,176,.4);font-weight:400;font-size:12px">(optionnel — pour retrouver votre carte)</span>
+              E-mail <span style="color:#f0b429">*</span>
             </label>
             <input id="inp-email" type="email" autocomplete="email" inputmode="email"
                    placeholder="votre@email.com" class="field"
                    onkeydown="if(event.key==='Enter')createCard()">
           </div>
+        </div>
+
+        <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:16px;margin-top:4px">
+          <input type="checkbox" id="inp-cgu" style="margin-top:3px;width:16px;height:16px;accent-color:#f0b429;cursor:pointer;flex-shrink:0">
+          <label for="inp-cgu" style="color:rgba(138,154,176,.7);font-size:12px;line-height:1.6;cursor:pointer">
+            J'ai lu et j'accepte les <a href="/cgu" target="_blank" style="color:#f0b429;text-decoration:underline">Conditions Générales d'Utilisation</a> et la <a href="/privacy" target="_blank" style="color:#f0b429;text-decoration:underline">Politique de Confidentialité</a>
+          </label>
         </div>
 
         <div id="create-error" style="display:none;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:12px;padding:12px 14px;color:rgb(248,113,113);font-size:13px;margin-bottom:14px"></div>
@@ -309,9 +315,12 @@
     const name  = document.getElementById('inp-name').value.trim();
     const phone = normalizePhone(document.getElementById('inp-phone').value);
     const email = document.getElementById('inp-email').value.trim();
+    const cgu   = document.getElementById('inp-cgu').checked;
 
     if (!name)              { showCreateError('Veuillez entrer votre prénom.'); return; }
     if (!phone || phone.length < 8) { showCreateError('Veuillez entrer un numéro de téléphone valide.'); return; }
+    if (!email || !email.includes('@')) { showCreateError('L\'email est obligatoire.'); return; }
+    if (!cgu)               { showCreateError('Vous devez accepter les CGU pour continuer.'); return; }
 
     const btn = document.getElementById('btn-create');
     btn.disabled = true;
@@ -322,7 +331,7 @@
       const r = await fetch('/api/customers/join', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ first_name: name, phone, email: email || undefined }),
+        body: JSON.stringify({ first_name: name, phone, email, cgu_accepted: true }),
       });
       const data = await r.json();
 

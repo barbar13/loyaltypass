@@ -96,15 +96,19 @@ router.get('/lookup', async (req, res) => {
 
 // POST /api/customers/join — create standalone customer card (no merchant required)
 router.post('/join', async (req, res) => {
-  const { first_name, phone, email: customerEmail } = req.body;
-  if (!first_name || !phone) return res.status(400).json({ error: 'first_name et phone sont requis' });
+  const { first_name, phone, email: customerEmail, cgu_accepted } = req.body;
+  if (!first_name)      return res.status(400).json({ error: 'Le prénom est obligatoire' });
+  if (!phone)           return res.status(400).json({ error: 'Le numéro de téléphone est obligatoire' });
+  if (!customerEmail)   return res.status(400).json({ error: 'L\'email est obligatoire' });
+  if (!cgu_accepted)    return res.status(400).json({ error: 'CGU non acceptées' });
   try {
     let customer = await db.one('SELECT * FROM customers WHERE phone = $1', [phone.trim()]);
     const isNew = !customer;
     if (!customer) {
+      const cguAt = new Date().toISOString();
       const id = await db.insert(
-        'INSERT INTO customers (first_name, phone, email, qr_code) VALUES ($1, $2, $3, $4)',
-        [first_name.trim(), phone.trim(), customerEmail ? customerEmail.trim().toLowerCase() : null, uuidv4()]
+        'INSERT INTO customers (first_name, phone, email, qr_code, cgu_accepted_at) VALUES ($1, $2, $3, $4, $5)',
+        [first_name.trim(), phone.trim(), customerEmail.trim().toLowerCase(), uuidv4(), cguAt]
       );
       customer = await db.one('SELECT id, first_name, phone, email, qr_code FROM customers WHERE id = $1', [id]);
     }

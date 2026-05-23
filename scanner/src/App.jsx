@@ -5,9 +5,11 @@ import { getDashboard } from './api.js';
 
 const STORAGE_KEY = 'fidelyzio_auth';
 
-function isTokenValid(token) {
+function isSessionValid(stored) {
+  if (!stored?.token) return false;
+  if (stored.expires && stored.expires < Date.now()) return false;
   try {
-    const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+    const payload = JSON.parse(atob(stored.token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
     return payload.exp * 1000 > Date.now();
   } catch { return false; }
 }
@@ -16,8 +18,7 @@ export default function App() {
   const [auth, setAuth] = useState(() => {
     try {
       const stored = JSON.parse(localStorage.getItem(STORAGE_KEY));
-      if (!stored?.token) return null;
-      if (!isTokenValid(stored.token)) {
+      if (!isSessionValid(stored)) {
         localStorage.removeItem(STORAGE_KEY);
         return null;
       }
@@ -49,7 +50,7 @@ export default function App() {
   }, [auth, refreshDashboard]);
 
   function handleLogin(merchant, token) {
-    const session = { merchant, token };
+    const session = { merchant, token, expires: Date.now() + 90 * 24 * 60 * 60 * 1000 };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
     setAuth(session);
   }

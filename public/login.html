@@ -148,7 +148,7 @@
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Identifiants invalides');
 
-      localStorage.setItem('fidelyzio_auth', JSON.stringify({ merchant: data.merchant, token: data.token }));
+      localStorage.setItem('fidelyzio_auth', JSON.stringify({ merchant: data.merchant, token: data.token, expires: Date.now() + 90 * 24 * 60 * 60 * 1000 }));
       window.location.replace('/scanner');
     } catch (err) {
       showError(err.message);

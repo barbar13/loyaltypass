@@ -130,34 +130,6 @@
         </div>
       </div>
 
-      <!-- Color picker -->
-      <div class="mb-6 animate-fade-up delay-4">
-        <label class="block text-sm font-medium text-gray-400 mb-3">Couleur de votre marque</label>
-
-        <!-- Preview bar -->
-        <div id="color-bar" class="color-bar" style="background:#6366f1"></div>
-
-        <!-- Swatches -->
-        <div class="flex flex-wrap gap-2 items-center">
-          <button type="button" class="swatch selected" style="background:#6366f1" data-color="#6366f1" onclick="pickColor(this)"></button>
-          <button type="button" class="swatch" style="background:#8b5cf6" data-color="#8b5cf6" onclick="pickColor(this)"></button>
-          <button type="button" class="swatch" style="background:#ec4899" data-color="#ec4899" onclick="pickColor(this)"></button>
-          <button type="button" class="swatch" style="background:#f43f5e" data-color="#f43f5e" onclick="pickColor(this)"></button>
-          <button type="button" class="swatch" style="background:#f97316" data-color="#f97316" onclick="pickColor(this)"></button>
-          <button type="button" class="swatch" style="background:#22c55e" data-color="#22c55e" onclick="pickColor(this)"></button>
-          <button type="button" class="swatch" style="background:#06b6d4" data-color="#06b6d4" onclick="pickColor(this)"></button>
-          <button type="button" class="swatch" style="background:#3b82f6" data-color="#3b82f6" onclick="pickColor(this)"></button>
-          <!-- Custom picker -->
-          <div class="relative">
-            <button type="button" id="swatch-custom" class="swatch swatch-custom" title="Couleur personnalisée"
-                    onclick="document.getElementById('inp-color').click()"></button>
-            <input type="color" id="inp-color" value="#6366f1"
-                   class="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
-                   oninput="pickCustomColor(this.value)" onchange="pickCustomColor(this.value)">
-          </div>
-        </div>
-      </div>
-
       <!-- Error -->
       <div id="form-error" class="hidden mb-4 rounded-xl px-4 py-3 bg-red-500/10 border border-red-500/25 text-red-400 text-sm flex items-start gap-2">
         <svg class="w-4 h-4 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
@@ -182,12 +154,14 @@
         </button>
       </div>
 
-      <p class="text-center text-gray-600 text-xs mt-4 mb-2 animate-fade-up delay-6">
-        Déjà inscrit ?
-        <a href="/login" class="text-gray-400 hover:text-white transition underline underline-offset-2">Se connecter →</a>
-        · <a href="/forgot-password" class="text-gray-400 hover:text-white transition underline underline-offset-2">Mot de passe oublié</a>
-        · <a href="/join" class="text-gray-400 hover:text-white transition underline underline-offset-2">Je suis client →</a>
-      </p>
+      <div class="mt-5 flex flex-col animate-fade-up delay-6">
+        <a href="/login" style="display:block;text-align:center;padding:12px 0;font-size:1rem;color:#9ca3af;text-decoration:none;-webkit-tap-highlight-color:transparent">
+          Déjà inscrit ? <span style="color:#e5e7eb;font-weight:600">Se connecter →</span>
+        </a>
+        <a href="/forgot-password" style="display:block;text-align:center;padding:12px 0;font-size:1rem;color:#6b7280;text-decoration:none;-webkit-tap-highlight-color:transparent">
+          Mot de passe oublié
+        </a>
+      </div>
 
     </form>
   </div>
@@ -264,28 +238,8 @@
 </div>
 
 <script>
-  let selectedColor = '#6366f1';
   let registeredMerchant = null;
   let registeredToken    = null;
-
-  // ── Color helpers ─────────────────────────────────────────────────────────
-  function setColor(hex) {
-    selectedColor = hex;
-    document.documentElement.style.setProperty('--brand', hex);
-    document.getElementById('color-bar').style.background = hex;
-  }
-
-  function pickColor(btn) {
-    document.querySelectorAll('.swatch').forEach(s => s.classList.remove('selected'));
-    btn.classList.add('selected');
-    setColor(btn.dataset.color);
-  }
-
-  function pickCustomColor(hex) {
-    document.querySelectorAll('.swatch').forEach(s => s.classList.remove('selected'));
-    document.getElementById('swatch-custom').classList.add('selected');
-    setColor(hex);
-  }
 
   // ── Password toggle ───────────────────────────────────────────────────────
   function togglePwd() {
@@ -335,7 +289,7 @@
       const res  = await fetch('/api/merchants/register', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ name, email, password, color: selectedColor }),
+        body:    JSON.stringify({ name, email, password }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Erreur lors de la création du compte');
@@ -385,7 +339,7 @@
 
     // Store auth so scanner auto-logs in
     try {
-      localStorage.setItem('fidelyzio_auth', JSON.stringify({ merchant, token }));
+      localStorage.setItem('fidelyzio_auth', JSON.stringify({ merchant, token, expires: Date.now() + 90 * 24 * 60 * 60 * 1000 }));
     } catch {}
   }
 

@@ -116,6 +116,9 @@ if (process.env.DATABASE_URL) {
       ['trial_reminder_sent',    "TEXT        NOT NULL DEFAULT ''"],
       ['business_type',          'TEXT'],
       ['loyalty_mechanic',       "TEXT NOT NULL DEFAULT 'points'"],
+      ['city',                   'TEXT'],
+      ['lat',                    'DOUBLE PRECISION'],
+      ['lng',                    'DOUBLE PRECISION'],
     ];
     const customerMigrations    = [['email', 'TEXT']];
     const membershipMigrations  = [['stamps_count', 'INTEGER NOT NULL DEFAULT 0']];
@@ -267,6 +270,9 @@ if (process.env.DATABASE_URL) {
   mcAdd('trial_reminder_sent',    "TEXT NOT NULL DEFAULT ''");
   mcAdd('business_type',          'TEXT');
   mcAdd('loyalty_mechanic',       "TEXT NOT NULL DEFAULT 'points'");
+  mcAdd('city',                   'TEXT');
+  mcAdd('lat',                    'REAL');
+  mcAdd('lng',                    'REAL');
 
   // memberships extra columns
   const mbCols = sqlite.prepare('PRAGMA table_info(memberships)').all();

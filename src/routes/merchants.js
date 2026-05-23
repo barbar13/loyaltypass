@@ -13,6 +13,61 @@ const SALT_ROUNDS = 12;
 const JWT_SECRET  = () => process.env.JWT_SECRET  || 'fidelyzio_dev_secret_change_in_prod';
 const JWT_EXPIRES = () => process.env.JWT_EXPIRES_IN || '30d';
 
+// ─── Public: nearby merchants ─────────────────────────────────────────────────
+
+function haversineKm(lat1, lng1, lat2, lng2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) ** 2
+    + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180)
+    * Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+router.get('/nearby', async (req, res) => {
+  const { lat, lng, radius, city } = req.query;
+  try {
+    if (city) {
+      const merchants = await db.all(
+        `SELECT id, name, business_type, color, city
+         FROM merchants
+         WHERE subscription_status IN ('active', 'trial')
+           AND (disabled IS NULL OR disabled = 0)
+           AND city IS NOT NULL
+           AND LOWER(city) LIKE $1
+         ORDER BY name LIMIT 20`,
+        [`%${city.trim().toLowerCase()}%`]
+      );
+      return res.json({ merchants });
+    }
+
+    if (!lat || !lng) return res.status(400).json({ error: 'lat et lng ou city requis' });
+    const latN = parseFloat(lat), lngN = parseFloat(lng);
+    const radiusKm = Math.min(parseFloat(radius) || 10, 100);
+    if (isNaN(latN) || isNaN(lngN)) return res.status(400).json({ error: 'Coordonnées invalides' });
+
+    const all = await db.all(
+      `SELECT id, name, business_type, color, city, lat, lng
+       FROM merchants
+       WHERE subscription_status IN ('active', 'trial')
+         AND (disabled IS NULL OR disabled = 0)
+         AND lat IS NOT NULL AND lng IS NOT NULL`,
+      []
+    );
+
+    const nearby = all
+      .map(m => ({ ...m, distance_km: Math.round(haversineKm(latN, lngN, m.lat, m.lng) * 10) / 10 }))
+      .filter(m => m.distance_km <= radiusKm)
+      .sort((a, b) => a.distance_km - b.distance_km)
+      .slice(0, 20);
+
+    res.json({ merchants: nearby });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ─── Public: enrollment branding ─────────────────────────────────────────────
 
 router.get('/:id/enroll', async (req, res) => {

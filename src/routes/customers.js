@@ -121,7 +121,7 @@ router.post('/join', async (req, res) => {
 
 // POST /api/customers/recover — send card link to email on file
 router.post('/recover', async (req, res) => {
-  console.log('[recover] hit, RESEND_API_KEY loaded:', !!process.env.RESEND_API_KEY);
+  console.log('[recover] hit - RESEND_API_KEY:', process.env.RESEND_API_KEY ? 'loaded' : 'MISSING');
   const { email: queryEmail, phone } = req.body;
   if (!queryEmail && !phone)
     return res.status(400).json({ error: 'email ou phone requis' });

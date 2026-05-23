@@ -121,6 +121,7 @@ router.post('/join', async (req, res) => {
 
 // POST /api/customers/recover — send card link to email on file
 router.post('/recover', async (req, res) => {
+  console.log('[recover] hit, RESEND_API_KEY loaded:', !!process.env.RESEND_API_KEY);
   const { email: queryEmail, phone } = req.body;
   if (!queryEmail && !phone)
     return res.status(400).json({ error: 'email ou phone requis' });
@@ -139,7 +140,7 @@ router.post('/recover', async (req, res) => {
     if (customer?.email) {
       const baseUrl = process.env.BASE_URL || 'https://fidelyzio.com';
       const cardUrl = `${baseUrl}/card/${customer.qr_code}`;
-      email.sendCardRecovery({ to: customer.email, firstName: customer.first_name, cardUrl }).catch(() => {});
+      email.sendCardRecovery({ to: customer.email, firstName: customer.first_name, cardUrl }).catch((err) => console.error('[recover] email failed:', err));
     }
 
     res.json({ success: true });

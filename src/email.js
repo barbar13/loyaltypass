@@ -1,27 +1,13 @@
 'use strict';
 const { Resend } = require('resend');
-
-function getClient() {
-  if (!process.env.RESEND_API_KEY) return null;
-  return new Resend(process.env.RESEND_API_KEY);
-}
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 async function sendEmail(to, subject, html) {
-  const client = getClient();
-  if (!client) {
-    console.log(`[email] Not configured — would send to ${to}: ${subject}`);
-    return;
-  }
   try {
-    await client.emails.send({
-      from: 'Fidelyzio <noreply@fidelyzio.com>',
-      to,
-      subject,
-      html,
-    });
-  } catch (err) {
-    console.error('[email] Failed:', err.message);
-  }
+    const result = await resend.emails.send({ from: 'Fidelyzio <noreply@fidelyzio.com>', to, subject, html });
+    console.log('Email sent:', result);
+    return result;
+  } catch (err) { console.error('Email error:', err); throw err; }
 }
 
 // ── Templates ─────────────────────────────────────────────────────────────────

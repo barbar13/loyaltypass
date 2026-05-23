@@ -377,7 +377,7 @@ function HomeTab({ merchant, stats, rewards, token, onScanClick }) {
                     <p className="text-gray-600 text-xs">{fmtRelative(s.created_at)}</p>
                   </div>
                   <p className={`text-sm font-bold shrink-0 ${isRedeem ? 'text-amber-400' : 'text-emerald-400'}`}>
-                    {isRedeem ? 'Récompense' : `+${s.points} pts`}
+                    {isRedeem ? 'Récompense' : s.type === 'stamps' ? '+1 tampon' : `+${s.points} pts`}
                   </p>
                 </div>
               );
@@ -559,7 +559,7 @@ function ClientsTab({ customers, rewards, token, onRewardsChange }) {
                               </div>
                               <span className="flex-1 text-gray-500 text-xs">{fmtRelative(s.created_at)}</span>
                               <span className={`text-xs font-semibold shrink-0 ${isRedeem ? 'text-amber-400' : 'text-emerald-400'}`}>
-                                {isRedeem ? 'Récompense' : `+${s.points} pts`}
+                                {isRedeem ? 'Récompense' : s.type === 'stamps' ? '+1 tampon' : `+${s.points} pts`}
                               </span>
                             </div>
                           );
@@ -611,7 +611,7 @@ function ClientsTab({ customers, rewards, token, onRewardsChange }) {
                       <p className="text-gray-600 text-xs">{fmtRelative(s.created_at)}</p>
                     </div>
                     <p className={`text-sm font-bold shrink-0 ${isRedeem ? 'text-amber-400' : 'text-emerald-400'}`}>
-                      {isRedeem ? 'Récompense' : `+${s.points} pts`}
+                      {isRedeem ? 'Récompense' : s.type === 'stamps' ? '+1 tampon' : `+${s.points} pts`}
                     </p>
                   </div>
                 );
@@ -646,7 +646,7 @@ function ClientsTab({ customers, rewards, token, onRewardsChange }) {
                     <span className="text-amber-400 shrink-0"><IcoGift s={20} /></span>
                     <div className="flex-1 min-w-0">
                       <p className="text-white font-semibold text-sm truncate">{r.description}</p>
-                      <p className="text-amber-400/80 text-xs">{r.points_required} pts requis</p>
+                      <p className="text-amber-400/80 text-xs">{r.points_required} {r.mechanic === 'stamps' ? (r.points_required > 1 ? 'tampons' : 'tampon') : 'pts'} requis</p>
                     </div>
                     <button onClick={() => handleOffer(r)} disabled={offering}
                       className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 active:scale-95 text-white font-bold text-xs disabled:opacity-60 transition-all shrink-0">

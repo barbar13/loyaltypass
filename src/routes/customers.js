@@ -192,7 +192,7 @@ router.get('/:qr_code', async (req, res) => {
 
     // Redemption history (negative-point transactions)
     const redemptions = await db.all(`
-      SELECT t.id, t.points, t.created_at, t.note,
+      SELECT t.id, t.points, t.type, t.created_at, t.note,
              m.id AS merchant_id, m.name AS merchant_name, m.color
       FROM transactions t
       JOIN merchants m ON m.id = t.merchant_id

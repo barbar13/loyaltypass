@@ -471,7 +471,7 @@
             <p class="text-white text-sm font-semibold truncate">${esc(name)}</p>
             <p class="text-gray-500 text-xs">${esc(r.merchant_name)} · ${fmtDate(r.created_at) || '—'}</p>
           </div>
-          <p class="text-red-400 text-xs font-semibold shrink-0">${r.points} pts</p>
+          <p class="text-red-400 text-xs font-semibold shrink-0">${(() => { const n = Math.abs(r.points); return r.type === 'stamps' ? `${n} tampon${n > 1 ? 's' : ''}` : `${n} pts`; })()}</p>
         </div>`;
     }).join('');
   }

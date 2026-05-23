@@ -407,7 +407,7 @@ router.get('/scans', auth, async (req, res) => {
     if (customer_id) { params.push(parseInt(customer_id, 10)); where += ` AND t.customer_id = $${params.length}`; }
 
     const scans = await db.all(`
-      SELECT t.id, t.points, t.note, t.created_at,
+      SELECT t.id, t.points, t.type, t.note, t.created_at,
              c.id AS customer_id, c.first_name, c.phone
       FROM transactions t
       JOIN customers c ON c.id = t.customer_id

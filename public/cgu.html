@@ -3,77 +3,122 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#0f0f14">
+  <meta name="theme-color" content="#FFFBF0">
   <title>Conditions Générales d'Utilisation — Fidelyzio</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <style>
-    body { background:#0f0f14; color:#e5e7eb; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; }
-    h2 { color:white; font-size:1.125rem; font-weight:700; margin:2rem 0 0.75rem; }
-    h3 { color:#d1d5db; font-size:1rem; font-weight:600; margin:1.25rem 0 0.5rem; }
-    p, li { color:#9ca3af; line-height:1.7; font-size:0.9375rem; }
-    ul { padding-left:1.5rem; }
-    li { margin-bottom:0.25rem; }
-    a { color:#818cf8; text-decoration:underline; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #FFFBF0; color: #0a0a0a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; -webkit-font-smoothing: antialiased; }
+    .nav { position: sticky; top: 0; z-index: 100; background: rgba(255,251,240,.97); backdrop-filter: blur(12px); border-bottom: 1px solid #E5E7EB; }
+    .nav-inner { max-width: 900px; margin: 0 auto; padding: 0 24px; height: 60px; display: flex; align-items: center; justify-content: space-between; }
+    .nav-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; color: #0a0a0a; font-size: 17px; font-weight: 900; }
+    .nav-logo-dot { width: 8px; height: 8px; border-radius: 50%; background: #F59E0B; }
+    .wrap { max-width: 760px; margin: 0 auto; padding: 64px 24px 96px; }
+    h1 { font-size: 2rem; font-weight: 900; letter-spacing: -.03em; margin-bottom: 8px; }
+    .updated { color: #9CA3AF; font-size: 13px; margin-bottom: 48px; }
+    h2 { font-size: 1.15rem; font-weight: 800; margin: 40px 0 12px; color: #0a0a0a; padding-top: 8px; border-top: 1px solid #E5E7EB; }
+    h2:first-of-type { border-top: none; }
+    p { font-size: 15px; line-height: 1.75; color: #374151; margin-bottom: 12px; }
+    ul { margin: 8px 0 12px 20px; }
+    li { font-size: 15px; line-height: 1.75; color: #374151; margin-bottom: 4px; }
+    a { color: #F59E0B; }
+    strong { color: #0a0a0a; }
+    .highlight { background: #FEF3C7; border: 1px solid #FDE68A; border-left: 3px solid #F59E0B; border-radius: 10px; padding: 16px 20px; margin: 16px 0; }
+    footer-bar { display: block; text-align: center; margin-top: 64px; color: #9CA3AF; font-size: 13px; }
   </style>
 </head>
 <body>
-<div class="max-w-2xl mx-auto px-5 py-12">
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="/home" class="nav-logo"><span class="nav-logo-dot"></span>Fidelyzio</a>
+    <a href="/home" style="color:#6B7280;font-size:14px;text-decoration:none">← Retour</a>
+  </div>
+</nav>
 
-  <!-- Header -->
-  <div class="mb-10">
-    <a href="/home" class="text-gray-500 text-sm hover:text-gray-300 transition">← Retour à l'accueil</a>
-    <h1 class="text-white text-3xl font-black mt-4">Conditions Générales<br>d'Utilisation</h1>
-    <p class="text-gray-500 text-sm mt-2">Dernière mise à jour : janvier 2025 · Version 1.0</p>
+<div class="wrap">
+  <h1>Conditions Générales d'Utilisation</h1>
+  <p class="updated">Dernière mise à jour : mai 2026</p>
+
+  <div class="highlight">
+    <p style="margin:0;font-size:14px">En accédant à la plateforme Fidelyzio et en créant un compte, vous acceptez sans réserve les présentes Conditions Générales d'Utilisation. Si vous n'acceptez pas ces conditions, vous ne devez pas utiliser le service.</p>
   </div>
 
-  <h2>1. Objet</h2>
-  <p>Les présentes Conditions Générales d'Utilisation (CGU) régissent l'accès et l'utilisation de la plateforme Fidelyzio, éditée par Fidelyzio SAS (ci-après « Fidelyzio »), permettant aux commerçants de créer et gérer un programme de fidélité numérique, et à leurs clients d'y participer.</p>
-
-  <h2>2. Définitions</h2>
+  <h2>Article 1 — Objet du service</h2>
+  <p>Fidelyzio est une plateforme SaaS (Software as a Service) de fidélisation digitale permettant aux commerçants indépendants de créer et gérer un programme de fidélité digital pour leur clientèle. La plateforme propose notamment :</p>
   <ul>
-    <li><strong style="color:#d1d5db">Plateforme</strong> : l'ensemble des services accessibles sur fidelyzio.com.</li>
-    <li><strong style="color:#d1d5db">Marchand</strong> : toute personne physique ou morale utilisant Fidelyzio pour gérer un programme de fidélité.</li>
-    <li><strong style="color:#d1d5db">Client</strong> : toute personne s'inscrivant à un programme de fidélité via un QR code Fidelyzio.</li>
-    <li><strong style="color:#d1d5db">Carte universelle</strong> : identifiant unique (QR code) associé à un Client, valable chez tous les Marchands Fidelyzio.</li>
+    <li>La création d'une carte de fidélité digitale accessible via QR code, sans installation d'application</li>
+    <li>La gestion de points de fidélité et de tampons digitaux</li>
+    <li>L'envoi de notifications push aux clients</li>
+    <li>Un tableau de bord analytique pour les commerçants</li>
+    <li>L'export de données clients au format CSV</li>
   </ul>
 
-  <h2>3. Accès au service</h2>
-  <p>L'accès à Fidelyzio est gratuit pour les Clients. Les Marchands accèdent au service selon les conditions tarifaires en vigueur, disponibles sur fidelyzio.com. Fidelyzio se réserve le droit de modifier ou d'interrompre tout ou partie du service à tout moment, sans préavis ni indemnité.</p>
+  <h2>Article 2 — Éditeur</h2>
+  <p>La plateforme Fidelyzio est éditée par :</p>
+  <p><strong>Titouan Rastoin</strong>, micro-entrepreneur domicilié à Marseille, France.<br>
+  SIRET : [À COMPLÉTER]<br>
+  Email : <a href="mailto:contact@fidelyzio.com">contact@fidelyzio.com</a></p>
 
-  <h2>4. Inscription et compte Marchand</h2>
-  <p>Pour créer un compte Marchand, vous devez fournir des informations exactes et à jour. Vous êtes seul responsable de la confidentialité de vos identifiants. Tout accès au service avec vos identifiants est réputé effectué par vous. Fidelyzio ne peut être tenu responsable de tout accès non autorisé résultant d'une négligence de votre part.</p>
+  <h2>Article 3 — Accès au service</h2>
+  <p><strong>Période d'essai :</strong> Tout commerçant peut accéder à l'ensemble des fonctionnalités de Fidelyzio pendant <strong>14 jours gratuitement</strong>, sans saisie de carte bancaire. À l'issue de cette période, l'accès est automatiquement suspendu sauf souscription à un abonnement.</p>
+  <p><strong>Abonnement :</strong> L'accès complet à la plateforme est conditionné à un abonnement mensuel au tarif de <strong>19 € HT/mois</strong>. Le paiement est géré par Stripe, prestataire de paiement sécurisé. L'abonnement est sans engagement et résiliable à tout moment.</p>
+  <p><strong>Suspension :</strong> En cas de non-paiement, le compte commerçant est suspendu automatiquement. Les données sont conservées pendant 30 jours, puis supprimées définitivement sauf demande de réactivation.</p>
 
-  <h2>5. Programme de fidélité</h2>
-  <h3>5.1 Côté Marchand</h3>
-  <p>Le Marchand est seul responsable du contenu de son programme (récompenses, nombre de points, conditions). Il s'engage à honorer les récompenses proposées à ses Clients et à utiliser Fidelyzio conformément aux lois applicables.</p>
-  <h3>5.2 Côté Client</h3>
-  <p>Les points de fidélité ne constituent pas une monnaie électronique et n'ont aucune valeur monétaire. Ils ne peuvent être ni échangés contre de l'argent, ni transférés. Les récompenses sont accordées à la discrétion du Marchand.</p>
+  <h2>Article 4 — Obligations du commerçant</h2>
+  <p>Le commerçant s'engage à :</p>
+  <ul>
+    <li>Fournir des informations exactes et à jour lors de son inscription</li>
+    <li>Utiliser la plateforme conformément à la législation en vigueur et aux présentes CGU</li>
+    <li>Ne pas utiliser le service à des fins frauduleuses ou illicites</li>
+    <li>Informer ses clients de la collecte de leurs données personnelles dans le cadre du programme de fidélité</li>
+    <li>Obtenir le consentement des clients mineurs via leurs représentants légaux</li>
+    <li>Maintenir la confidentialité de ses identifiants de connexion</li>
+    <li>Ne pas tenter de déstabiliser, pirater ou contourner les mécanismes de sécurité de la plateforme</li>
+  </ul>
 
-  <h2>6. Propriété intellectuelle</h2>
-  <p>La marque Fidelyzio, les logos, la charte graphique et tous les éléments du service sont la propriété exclusive de Fidelyzio SAS. Toute reproduction, même partielle, est interdite sans autorisation préalable écrite.</p>
+  <h2>Article 5 — Obligations du client (porteur de carte)</h2>
+  <p>Le client s'engage à :</p>
+  <ul>
+    <li>Fournir un prénom et un numéro de téléphone valides lors de la création de sa carte</li>
+    <li>Ne pas créer plusieurs comptes avec des données frauduleuses</li>
+    <li>Ne pas tenter de manipuler son solde de points par des moyens détournés</li>
+  </ul>
 
-  <h2>7. Responsabilité</h2>
-  <p>Fidelyzio est un prestataire de services techniques. Fidelyzio ne peut être tenu responsable du contenu des programmes de fidélité des Marchands, ni des litiges entre Marchands et Clients. La responsabilité de Fidelyzio est limitée au montant des sommes versées par le Marchand au cours des 12 derniers mois.</p>
+  <h2>Article 6 — Propriété intellectuelle</h2>
+  <p>L'ensemble des éléments constituant la plateforme Fidelyzio (code source, interface, marque, logo, contenus) est la propriété exclusive de Titouan Rastoin et est protégé par le droit de la propriété intellectuelle. Toute reproduction, représentation, modification ou exploitation non autorisée est strictement interdite.</p>
+  <p>Les données saisies par les commerçants (nom du commerce, récompenses, paramètres) restent leur propriété. Fidelyzio n'exploite pas ces données à des fins commerciales propres.</p>
 
-  <h2>8. Protection des données</h2>
-  <p>Fidelyzio traite les données personnelles conformément au RGPD et à sa <a href="/privacy">Politique de confidentialité</a>. En utilisant la Plateforme, vous acceptez ce traitement.</p>
+  <h2>Article 7 — Disponibilité et maintenance</h2>
+  <p>Fidelyzio s'efforce d'assurer la disponibilité du service 24h/24, 7j/7. Cependant, des interruptions temporaires peuvent survenir pour maintenance, mises à jour ou en cas de force majeure. Fidelyzio ne saurait être tenu responsable des conséquences d'une indisponibilité temporaire.</p>
 
-  <h2>9. Résiliation</h2>
-  <p>Le Marchand peut supprimer son compte à tout moment en contactant <a href="mailto:contact@fidelyzio.com">contact@fidelyzio.com</a>. Fidelyzio peut suspendre ou supprimer tout compte en cas de violation des présentes CGU, sans préavis ni remboursement.</p>
+  <h2>Article 8 — Limitation de responsabilité</h2>
+  <p>Dans les limites autorisées par la loi, Fidelyzio ne saurait être tenu responsable :</p>
+  <ul>
+    <li>Des pertes de données liées à des événements indépendants de sa volonté</li>
+    <li>Des dommages indirects (manque à gagner, perte de clientèle) résultant de l'utilisation ou de l'impossibilité d'utiliser le service</li>
+    <li>Des actes ou omissions de tiers (hébergeur, prestataire de paiement, opérateur de messagerie)</li>
+    <li>De l'utilisation frauduleuse du service par un tiers ayant accès aux identifiants du commerçant</li>
+  </ul>
+  <p>La responsabilité de Fidelyzio est en tout état de cause limitée au montant des sommes effectivement versées par le commerçant au cours des 3 derniers mois précédant le dommage.</p>
 
-  <h2>10. Modification des CGU</h2>
-  <p>Fidelyzio se réserve le droit de modifier les présentes CGU. Les Marchands seront informés par email au moins 15 jours avant l'entrée en vigueur de toute modification substantielle. La poursuite de l'utilisation du service après cette date vaut acceptation des nouvelles conditions.</p>
+  <h2>Article 9 — Résiliation</h2>
+  <p>Le commerçant peut résilier son abonnement à tout moment depuis son tableau de bord ou en contactant <a href="mailto:contact@fidelyzio.com">contact@fidelyzio.com</a>. La résiliation prend effet à la fin de la période de facturation en cours. Fidelyzio peut également résilier l'accès en cas de violation des présentes CGU, après mise en demeure restée sans effet sous 48 heures.</p>
 
-  <h2>11. Loi applicable et juridiction</h2>
-  <p>Les présentes CGU sont soumises au droit français. En cas de litige, les parties s'engagent à rechercher une solution amiable. À défaut, le Tribunal de Commerce compétent sera saisi.</p>
+  <h2>Article 10 — Modification des CGU</h2>
+  <p>Fidelyzio se réserve le droit de modifier les présentes CGU à tout moment. Les modifications sont notifiées par email aux commerçants actifs au moins 30 jours avant leur entrée en vigueur. La poursuite de l'utilisation du service après notification vaut acceptation des nouvelles conditions.</p>
 
-  <h2>12. Contact</h2>
-  <p>Pour toute question relative aux présentes CGU : <a href="mailto:legal@fidelyzio.com">legal@fidelyzio.com</a> · Fidelyzio SAS, France.</p>
+  <h2>Article 11 — Droit applicable et juridiction compétente</h2>
+  <p>Les présentes CGU sont soumises au <strong>droit français</strong>. En cas de litige, les parties s'engagent à rechercher une solution amiable avant toute action judiciaire. À défaut d'accord amiable, le tribunal compétent sera le <strong>Tribunal de Commerce de Marseille</strong>, nonobstant pluralité de défendeurs ou appel en garantie.</p>
 
-  <div class="mt-12 pt-8 border-t border-white/5 text-center">
-    <p class="text-gray-600 text-sm">© 2025 Fidelyzio · <a href="/privacy">Confidentialité</a> · <a href="/home">Accueil</a></p>
-  </div>
+  <h2>Article 12 — Contact</h2>
+  <p>Pour toute question relative aux présentes CGU : <a href="mailto:contact@fidelyzio.com">contact@fidelyzio.com</a></p>
 
+  <footer-bar>© 2026 Fidelyzio ·
+    <a href="/legal" style="color:#9CA3AF">Mentions légales</a> ·
+    <a href="/privacy" style="color:#9CA3AF">Confidentialité</a>
+  </footer-bar>
 </div>
+
+<script src="/js/cookie-consent.js"></script>
 </body>
 </html>

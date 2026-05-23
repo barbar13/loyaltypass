@@ -3,116 +3,153 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#0f0f14">
-  <title>Politique de Confidentialité — Fidelyzio</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <meta name="theme-color" content="#FFFBF0">
+  <title>Politique de confidentialité — Fidelyzio</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <style>
-    body { background:#0f0f14; color:#e5e7eb; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; }
-    h2 { color:white; font-size:1.125rem; font-weight:700; margin:2rem 0 0.75rem; }
-    h3 { color:#d1d5db; font-size:1rem; font-weight:600; margin:1.25rem 0 0.5rem; }
-    p, li { color:#9ca3af; line-height:1.7; font-size:0.9375rem; }
-    ul { padding-left:1.5rem; }
-    li { margin-bottom:0.25rem; }
-    a { color:#818cf8; text-decoration:underline; }
-    table { width:100%; border-collapse:collapse; margin:1rem 0; }
-    th { text-align:left; color:#6b7280; font-size:0.8125rem; font-weight:600; padding:8px 12px; border-bottom:1px solid rgba(255,255,255,.08); }
-    td { color:#9ca3af; font-size:0.875rem; padding:8px 12px; border-bottom:1px solid rgba(255,255,255,.04); vertical-align:top; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #FFFBF0; color: #0a0a0a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; -webkit-font-smoothing: antialiased; }
+    .nav { position: sticky; top: 0; z-index: 100; background: rgba(255,251,240,.97); backdrop-filter: blur(12px); border-bottom: 1px solid #E5E7EB; }
+    .nav-inner { max-width: 900px; margin: 0 auto; padding: 0 24px; height: 60px; display: flex; align-items: center; justify-content: space-between; }
+    .nav-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; color: #0a0a0a; font-size: 17px; font-weight: 900; }
+    .nav-logo-dot { width: 8px; height: 8px; border-radius: 50%; background: #F59E0B; }
+    .wrap { max-width: 760px; margin: 0 auto; padding: 64px 24px 96px; }
+    h1 { font-size: 2rem; font-weight: 900; letter-spacing: -.03em; margin-bottom: 8px; }
+    .updated { color: #9CA3AF; font-size: 13px; margin-bottom: 48px; }
+    h2 { font-size: 1.15rem; font-weight: 800; margin: 40px 0 12px; color: #0a0a0a; padding-top: 8px; border-top: 1px solid #E5E7EB; }
+    p { font-size: 15px; line-height: 1.75; color: #374151; margin-bottom: 12px; }
+    ul { margin: 8px 0 12px 20px; }
+    li { font-size: 15px; line-height: 1.75; color: #374151; margin-bottom: 4px; }
+    a { color: #F59E0B; }
+    strong { color: #0a0a0a; }
+    code { background: #FEF3C7; padding: 1px 6px; border-radius: 4px; font-size: 13px; }
+    table { width: 100%; border-collapse: collapse; margin: 12px 0 20px; font-size: 14px; }
+    th { background: #FEF3C7; text-align: left; padding: 10px 14px; font-weight: 700; color: #0a0a0a; border: 1px solid #FDE68A; }
+    td { padding: 10px 14px; border: 1px solid #E5E7EB; color: #374151; vertical-align: top; }
+    tr:nth-child(even) td { background: #fffdf5; }
+    .highlight { background: #FEF3C7; border: 1px solid #FDE68A; border-left: 3px solid #F59E0B; border-radius: 10px; padding: 16px 20px; margin: 16px 0; }
+    footer-bar { display: block; text-align: center; margin-top: 64px; color: #9CA3AF; font-size: 13px; }
   </style>
 </head>
 <body>
-<div class="max-w-2xl mx-auto px-5 py-12">
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="/home" class="nav-logo"><span class="nav-logo-dot"></span>Fidelyzio</a>
+    <a href="/home" style="color:#6B7280;font-size:14px;text-decoration:none">← Retour</a>
+  </div>
+</nav>
 
-  <div class="mb-10">
-    <a href="/home" class="text-gray-500 text-sm hover:text-gray-300 transition">← Retour à l'accueil</a>
-    <h1 class="text-white text-3xl font-black mt-4">Politique de<br>Confidentialité</h1>
-    <p class="text-gray-500 text-sm mt-2">Dernière mise à jour : janvier 2025 — Conforme au RGPD</p>
+<div class="wrap">
+  <h1>Politique de confidentialité</h1>
+  <p class="updated">Dernière mise à jour : mai 2026 — Conforme au RGPD</p>
+
+  <div class="highlight">
+    <p style="margin:0;font-size:14px"><strong>Résumé :</strong> Fidelyzio collecte uniquement les données strictement nécessaires au fonctionnement du service. Aucune donnée n'est vendue à des tiers. Vous disposez de droits que vous pouvez exercer à tout moment.</p>
   </div>
 
   <h2>1. Responsable du traitement</h2>
-  <p>Fidelyzio SAS, dont le siège social est en France, est responsable du traitement de vos données personnelles dans le cadre de l'utilisation de la plateforme fidelyzio.com.</p>
-  <p>Contact DPO : <a href="mailto:privacy@fidelyzio.com">privacy@fidelyzio.com</a></p>
+  <p><strong>Titouan Rastoin</strong>, micro-entrepreneur — Marseille, France<br>
+  Email : <a href="mailto:contact@fidelyzio.com">contact@fidelyzio.com</a></p>
 
   <h2>2. Données collectées</h2>
-  <h3>Marchands</h3>
-  <ul>
-    <li>Identité : nom de l'établissement</li>
-    <li>Contact : adresse e-mail</li>
-    <li>Authentification : mot de passe haché (bcrypt, non lisible)</li>
-    <li>Personnalisation : couleur de marque, logo (facultatif)</li>
-    <li>Activité : transactions effectuées, statistiques d'utilisation</li>
-  </ul>
-  <h3>Clients</h3>
-  <ul>
-    <li>Identité : prénom</li>
-    <li>Contact : numéro de téléphone, e-mail (facultatif)</li>
-    <li>Fidélité : points cumulés, historique des visites et récompenses</li>
-    <li>Identifiant unique : QR code généré aléatoirement</li>
-  </ul>
-
-  <h2>3. Finalités et base légale</h2>
+  <p><strong>Commerçants (comptes marchands) :</strong></p>
   <table>
-    <thead><tr><th>Finalité</th><th>Base légale</th></tr></thead>
-    <tbody>
-      <tr><td>Gestion du compte Marchand et du programme de fidélité</td><td>Exécution du contrat</td></tr>
-      <tr><td>Inscription du Client au programme de fidélité</td><td>Consentement (checkbox RGPD)</td></tr>
-      <tr><td>Notifications de points par e-mail (si email fourni)</td><td>Consentement</td></tr>
-      <tr><td>Statistiques d'utilisation agrégées</td><td>Intérêt légitime</td></tr>
-      <tr><td>Sécurité et prévention des fraudes</td><td>Intérêt légitime</td></tr>
-      <tr><td>Réinitialisation du mot de passe</td><td>Exécution du contrat</td></tr>
-    </tbody>
+    <tr><th>Donnée</th><th>Finalité</th><th>Base légale</th></tr>
+    <tr><td>Nom du commerce</td><td>Identification, affichage clients</td><td>Exécution du contrat</td></tr>
+    <tr><td>Adresse email</td><td>Connexion, communications</td><td>Exécution du contrat</td></tr>
+    <tr><td>Mot de passe (hashé bcrypt)</td><td>Authentification sécurisée</td><td>Exécution du contrat</td></tr>
+    <tr><td>Type de commerce, couleur</td><td>Personnalisation du programme</td><td>Exécution du contrat</td></tr>
+    <tr><td>Données de facturation Stripe</td><td>Gestion de l'abonnement</td><td>Exécution du contrat</td></tr>
   </table>
+
+  <p><strong>Clients (porteurs de carte) :</strong></p>
+  <table>
+    <tr><th>Donnée</th><th>Finalité</th><th>Base légale</th></tr>
+    <tr><td>Prénom</td><td>Personnalisation de la carte</td><td>Exécution du contrat</td></tr>
+    <tr><td>Numéro de téléphone</td><td>Identifiant unique, récupération de carte</td><td>Exécution du contrat</td></tr>
+    <tr><td>Email (optionnel)</td><td>Emails transactionnels, récupération</td><td>Consentement explicite</td></tr>
+    <tr><td>Solde de points et tampons</td><td>Gestion du programme de fidélité</td><td>Exécution du contrat</td></tr>
+    <tr><td>Historique des scans</td><td>Calcul des points, anti-fraude</td><td>Exécution du contrat</td></tr>
+    <tr><td>Abonnement push (endpoint)</td><td>Notifications push</td><td>Consentement explicite</td></tr>
+  </table>
+
+  <h2>3. Finalités du traitement</h2>
+  <ul>
+    <li>Création et gestion du programme de fidélité</li>
+    <li>Attribution et suivi des points et tampons</li>
+    <li>Envoi d'emails transactionnels (bienvenue, récupération de carte, alertes d'essai)</li>
+    <li>Notifications push avec consentement préalable</li>
+    <li>Facturation et gestion de l'abonnement</li>
+    <li>Prévention de la fraude (anti-double-scan)</li>
+    <li>Statistiques d'activité pour le commerçant</li>
+  </ul>
 
   <h2>4. Durée de conservation</h2>
   <ul>
-    <li>Compte Marchand : durée de la relation contractuelle + 3 ans (obligations comptables)</li>
-    <li>Données Client : durée de participation active au programme + 2 ans d'inactivité</li>
-    <li>Tokens de réinitialisation : 1 heure puis suppression automatique</li>
-    <li>Journaux de sécurité : 12 mois</li>
+    <li><strong>Comptes commerçants :</strong> conservés tant que le compte est actif ; supprimés 30 jours après résiliation.</li>
+    <li><strong>Comptes clients :</strong> conservés tant que le commerçant associé est actif ; supprimés sur demande sous 30 jours.</li>
+    <li><strong>Transactions :</strong> conservées 5 ans (obligation légale).</li>
+    <li><strong>Logs de connexion :</strong> conservés 12 mois.</li>
   </ul>
 
-  <h2>5. Destinataires des données</h2>
-  <p>Vos données sont hébergées sur des serveurs sécurisés (Render.com, UE ou USA avec garanties RGPD adéquates). Elles ne sont jamais vendues à des tiers. Elles peuvent être partagées avec :</p>
+  <h2>5. Hébergement et transferts hors UE</h2>
+  <p>La plateforme est hébergée par <strong>Render Services, Inc.</strong> (Delaware, USA). Ce transfert est encadré par les Clauses Contractuelles Types de la Commission européenne (article 46 RGPD).</p>
+  <p>Les emails transactionnels sont envoyés via <strong>Resend</strong> (USA) avec garanties contractuelles adéquates. Les paiements sont traités par <strong>Stripe, Inc.</strong> (certifié PCI-DSS) — aucune donnée de carte bancaire n'est stockée par Fidelyzio.</p>
+
+  <h2>6. Partage avec des tiers</h2>
+  <p>Fidelyzio ne vend ni ne loue vos données. Partage limité à :</p>
   <ul>
-    <li>Notre hébergeur (Render.com) dans le cadre de la fourniture du service</li>
-    <li>Notre fournisseur d'emails transactionnels (Gmail/Google Workspace)</li>
-    <li>Les autorités compétentes sur réquisition judiciaire</li>
+    <li><strong>Stripe</strong> — paiements commerçants</li>
+    <li><strong>Resend</strong> — routage d'emails</li>
+    <li><strong>Render</strong> — hébergement</li>
+    <li>Autorités compétentes sur réquisition légale</li>
   </ul>
 
-  <h2>6. Transferts hors UE</h2>
-  <p>Certains prestataires (Google) peuvent traiter des données hors de l'UE. Ces transferts sont encadrés par les Clauses Contractuelles Types approuvées par la Commission européenne ou par le Data Privacy Framework.</p>
-
-  <h2>7. Vos droits (RGPD)</h2>
-  <p>Conformément aux articles 15 à 22 du RGPD, vous disposez des droits suivants :</p>
+  <h2>7. Cookies et stockage local</h2>
+  <p>Fidelyzio <strong>n'utilise aucun cookie publicitaire ou de suivi</strong>. Seul le <strong>localStorage</strong> du navigateur est utilisé pour des données techniques :</p>
   <ul>
-    <li><strong style="color:#d1d5db">Accès</strong> : obtenir une copie de vos données</li>
-    <li><strong style="color:#d1d5db">Rectification</strong> : corriger des données inexactes</li>
-    <li><strong style="color:#d1d5db">Effacement</strong> : demander la suppression de vos données</li>
-    <li><strong style="color:#d1d5db">Portabilité</strong> : recevoir vos données dans un format structuré</li>
-    <li><strong style="color:#d1d5db">Opposition</strong> : vous opposer au traitement basé sur l'intérêt légitime</li>
-    <li><strong style="color:#d1d5db">Limitation</strong> : restreindre temporairement le traitement</li>
+    <li><code>fidelyzio_auth</code> — token d'authentification commerçant (30 jours)</li>
+    <li><code>fidelyzio_card_url</code> — URL de la carte de fidélité du client</li>
+    <li><code>fidelyzio_homescreen_prompted</code> — indicateur du tutoriel écran d'accueil</li>
+    <li><code>fidelyzio_cookie_consent</code> — enregistrement de votre acceptation du bandeau</li>
   </ul>
-  <p>Pour exercer ces droits : <a href="mailto:privacy@fidelyzio.com">privacy@fidelyzio.com</a>. Réponse sous 30 jours. En cas de litige non résolu, vous pouvez saisir la <a href="https://www.cnil.fr" target="_blank">CNIL</a>.</p>
+  <p>Ces données restent dans votre navigateur et ne sont jamais transmises à des tiers.</p>
 
-  <h2>8. Sécurité</h2>
-  <p>Fidelyzio met en œuvre les mesures techniques et organisationnelles adaptées : chiffrement des mots de passe (bcrypt), connexions HTTPS obligatoires, tokens JWT à durée limitée, accès aux données restreint par rôle, journalisation des activités sensibles.</p>
+  <h2>8. Vos droits RGPD</h2>
+  <p>Vous pouvez exercer vos droits à tout moment via <a href="mailto:contact@fidelyzio.com">contact@fidelyzio.com</a> (réponse sous 30 jours) :</p>
+  <table>
+    <tr><th>Droit</th><th>Description</th></tr>
+    <tr><td><strong>Accès</strong></td><td>Copie de vos données personnelles</td></tr>
+    <tr><td><strong>Rectification</strong></td><td>Corriger des données inexactes</td></tr>
+    <tr><td><strong>Suppression</strong></td><td>Effacement de vos données (droit à l'oubli)</td></tr>
+    <tr><td><strong>Portabilité</strong></td><td>Export de vos données en format lisible</td></tr>
+    <tr><td><strong>Opposition</strong></td><td>Opposition à certains traitements</td></tr>
+    <tr><td><strong>Limitation</strong></td><td>Restriction du traitement</td></tr>
+  </table>
+  <p>En cas de litige, vous pouvez saisir la <a href="https://www.cnil.fr" target="_blank" rel="noopener">CNIL</a>.</p>
 
-  <h2>9. Cookies</h2>
-  <p>Fidelyzio n'utilise pas de cookies tiers ni de traceurs publicitaires. Le stockage local (localStorage) est utilisé uniquement pour maintenir votre session et votre préférence de langue.</p>
+  <h2>9. Sécurité</h2>
+  <ul>
+    <li>Chiffrement TLS/HTTPS sur toutes les communications</li>
+    <li>Mots de passe hashés avec bcrypt (facteur de coût 12)</li>
+    <li>Authentification par token JWT avec expiration</li>
+    <li>Accès aux données de production restreint à l'éditeur</li>
+    <li>Sauvegardes régulières de la base de données</li>
+  </ul>
 
-  <h2>10. Mineurs</h2>
-  <p>La plateforme n'est pas destinée aux personnes de moins de 16 ans. Si vous avez connaissance qu'un mineur nous a fourni des données sans consentement parental, contactez-nous immédiatement.</p>
+  <h2>10. Modifications</h2>
+  <p>Toute modification substantielle est notifiée par email aux commerçants inscrits. La date de mise à jour figure en haut de ce document.</p>
 
-  <h2>11. Modifications</h2>
-  <p>Toute modification substantielle de cette politique sera notifiée par email aux utilisateurs inscrits au moins 15 jours avant son entrée en vigueur.</p>
+  <h2>11. Contact et réclamations</h2>
+  <p>Pour toute question : <a href="mailto:contact@fidelyzio.com">contact@fidelyzio.com</a><br>
+  Autorité de contrôle : <a href="https://www.cnil.fr" target="_blank" rel="noopener">CNIL</a></p>
 
-  <h2>12. Contact</h2>
-  <p>Responsable du traitement : Fidelyzio SAS, France<br>
-  DPO : <a href="mailto:privacy@fidelyzio.com">privacy@fidelyzio.com</a></p>
-
-  <div class="mt-12 pt-8 border-t border-white/5 text-center">
-    <p class="text-gray-600 text-sm">© 2025 Fidelyzio · <a href="/cgu">CGU</a> · <a href="/home">Accueil</a></p>
-  </div>
-
+  <footer-bar>© 2026 Fidelyzio ·
+    <a href="/legal" style="color:#9CA3AF">Mentions légales</a> ·
+    <a href="/cgu" style="color:#9CA3AF">CGU</a>
+  </footer-bar>
 </div>
+
+<script src="/js/cookie-consent.js"></script>
 </body>
 </html>

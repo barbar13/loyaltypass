@@ -52,6 +52,7 @@ app.get('/merchant/qr-print',   (_req, res) => res.sendFile(path.join(PUBLIC, 'q
 app.get('/home',                (_req, res) => res.sendFile(path.join(PUBLIC, 'home.html')));
 app.get('/cgu',                 (_req, res) => res.sendFile(path.join(PUBLIC, 'cgu.html')));
 app.get('/privacy',             (_req, res) => res.sendFile(path.join(PUBLIC, 'privacy.html')));
+app.get('/legal',               (_req, res) => res.sendFile(path.join(PUBLIC, 'legal.html')));
 app.get('/subscribe',           (_req, res) => res.sendFile(path.join(PUBLIC, 'subscribe.html')));
 app.get('/join',                (_req, res) => res.sendFile(path.join(PUBLIC, 'join.html')));
 

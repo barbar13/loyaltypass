@@ -37,10 +37,10 @@
 
     /* ── Typography ────────────────────────────────────────────────────────── */
     .hero-h1 {
-      font-size: clamp(2.5rem, 5.5vw, 4.5rem);
+      font-size: clamp(3rem, 6.5vw, 5.5rem);
       font-weight: 900;
-      line-height: 1.08;
-      letter-spacing: -0.035em;
+      line-height: 1.06;
+      letter-spacing: -0.04em;
       color: var(--navy);
     }
     .section-h2 {
@@ -149,18 +149,15 @@
       color: var(--soft); line-height: 1.75; max-width: 480px;
     }
     .hero-stats {
-      display: flex; flex-wrap: wrap; gap: 0;
+      display: flex; flex-wrap: nowrap; gap: 32px; align-items: flex-start;
       border-top: 1px solid var(--border); padding-top: 28px; margin-top: 36px;
     }
-    .hero-stat {
-      padding: 0 28px 0 0; margin-right: 28px;
-      border-right: 1px solid var(--border);
-    }
-    .hero-stat:last-child { border-right: none; padding-right: 0; margin-right: 0; }
+    .hero-stat { flex: 1; min-width: 0; }
     .hero-stat-val {
-      font-size: 17px; font-weight: 900; color: var(--navy); letter-spacing: -0.02em;
+      font-size: 16px; font-weight: 900; color: var(--navy); letter-spacing: -0.02em;
+      white-space: nowrap;
     }
-    .hero-stat-lbl { font-size: 11px; color: var(--muted); margin-top: 3px; }
+    .hero-stat-lbl { font-size: 11px; color: var(--muted); margin-top: 3px; line-height: 1.4; }
 
     /* ── Hero product visual ───────────────────────────────────────────────── */
     .hero-visual {
@@ -243,7 +240,9 @@
     .step-card {
       display: flex; align-items: flex-start; gap: 24px;
       background: #fff; border: 1px solid var(--border); border-radius: 18px; padding: 28px 28px;
+      transition: box-shadow 0.2s ease, transform 0.2s ease;
     }
+    .step-card:hover { box-shadow: 0 8px 32px rgba(13,20,32,.08); transform: translateY(-2px); }
     .step-num-badge {
       width: 44px; height: 44px; border-radius: 12px;
       background: var(--navy); color: var(--gold);
@@ -332,6 +331,7 @@
       Fidelyzio
     </a>
     <div class="nav-actions">
+      <a href="#tarifs" class="btn-nav-ghost">Tarifs</a>
       <a href="/register" class="btn-nav-indigo">Espace commerçant</a>
       <a href="/join"     class="btn-nav-amber">Ma carte</a>
     </div>
@@ -460,16 +460,72 @@
   </div>
 </section>
 
+<!-- ══════════════════════ VOUS ÊTES ? ══════════════════════════════════════ -->
+<section class="section-pad" style="background:var(--cream2);border-top:1px solid var(--border)">
+  <div class="wrap">
+    <div style="text-align:center;margin-bottom:48px">
+      <p style="color:var(--muted);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px">À chacun son espace</p>
+      <h2 class="section-h2">Vous êtes ?</h2>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;border-radius:24px;overflow:hidden;box-shadow:0 20px 60px rgba(13,20,32,.15)">
+
+      <!-- Merchant card — dark navy -->
+      <a href="/register" class="vous-card vous-card-merchant" style="display:flex;flex-direction:column;gap:20px;padding:48px 40px;background:#0d1420;text-decoration:none;transition:background .2s ease">
+        <div style="width:52px;height:52px;border-radius:16px;background:rgba(99,102,241,.2);border:1px solid rgba(99,102,241,.3);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="#818cf8" stroke-width="1.8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016 2.993 2.993 0 0 0 2.25-1.016 3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72M6.75 18h3.75a.75.75 0 0 0 .75-.75V13.5a.75.75 0 0 0-.75-.75H6.75a.75.75 0 0 0-.75.75v3.75c0 .414.336.75.75.75Z"/>
+          </svg>
+        </div>
+        <div style="flex:1">
+          <p style="color:#fff;font-size:24px;font-weight:900;letter-spacing:-.02em;margin-bottom:10px">Commerçant</p>
+          <p style="color:rgba(250,250,248,.5);font-size:15px;line-height:1.65">Créez votre programme de fidélité en 2 minutes. Points, tampons, notifications push, analytics — tout inclus. Essai gratuit 14 jours, sans carte bancaire.</p>
+        </div>
+        <span style="display:inline-flex;align-items:center;gap:8px;background:#6366f1;color:#fff;font-size:14px;font-weight:700;padding:13px 22px;border-radius:10px;align-self:flex-start;transition:background .2s ease">
+          Créer mon programme
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>
+        </span>
+      </a>
+
+      <!-- Client card — white with amber border -->
+      <a href="/join" class="vous-card vous-card-client" style="display:flex;flex-direction:column;gap:20px;padding:48px 40px;background:#fff;border-left:3px solid var(--gold);text-decoration:none;transition:background .2s ease">
+        <div style="width:52px;height:52px;border-radius:16px;background:rgba(240,180,41,.12);border:1px solid rgba(240,180,41,.3);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="#d97706" stroke-width="1.8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z"/>
+          </svg>
+        </div>
+        <div style="flex:1">
+          <p style="color:#0d1420;font-size:24px;font-weight:900;letter-spacing:-.02em;margin-bottom:10px">Client</p>
+          <p style="color:#5a6573;font-size:15px;line-height:1.65">Retrouvez ou créez votre carte de fidélité Fidelyzio. Accédez à vos points et récompenses dans tous vos commerces préférés. Gratuit, sans application.</p>
+        </div>
+        <span style="display:inline-flex;align-items:center;gap:8px;background:var(--gold);color:#0d1420;font-size:14px;font-weight:700;padding:13px 22px;border-radius:10px;align-self:flex-start;transition:background .2s ease">
+          Trouver ma carte
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>
+        </span>
+      </a>
+
+    </div>
+  </div>
+</section>
+<style>
+  @media(max-width:680px) {
+    .vous-card { padding: 36px 24px !important; }
+    section > .wrap > div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+    .vous-card-client { border-left: none !important; border-top: 3px solid var(--gold) !important; }
+  }
+  .vous-card-merchant:hover { background: #111d2e !important; }
+  .vous-card-client:hover { background: #fffbf0 !important; }
+</style>
+
 <!-- ══════════════════════ STATS STRIP ══════════════════════════════════════ -->
 <div class="stats-strip">
   <div class="wrap" style="padding-left:0;padding-right:0">
     <div class="stats-strip-inner">
       <div class="strip-stat">
-        <div class="strip-val">+18%</div>
+        <div class="strip-val">+20%</div>
         <div class="strip-lbl">de visites répétées en moyenne</div>
       </div>
       <div class="strip-stat">
-        <div class="strip-val">5 min</div>
+        <div class="strip-val">2 min</div>
         <div class="strip-lbl">de setup, QR en caisse prêt</div>
       </div>
       <div class="strip-stat">
@@ -718,43 +774,6 @@
   </div>
 </section>
 
-<!-- ══════════════════════ VOUS ÊTES ? ══════════════════════════════════════ -->
-<section class="section-pad-sm" style="background:var(--cream2)">
-  <div class="wrap" style="max-width:720px">
-    <div style="text-align:center;margin-bottom:40px">
-      <p style="color:var(--muted);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px">À chacun son espace</p>
-      <h2 class="section-h2">Vous êtes ?</h2>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-      <a href="/register" style="display:flex;flex-direction:column;gap:16px;padding:28px;border-radius:20px;background:#0d1420;border:1.5px solid rgba(99,102,241,.3);text-decoration:none;transition:border-color .2s,transform .1s" onmouseover="this.style.borderColor='#6366f1';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='rgba(99,102,241,.3)';this.style.transform='translateY(0)'">
-        <div style="width:44px;height:44px;border-radius:14px;background:rgba(99,102,241,.15);display:flex;align-items:center;justify-content:center">
-          <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#6366f1" stroke-width="1.8">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016 2.993 2.993 0 0 0 2.25-1.016 3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72M6.75 18h3.75a.75.75 0 0 0 .75-.75V13.5a.75.75 0 0 0-.75-.75H6.75a.75.75 0 0 0-.75.75v3.75c0 .414.336.75.75.75Z"/>
-          </svg>
-        </div>
-        <div>
-          <p style="color:#fafaf8;font-size:16px;font-weight:800;margin-bottom:6px">Commerçant</p>
-          <p style="color:rgba(250,250,248,.45);font-size:13px;line-height:1.6">Créez votre programme de fidélité en 2 minutes. Essai gratuit 14 jours.</p>
-        </div>
-        <span style="color:#6366f1;font-size:14px;font-weight:700;margin-top:auto">Espace commerçant →</span>
-      </a>
-
-      <a href="/join" style="display:flex;flex-direction:column;gap:16px;padding:28px;border-radius:20px;background:rgba(240,180,41,.06);border:1.5px solid rgba(240,180,41,.25);text-decoration:none;transition:border-color .2s,transform .1s" onmouseover="this.style.borderColor='#f0b429';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='rgba(240,180,41,.25)';this.style.transform='translateY(0)'">
-        <div style="width:44px;height:44px;border-radius:14px;background:rgba(240,180,41,.15);display:flex;align-items:center;justify-content:center">
-          <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#f0b429" stroke-width="1.8">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z"/>
-          </svg>
-        </div>
-        <div>
-          <p style="color:#fafaf8;font-size:16px;font-weight:800;margin-bottom:6px">Client</p>
-          <p style="color:rgba(250,250,248,.45);font-size:13px;line-height:1.6">Retrouvez ou créez votre carte de fidélité Fidelyzio. Gratuit.</p>
-        </div>
-        <span style="color:#f0b429;font-size:14px;font-weight:700;margin-top:auto">Ma carte →</span>
-      </a>
-    </div>
-  </div>
-</section>
-
 <!-- ══════════════════════ CONTACT FORM ═════════════════════════════════════ -->
 <section class="section-pad contact-section">
   <div class="wrap" style="max-width:720px">
@@ -836,7 +855,8 @@
     </div>
     <p style="color:rgba(250,250,248,.3);font-size:13px;margin-bottom:28px">La fidélité digitale pour les commerces indépendants.</p>
     <div style="display:flex;gap:24px;justify-content:center;flex-wrap:wrap;margin-bottom:28px">
-      <a href="/cgu"     style="color:rgba(250,250,248,.3);font-size:13px;text-decoration:none" onmouseover="this.style.color='#fafaf8'" onmouseout="this.style.color='rgba(250,250,248,.3)'">Conditions d'utilisation</a>
+      <a href="/legal"   style="color:rgba(250,250,248,.3);font-size:13px;text-decoration:none" onmouseover="this.style.color='#fafaf8'" onmouseout="this.style.color='rgba(250,250,248,.3)'">Mentions légales</a>
+      <a href="/cgu"     style="color:rgba(250,250,248,.3);font-size:13px;text-decoration:none" onmouseover="this.style.color='#fafaf8'" onmouseout="this.style.color='rgba(250,250,248,.3)'">CGU</a>
       <a href="/privacy" style="color:rgba(250,250,248,.3);font-size:13px;text-decoration:none" onmouseover="this.style.color='#fafaf8'" onmouseout="this.style.color='rgba(250,250,248,.3)'">Confidentialité</a>
       <a href="/login"   style="color:rgba(250,250,248,.3);font-size:13px;text-decoration:none" onmouseover="this.style.color='#fafaf8'" onmouseout="this.style.color='rgba(250,250,248,.3)'">Connexion marchand</a>
       <a href="/join"    style="color:rgba(250,250,248,.3);font-size:13px;text-decoration:none" onmouseover="this.style.color='#fafaf8'" onmouseout="this.style.color='rgba(250,250,248,.3)'">Trouver ma carte</a>

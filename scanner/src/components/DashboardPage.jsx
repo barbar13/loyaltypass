@@ -1194,6 +1194,36 @@ function ChartCard({ title, subtitle, children, action }) {
   );
 }
 
+function DonutChart({ chartKey, labels, values, colors, stats }) {
+  const DONUT_OPTS = {
+    responsive: true, maintainAspectRatio: false,
+    interaction: { mode: 'nearest', intersect: true },
+    plugins: {
+      legend: { display: true, position: 'bottom', labels: { color: '#6b7280', font: { size: 11 }, padding: 10, boxWidth: 8, usePointStyle: true } },
+      tooltip: { ...TOOLTIP_OPTS, displayColors: true },
+    },
+    cutout: '68%',
+  };
+  return (
+    <div className="flex flex-col items-center gap-3">
+      <div style={{ height: 150, position: 'relative', width: '100%' }}>
+        <CanvasChart chartKey={chartKey} type="doughnut" height={150}
+          data={{ labels, datasets: [{ data: values, backgroundColor: colors, borderColor: '#0e0e18', borderWidth: 3, hoverOffset: 4 }] }}
+          options={DONUT_OPTS}
+        />
+      </div>
+      <div className="flex gap-4 justify-center flex-wrap">
+        {stats.map(s => (
+          <div key={s.label} className="text-center">
+            <p className="text-gray-600 text-[10px] uppercase tracking-wide">{s.label}</p>
+            <p className={`font-bold text-sm leading-none ${s.color}`}>{s.value}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ── TopClientsTable ───────────────────────────────────────────────────────────
 
 function TopClientsTable({ customers }) {
@@ -1537,6 +1567,9 @@ function AnalyticsTab({ token, color }) {
   const ptsDist        = data.total_points_distributed || 0;
   const ptsRedeemed    = Math.min(data.total_points_redeemed || 0, ptsDist);
   const ptsNet         = Math.max(0, ptsDist - ptsRedeemed);
+  const stDist         = data.total_stamps_distributed || 0;
+  const stRedeemed     = Math.min(data.total_stamps_redeemed || 0, stDist);
+  const stNet          = Math.max(0, stDist - stRedeemed);
 
   const weeklyNew = data.cumulative_customers.map((w, i, arr) => ({
     label: w.label,
@@ -1629,7 +1662,7 @@ function AnalyticsTab({ token, color }) {
         </div>
       </div>
 
-      {/* ── Row 3: New clients + Points donut ────────────────────────────────── */}
+      {/* ── Row 3: New clients + donut charts ────────────────────────────────── */}
       <div className="grid md:grid-cols-2 gap-3 md:gap-4">
         <ChartCard title="Nouveaux clients" subtitle={periodLabel}>
           {hasWeeklyData ? (
@@ -1645,36 +1678,43 @@ function AnalyticsTab({ token, color }) {
           )}
         </ChartCard>
 
-        <ChartCard title="Points distribués vs échangés" subtitle={periodLabel}>
-          {ptsDist === 0 ? (
-            <ChartEmpty icon={<IcoStar s={22} />} msg="Aucun point distribué sur cette période" height={170} />
-          ) : (
-            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-              <div className="flex-1 min-w-0" style={{ height: 170, position: 'relative' }}>
-                <CanvasChart key={`donut-${ck}`} chartKey={ck} type="doughnut" height={170}
-                  data={{
-                    labels: ['Points actifs', 'Points échangés'],
-                    datasets: [{ data: [ptsNet, ptsRedeemed], backgroundColor: [CHART_COLORS.indigo, CHART_COLORS.rose], borderColor: '#0e0e18', borderWidth: 3, hoverOffset: 4 }],
-                  }}
-                  options={{
-                    responsive: true, maintainAspectRatio: false,
-                    interaction: { mode: 'nearest', intersect: true },
-                    plugins: {
-                      legend: { display: true, position: 'bottom', labels: { color: '#6b7280', font: { size: 13 }, padding: 12, boxWidth: 10, usePointStyle: true } },
-                      tooltip: { ...TOOLTIP_OPTS, displayColors: true },
-                    },
-                    cutout: '68%',
-                  }}
-                />
-              </div>
-              <div className="shrink-0 flex flex-row sm:flex-col gap-4 sm:gap-3 justify-around sm:justify-start">
-                <div><p className="text-gray-600 text-[10px] uppercase tracking-wide">Distribués</p><p className="text-white font-bold text-base leading-none">{ptsDist.toLocaleString('fr-FR')}</p></div>
-                <div><p className="text-gray-600 text-[10px] uppercase tracking-wide">Échangés</p><p className="text-rose-400 font-bold text-base leading-none">{ptsRedeemed.toLocaleString('fr-FR')}</p></div>
-                <div><p className="text-gray-600 text-[10px] uppercase tracking-wide">Taux</p><p className="text-white font-bold text-base leading-none">{Math.round((ptsRedeemed / ptsDist) * 100)}%</p></div>
-              </div>
-            </div>
+        <div className={`grid gap-3 ${ptsDist > 0 && stDist > 0 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+          {ptsDist > 0 && (
+            <ChartCard title="Points distribués vs échangés" subtitle={periodLabel}>
+              <DonutChart
+                chartKey={`donut-pts-${ck}`}
+                labels={['Points actifs', 'Points échangés']}
+                values={[ptsNet, ptsRedeemed]}
+                colors={[CHART_COLORS.indigo, CHART_COLORS.rose]}
+                stats={[
+                  { label: 'Distribués', value: ptsDist.toLocaleString('fr-FR'), color: 'text-white' },
+                  { label: 'Échangés', value: ptsRedeemed.toLocaleString('fr-FR'), color: 'text-rose-400' },
+                  { label: 'Taux', value: `${Math.round((ptsRedeemed / ptsDist) * 100)}%`, color: 'text-white' },
+                ]}
+              />
+            </ChartCard>
           )}
-        </ChartCard>
+          {stDist > 0 && (
+            <ChartCard title="Tampons distribués vs échangés" subtitle={periodLabel}>
+              <DonutChart
+                chartKey={`donut-st-${ck}`}
+                labels={['Tampons actifs', 'Tampons échangés']}
+                values={[stNet, stRedeemed]}
+                colors={[CHART_COLORS.amber, CHART_COLORS.rose]}
+                stats={[
+                  { label: 'Distribués', value: stDist.toLocaleString('fr-FR'), color: 'text-white' },
+                  { label: 'Échangés', value: stRedeemed.toLocaleString('fr-FR'), color: 'text-rose-400' },
+                  { label: 'Taux', value: stDist > 0 ? `${Math.round((stRedeemed / stDist) * 100)}%` : '0%', color: 'text-white' },
+                ]}
+              />
+            </ChartCard>
+          )}
+          {ptsDist === 0 && stDist === 0 && (
+            <ChartCard title="Points distribués vs échangés" subtitle={periodLabel}>
+              <ChartEmpty icon={<IcoStar s={22} />} msg="Aucune donnée sur cette période" height={170} />
+            </ChartCard>
+          )}
+        </div>
       </div>
 
       {/* ── Row 4: Top clients table ──────────────────────────────────────────── */}

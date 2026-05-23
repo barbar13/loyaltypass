@@ -474,7 +474,7 @@ router.get('/analytics', auth, async (req, res) => {
         GROUP BY mb.customer_id, mb.points, mb.joined_at, c.first_name, c.phone
       `, [merchantId]),
       db.all(
-        'SELECT id, customer_id, points, note, created_at FROM transactions WHERE merchant_id = $1 ORDER BY created_at',
+        'SELECT id, customer_id, points, type, note, created_at FROM transactions WHERE merchant_id = $1 ORDER BY created_at',
         [merchantId]
       ),
     ]);
@@ -537,8 +537,10 @@ router.get('/analytics', auth, async (req, res) => {
     const lastMonthCustomers = memberships.filter(m => { const ts = toTs(m.joined_at); return ts >= tsLastMonthStart && ts < tsMonthStart; }).length;
 
     // ── Rewards analysis (period-scoped) ─────────────────────────────────
-    const totalPointsDistrib  = periodPosTxns.reduce((s, t) => s + t.points, 0);
-    const totalPointsRedeemed = periodRedeems.reduce((s, t) => s + Math.abs(t.points), 0);
+    const totalPointsDistrib  = periodPosTxns.filter(t => (t.type || 'points') === 'points').reduce((s, t) => s + t.points, 0);
+    const totalPointsRedeemed = periodRedeems.filter(t => (t.type || 'points') === 'points').reduce((s, t) => s + Math.abs(t.points), 0);
+    const totalStampsDistrib  = periodPosTxns.filter(t => t.type === 'stamps').length;
+    const totalStampsRedeemed = periodRedeems.filter(t => t.type === 'stamps').length;
     const customersWhoRedeemed = new Set(allRedeems.map(r => r.customer_id));
     const redemptionRate = memberships.length > 0
       ? Math.round((customersWhoRedeemed.size / memberships.length) * 100) : 0;
@@ -608,6 +610,8 @@ router.get('/analytics', auth, async (req, res) => {
       scans_by_hour:       scansByHour,
       total_points_distributed: totalPointsDistrib,
       total_points_redeemed:    totalPointsRedeemed,
+      total_stamps_distributed: totalStampsDistrib,
+      total_stamps_redeemed:    totalStampsRedeemed,
       total_redeemed:           periodRedeems.length,
       redemption_rate:          redemptionRate,
       most_popular_reward:      mostPopularReward,

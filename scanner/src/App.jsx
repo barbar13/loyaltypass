@@ -5,10 +5,24 @@ import { getDashboard } from './api.js';
 
 const STORAGE_KEY = 'fidelyzio_auth';
 
+function isTokenValid(token) {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+    return payload.exp * 1000 > Date.now();
+  } catch { return false; }
+}
+
 export default function App() {
   const [auth, setAuth] = useState(() => {
-    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) ?? null; }
-    catch { return null; }
+    try {
+      const stored = JSON.parse(localStorage.getItem(STORAGE_KEY));
+      if (!stored?.token) return null;
+      if (!isTokenValid(stored.token)) {
+        localStorage.removeItem(STORAGE_KEY);
+        return null;
+      }
+      return stored;
+    } catch { return null; }
   });
   const [dashData, setDashData] = useState(null);
   const [dashLoading, setDashLoading] = useState(false);

@@ -94,13 +94,15 @@ export default function ScanModal({ token, onClose, onRefresh }) {
   const [redeemResult, setRedeemResult] = useState(null);
   const [errMsg,       setErrMsg]       = useState('');
 
-  const scannedQrRef = useRef('');
-  const forceRef     = useRef(false);
-  const camActive    = phase === 'scanning';
+  const scannedQrRef  = useRef('');
+  const forceRef      = useRef(false);
+  const processingRef = useRef(false);
+  const camActive     = phase === 'scanning';
 
   function reset() {
     scannedQrRef.current = '';
     forceRef.current = false;
+    processingRef.current = false;
     setPhase('scanning');
     setInputMode(null);
     setPreview(null);
@@ -110,6 +112,8 @@ export default function ScanModal({ token, onClose, onRefresh }) {
   }
 
   const handleScan = useCallback(async (qrCode) => {
+    if (processingRef.current) return;
+    processingRef.current = true;
     scannedQrRef.current = qrCode;
     setPhase('loading');
     try {

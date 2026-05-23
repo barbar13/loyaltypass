@@ -28,7 +28,6 @@ export default function QrReader({ active, onScan }) {
 
       const config   = { fps: 15, qrbox: { width: 220, height: 220 } };
       const onSuccess = (text) => {
-        try { scanner.pause(true); } catch {}
         onScanRef.current(text);
       };
 

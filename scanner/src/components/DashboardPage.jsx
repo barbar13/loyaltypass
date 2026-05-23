@@ -1766,8 +1766,8 @@ export default function DashboardPage({ auth, dashData, dashLoading, onLogout, o
     { id: 'home',          label: 'Accueil',       short: 'Accueil', Icon: IconHome     },
     { id: 'clients',       label: 'Clients',       short: 'Clients', Icon: IconUsers    },
     { id: 'rewards',       label: 'Récompenses',   short: 'Récomp.', Icon: IconGift     },
-    { id: 'notifications', label: 'Notifications', short: 'Notifs',  Icon: IconBell     },
     { id: 'analytics',     label: 'Statistiques',  short: 'Stats',   Icon: IconChart    },
+    { id: 'notifications', label: 'Notifications', short: 'Notifs',  Icon: IconBell     },
     { id: 'settings',      label: 'Paramètres',    short: 'Compte',  Icon: IconSettings },
   ];
 

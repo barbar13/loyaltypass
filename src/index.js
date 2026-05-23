@@ -53,6 +53,8 @@ app.get('/home',                (_req, res) => res.sendFile(path.join(PUBLIC, 'h
 app.get('/cgu',                 (_req, res) => res.sendFile(path.join(PUBLIC, 'cgu.html')));
 app.get('/privacy',             (_req, res) => res.sendFile(path.join(PUBLIC, 'privacy.html')));
 app.get('/legal',               (_req, res) => res.sendFile(path.join(PUBLIC, 'legal.html')));
+app.get('/robots.txt',          (_req, res) => { res.setHeader('Content-Type','text/plain'); res.sendFile(path.join(PUBLIC, 'robots.txt')); });
+app.get('/sitemap.xml',         (_req, res) => { res.setHeader('Content-Type','application/xml'); res.sendFile(path.join(PUBLIC, 'sitemap.xml')); });
 app.get('/subscribe',           (_req, res) => res.sendFile(path.join(PUBLIC, 'subscribe.html')));
 app.get('/join',                (_req, res) => res.sendFile(path.join(PUBLIC, 'join.html')));
 

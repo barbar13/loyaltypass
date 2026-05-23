@@ -34,7 +34,22 @@
       "Bash(sed -i \"s|href=\\\\\"/\\\\\" class=\\\\\"text-gray-600 text-sm hover:text-gray-400 transition\\\\\">← Retour au tableau de bord|href=\\\\\"/scanner\\\\\" class=\\\\\"text-gray-600 text-sm hover:text-gray-400 transition\\\\\">← Retour au tableau de bord|g\" public/subscribe.html)",
       "Bash(sed -i 's|<a href=\"/\">\\\\n|<a href=\"/scanner\">|g' public/qr-print.html)",
       "Bash(sed -i 's|<a href=\"/\"\\\\n.*class=\"px-6|<a href=\"/home\"\\\\n     class=\"px-6|g' public/my-card.html)",
-      "Bash(dir *)"
+      "Bash(dir *)",
+      "Bash(python3 *)",
+      "Bash(node -e \"const wp=require\\('web-push'\\);const k=wp.generateVAPIDKeys\\(\\);console.log\\('PUBLIC:',k.publicKey\\);console.log\\('PRIVATE:',k.privateKey\\);\")",
+      "Bash(node -e \"require\\('./src/email.js'\\); console.log\\('email.js OK'\\)\")",
+      "Bash(node -e \"require\\('./src/routes/customers.js'\\); console.log\\('customers.js OK'\\)\")",
+      "Bash(node -e \"require\\('./src/index.js'\\); setTimeout\\(\\(\\)=>process.exit\\(0\\),800\\);\")",
+      "Bash(node -e \"const {Html5Qrcode}=require\\('html5-qrcode'\\); const h=new Html5Qrcode.__proto__; console.log\\('startWithStream' in Html5Qrcode.prototype\\);\")",
+      "Bash(node -e \"const pkg=require\\('./node_modules/html5-qrcode/package.json'\\); console.log\\(pkg.version\\);\")",
+      "Bash(node -e \"require\\('./src/routes/merchants.js'\\); console.log\\('merchants.js OK'\\)\")",
+      "Bash(node -e \"require\\('./src/database.js'\\); setTimeout\\(\\(\\)=>{console.log\\('database.js OK'\\);process.exit\\(0\\)},500\\)\")",
+      "Bash(git reset *)",
+      "Bash(git cherry-pick *)",
+      "Bash(git checkout *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\titou\\\\loyaltypass\" -Recurse -ErrorAction SilentlyContinue)",
+      "Bash(Select-Object -First 20)",
+      "Bash(npx web-push *)"
     ]
   }
 }

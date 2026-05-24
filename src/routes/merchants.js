@@ -586,7 +586,7 @@ router.get('/analytics', auth, async (req, res) => {
     const totalPointsDistrib  = periodPosTxns.filter(t => (t.type || 'points') === 'points').reduce((s, t) => s + t.points, 0);
     const totalPointsRedeemed = periodRedeems.filter(t => (t.type || 'points') === 'points').reduce((s, t) => s + Math.abs(t.points), 0);
     const totalStampsDistrib  = periodPosTxns.filter(t => t.type === 'stamps').length;
-    const totalStampsRedeemed = periodRedeems.filter(t => t.type === 'stamps').length;
+    const totalStampsRedeemed = periodRedeems.filter(t => t.type === 'stamps').reduce((s, t) => s + Math.abs(Number(t.points)), 0);
     const customersWhoRedeemed = new Set(allRedeems.map(r => r.customer_id));
     const redemptionRate = memberships.length > 0
       ? Math.round((customersWhoRedeemed.size / memberships.length) * 100) : 0;

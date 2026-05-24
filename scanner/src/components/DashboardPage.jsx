@@ -242,7 +242,7 @@ function HomeTab({ merchant, stats, rewards, token, onScanClick }) {
   ];
 
   return (
-    <div className="px-5 md:px-6 pt-5 pb-8 max-w-2xl">
+    <div className="px-5 md:px-8 pt-5 pb-8 w-full">
 
       {/* Welcome */}
       <div className="mb-5">
@@ -251,11 +251,11 @@ function HomeTab({ merchant, stats, rewards, token, onScanClick }) {
       </div>
 
       {/* Quick stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6 w-full">
         {quickStats.map(s => (
           <div key={s.label} className="bg-[#0e0e18] border border-white/5 rounded-2xl p-4">
             <div className="text-gray-500 mb-2">{s.icon}</div>
-            <p className="text-2xl font-black text-white leading-none">{s.value}</p>
+            <p className="text-3xl font-bold text-white leading-none">{s.value}</p>
             <p className="text-gray-600 text-[10px] uppercase tracking-wider mt-1">{s.label}</p>
           </div>
         ))}
@@ -274,6 +274,9 @@ function HomeTab({ merchant, stats, rewards, token, onScanClick }) {
         Scanner un client
       </button>
 
+      {/* Desktop 2-col: QR left, activity right */}
+      <div className="md:grid md:grid-cols-2 md:gap-6 w-full">
+      <div>
       {/* Desktop: info message instead of scan button */}
       <div className="hidden md:flex items-center gap-3 bg-[#0e0e18] border border-white/5 rounded-2xl px-5 py-4">
         <div className="text-gray-500 shrink-0"><IcoMobile s={22} /></div>
@@ -316,7 +319,7 @@ function HomeTab({ merchant, stats, rewards, token, onScanClick }) {
           <div className={`${showQr ? '' : 'hidden'} md:block px-5 pb-5 border-t border-white/5 md:border-t-0`}>
             <div className="flex justify-center my-4">
               <div className="bg-white p-4 rounded-2xl shadow-xl md:p-5">
-                <img src={enrollQr} alt="QR inscription" className="w-44 h-44 md:w-56 md:h-56 rounded-lg block"
+                <img src={enrollQr} alt="QR inscription" className="w-64 h-64 rounded-lg block"
                   onError={e => { e.target.style.opacity = '0.3'; }} />
               </div>
             </div>
@@ -336,8 +339,9 @@ function HomeTab({ merchant, stats, rewards, token, onScanClick }) {
         )}
       </div>
 
+      </div>{/* end left col */}
+      <div className="mt-5 md:mt-0">
       {/* Recent activity */}
-      <div className="mt-5">
         <p className="text-gray-500 text-xs font-semibold uppercase tracking-widest mb-3">Activité récente</p>
 
         {recentScans === null && (
@@ -385,6 +389,7 @@ function HomeTab({ merchant, stats, rewards, token, onScanClick }) {
           </div>
         )}
       </div>
+      </div>{/* end 2-col */}
     </div>
   );
 }
@@ -445,7 +450,7 @@ function ClientsTab({ customers, rewards, token, onRewardsChange }) {
   }
 
   return (
-    <div className="px-5 md:px-6 pt-2 pb-8">
+    <div className="px-5 md:px-8 pt-2 pb-8 w-full">
       {/* Search + CSV */}
       <div className="flex gap-2 mb-4">
         <div className="relative flex-1">
@@ -453,7 +458,7 @@ function ClientsTab({ customers, rewards, token, onRewardsChange }) {
             <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
           </svg>
           <input type="search" placeholder="Rechercher…" value={search} onChange={e => setSearch(e.target.value)}
-            className="w-full bg-gray-900 border border-white/5 rounded-2xl pl-9 pr-4 py-3 text-white placeholder-gray-600 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 transition" />
+            className="w-full bg-gray-900 border border-white/5 rounded-2xl pl-9 pr-4 py-3 text-white placeholder-gray-600 text-base focus:outline-none focus:ring-1 focus:ring-indigo-500 transition" />
         </div>
         {customers.length > 0 && (
           <button onClick={() => exportCSV(filtered)} title="Exporter CSV"
@@ -668,7 +673,7 @@ function ClientsTab({ customers, rewards, token, onRewardsChange }) {
 function RewardCard({ r, token, onRewardsChange }) {
   const isStamp = r.mechanic === 'stamps';
   return (
-    <div className={`bg-[#0e0e18] border rounded-2xl px-4 py-4 flex items-center gap-3 ${isStamp ? 'border-amber-500/20' : 'border-white/5'}`}>
+    <div className={`bg-[#0e0e18] border rounded-2xl p-6 flex items-center gap-3 text-base ${isStamp ? 'border-amber-500/20' : 'border-white/5'}`}>
       <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${isStamp ? 'bg-amber-500/15 border border-amber-500/25' : 'bg-indigo-500/15 border border-indigo-500/25'}`}>
         {isStamp
           ? <svg className="w-4 h-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
@@ -711,7 +716,7 @@ function RewardsTab({ rewards, token, onRewardsChange }) {
   const stRewards = active.filter(r => r.mechanic === 'stamps');
 
   return (
-    <div className="px-5 md:px-6 pt-2 pb-6 md:grid md:grid-cols-2 md:gap-6 md:items-start">
+    <div className="px-5 md:px-8 pt-2 pb-6 md:grid md:grid-cols-2 md:gap-8 md:items-start w-full">
       <div className="space-y-4">
         {active.length === 0 && (
           <div className="text-center py-10 bg-[#0e0e18] border border-white/5 rounded-2xl">
@@ -918,14 +923,14 @@ function SettingsTab({ merchant, token, onRefresh }) {
   }
 
   return (
-    <div className="px-5 md:px-6 pt-2 pb-6 md:max-w-lg">
+    <div className="px-5 md:px-8 pt-2 pb-6 w-full md:grid md:grid-cols-2 md:gap-8 md:items-start">
       <form onSubmit={handleSave} className="space-y-5">
         <div className="bg-[#0e0e18] border border-white/5 rounded-2xl p-5 space-y-4">
           <p className="text-gray-400 text-sm font-semibold">Informations de l'établissement</p>
           <div>
             <label className="block text-xs text-gray-500 mb-1.5">Nom de l'établissement</label>
             <input value={name} onChange={e => setName(e.target.value)} required
-              className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 transition" />
+              className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white text-base focus:outline-none focus:ring-1 focus:ring-indigo-500 transition" />
           </div>
           <div>
             <label className="block text-xs text-gray-500 mb-1.5">Couleur de marque</label>
@@ -962,13 +967,13 @@ function SettingsTab({ merchant, token, onRefresh }) {
           <div>
             <label className="block text-xs text-gray-500 mb-1.5">Nouveau mot de passe</label>
             <input type="password" value={pwd} onChange={e => setPwd(e.target.value)} placeholder="Laisser vide pour ne pas changer"
-              className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-600 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 transition" />
+              className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-600 text-base focus:outline-none focus:ring-1 focus:ring-indigo-500 transition" />
           </div>
           {pwd && (
             <div>
               <label className="block text-xs text-gray-500 mb-1.5">Confirmer</label>
               <input type="password" value={pwd2} onChange={e => setPwd2(e.target.value)} placeholder="••••••••"
-                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-600 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 transition" />
+                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-600 text-base focus:outline-none focus:ring-1 focus:ring-indigo-500 transition" />
             </div>
           )}
         </div>
@@ -980,9 +985,9 @@ function SettingsTab({ merchant, token, onRefresh }) {
         </button>
       </form>
 
-      {/* ── Abonnement ── */}
-      <div className="mt-5 bg-[#0e0e18] border border-white/5 rounded-2xl p-5 space-y-3">
-        <p className="text-gray-400 text-sm font-semibold">Abonnement</p>
+      {/* ── Abonnement (right col) ── */}
+      <div className="mt-5 md:mt-0 bg-[#0e0e18] border border-white/5 rounded-2xl p-8 space-y-3">
+        <p className="text-gray-400 text-lg font-semibold">Abonnement</p>
 
         {subStatus === null
           ? <div className="h-6 w-48 bg-white/[0.06] rounded-full animate-pulse" />
@@ -1082,10 +1087,10 @@ function NotificationsTab({ token, customers, rewards }) {
   const canSend  = title.trim().length > 0 && body.trim().length > 0 && !sending;
 
   return (
-    <div className="px-5 md:px-6 pt-2 pb-8 md:max-w-2xl">
+    <div className="px-5 md:px-8 pt-2 pb-8 w-full md:grid md:grid-cols-2 md:gap-8 md:items-start">
 
-      {/* ── Compose form ── */}
-      <div className="bg-[#0e0e18] border border-white/5 rounded-2xl p-5 mb-6">
+      {/* ── Compose form (left col) ── */}
+      <div className="bg-[#0e0e18] border border-white/5 rounded-2xl p-5">
         <p className="text-gray-400 text-sm font-semibold mb-4">Nouvelle notification</p>
 
         {/* Title */}
@@ -1096,7 +1101,7 @@ function NotificationsTab({ token, customers, rewards }) {
           </div>
           <input type="text" maxLength={50} value={title} onChange={e => setTitle(e.target.value)}
             placeholder="ex : Offre spéciale ce week-end !"
-            className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-600 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 transition" />
+            className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-600 text-base focus:outline-none focus:ring-1 focus:ring-indigo-500 transition" />
         </div>
 
         {/* Body */}
@@ -1107,7 +1112,7 @@ function NotificationsTab({ token, customers, rewards }) {
           </div>
           <textarea maxLength={150} rows={3} value={body} onChange={e => setBody(e.target.value)}
             placeholder="ex : Venez profiter de vos points, on vous attend !"
-            className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-600 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 transition resize-none" />
+            className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-600 text-base focus:outline-none focus:ring-1 focus:ring-indigo-500 transition resize-none min-h-[150px]" />
         </div>
 
         {/* Audience */}
@@ -1170,7 +1175,8 @@ function NotificationsTab({ token, customers, rewards }) {
         </button>
       </div>
 
-      {/* ── History ── */}
+      {/* ── History (right col) ── */}
+      <div>
       <p className="text-gray-500 text-xs font-semibold uppercase tracking-widest mb-3">Historique</p>
       {history === null && (
         <div className="space-y-2">
@@ -1200,6 +1206,7 @@ function NotificationsTab({ token, customers, rewards }) {
           ))}
         </div>
       )}
+      </div>{/* end history col */}
     </div>
   );
 }
@@ -1631,9 +1638,9 @@ function AnalyticsTab({ token, color }) {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[1,2,3,4].map(i => <div key={i} className="bg-[#0e0e18] border border-white/5 rounded-2xl p-4 space-y-3"><Skel h="h-3" w="w-20" /><Skel h="h-8" w="w-16" /><Skel h="h-3" w="w-24" /></div>)}
       </div>
-      <div className="grid md:grid-cols-5 gap-3 md:gap-4">
-        <div className="md:col-span-3 bg-[#0e0e18] border border-white/5 rounded-2xl p-5"><Skel h="h-3" w="w-32" /><div className="mt-4"><Skel h="h-40" /></div></div>
-        <div className="md:col-span-2 bg-[#0e0e18] border border-white/5 rounded-2xl p-5"><Skel h="h-3" w="w-28" /><div className="mt-4"><Skel h="h-40" /></div></div>
+      <div className="grid md:grid-cols-2 gap-6">
+        <div className="bg-[#0e0e18] border border-white/5 rounded-2xl p-5"><Skel h="h-3" w="w-32" /><div className="mt-4"><Skel h="h-40" /></div></div>
+        <div className="bg-[#0e0e18] border border-white/5 rounded-2xl p-5"><Skel h="h-3" w="w-28" /><div className="mt-4"><Skel h="h-40" /></div></div>
       </div>
     </div>
   );
@@ -1727,15 +1734,15 @@ function AnalyticsTab({ token, color }) {
           ? 'grid-cols-2 md:grid-cols-5'
           : 'grid-cols-2 md:grid-cols-4';
         return (
-          <div className={`grid ${gridCls} gap-3`}>
+          <div className={`grid ${gridCls} gap-6 w-full`}>
             {kpiCards.map(c => <KpiCard key={c.label} label={c.label} value={c.value} sub={c.sub} borderColor={c.borderColor} />)}
           </div>
         );
       })()}
 
-      {/* ── Row 2: Scans/day (3/5) + Weekday (2/5) ───────────────────────────── */}
-      <div className="grid md:grid-cols-5 gap-3 md:gap-4">
-        <div className="md:col-span-3 min-w-0">
+      {/* ── Row 2: Scans/day + Weekday ───────────────────────────── */}
+      <div className="grid md:grid-cols-2 gap-6 w-full">
+        <div className="min-w-0">
           <ChartCard title="Scans par jour" subtitle={periodLabel}>
             {hasScans ? (
               <CanvasChart key={`sd-${ck}`} chartKey={ck} type="line" height={160}
@@ -1750,7 +1757,7 @@ function AnalyticsTab({ token, color }) {
             )}
           </ChartCard>
         </div>
-        <div className="md:col-span-2 min-w-0">
+        <div className="min-w-0">
           <ChartCard title="Visites par jour" subtitle={periodLabel}>
             {hasWeekdayData ? (
               <CanvasChart key={`dow-${ck}`} chartKey={ck} type="bar" height={160}
@@ -1768,7 +1775,7 @@ function AnalyticsTab({ token, color }) {
       </div>
 
       {/* ── Row 3: New clients + donut charts ────────────────────────────────── */}
-      <div className="grid md:grid-cols-2 gap-3 md:gap-4">
+      <div className="grid md:grid-cols-2 gap-6 w-full">
         <ChartCard title="Nouveaux clients" subtitle={periodLabel}>
           {hasWeeklyData ? (
             <CanvasChart key={`wc-${ck}`} chartKey={ck} type="bar" height={160}
@@ -1826,26 +1833,26 @@ function AnalyticsTab({ token, color }) {
       <TopClientsTable customers={data.top_customers} />
 
       {/* ── Row 5: Analysis summary cards ────────────────────────────────────── */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 w-full">
         <div className="bg-[#0e0e18] border border-white/5 rounded-2xl p-4">
           <p className="text-gray-500 text-[10px] uppercase tracking-wider mb-2">Actifs (période)</p>
-          <p className="text-emerald-400 text-2xl font-black leading-none">{activePct}%</p>
+          <p className="text-emerald-400 text-3xl font-bold leading-none">{activePct}%</p>
           <div className="mt-2 h-1.5 bg-gray-800 rounded-full overflow-hidden"><div className="h-full rounded-full bg-emerald-500" style={{ width: `${activePct}%` }} /></div>
           <p className="text-gray-600 text-[10px] mt-1.5">{data.active_customers} / {totalCustomers}</p>
         </div>
         <div className="bg-[#0e0e18] border border-white/5 rounded-2xl p-4">
           <p className="text-gray-500 text-[10px] uppercase tracking-wider mb-2">Fréq. moy.</p>
-          <p className="text-white text-2xl font-black leading-none">{data.avg_visit_frequency}</p>
+          <p className="text-white text-3xl font-bold leading-none">{data.avg_visit_frequency}</p>
           <p className="text-gray-600 text-[10px] mt-1.5">visites / client actif</p>
         </div>
         <div className="bg-[#0e0e18] border border-white/5 rounded-2xl p-4">
           <p className="text-gray-500 text-[10px] uppercase tracking-wider mb-2">Rétention</p>
-          <p className={`text-2xl font-black leading-none ${data.retention_rate >= 50 ? 'text-emerald-400' : 'text-amber-400'}`}>{data.retention_rate}%</p>
+          <p className={`text-3xl font-bold leading-none ${data.retention_rate >= 50 ? 'text-emerald-400' : 'text-amber-400'}`}>{data.retention_rate}%</p>
           <p className="text-gray-600 text-[10px] mt-1.5">revenus 2x+ (all time)</p>
         </div>
         <div className="bg-[#0e0e18] border border-white/5 rounded-2xl p-4">
           <p className="text-gray-500 text-[10px] uppercase tracking-wider mb-2">Inactifs</p>
-          <p className={`text-2xl font-black leading-none ${data.inactive_customers > 0 ? 'text-red-400' : 'text-emerald-400'}`}>{data.inactive_customers}</p>
+          <p className={`text-3xl font-bold leading-none ${data.inactive_customers > 0 ? 'text-red-400' : 'text-emerald-400'}`}>{data.inactive_customers}</p>
           <p className="text-gray-600 text-[10px] mt-1.5">hors période</p>
         </div>
       </div>
@@ -1882,7 +1889,7 @@ export default function DashboardPage({ auth, dashData, dashLoading, onLogout, o
   };
 
   return (
-    <div className="min-h-dvh bg-[#0f0f14] flex">
+    <div className="min-h-dvh bg-[#0f0f14] flex" style={{fontSize:'16px'}}>
 
       {/* ── Desktop sidebar ───────────────────────────────────────────────────── */}
       <aside className="hidden md:flex flex-col fixed inset-y-0 left-0 w-56 bg-[#0c0c14] border-r border-white/5 z-40">
@@ -1966,7 +1973,7 @@ export default function DashboardPage({ auth, dashData, dashLoading, onLogout, o
         </header>
 
         {/* Tab content */}
-        <main className="flex-1 overflow-y-auto pb-20 md:pb-6">
+        <main className="flex-1 overflow-y-auto pb-20 md:pb-6 w-full">
           <TrialBanner merchant={merchant} token={auth.token} />
           {tab === 'home' && merchant.subscription_status !== 'suspended' && (
             <OnboardingChecklist merchant={merchant} stats={stats} rewards={rewards} />

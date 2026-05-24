@@ -62,7 +62,10 @@
       "Bash(node -e \"require\\('./src/index.js'\\)\")",
       "Bash(node --check src/middleware/auth.js)",
       "Bash(node --check src/index.js)",
-      "Bash(node --check src/routes/merchants.js)"
+      "Bash(node --check src/routes/merchants.js)",
+      "PowerShell(Get-Content 'C:\\\\Users\\\\titou\\\\.claude\\\\projects\\\\C--Users-titou-loyaltypass\\\\dde60228-0c1c-4fab-b1ab-8b79a907d8b3.jsonl' -Tail 30 | ForEach-Object { try { $obj = $_ | ConvertFrom-Json; if \\($obj.role -in @\\('user','assistant'\\)\\) { $content = $obj.content; if \\($content -is [array]\\) { foreach \\($c in $content\\) { if \\($c.type -eq 'text'\\) { $text = $c.text; $len = [Math]::Min\\(400, $text.Length\\); Write-Host \"[$\\($obj.role\\)]: $\\($text.Substring\\(0, $len\\)\\)\" } } } elseif \\($content -is [string]\\) { $len = [Math]::Min\\(400, $content.Length\\); Write-Host \"[$\\($obj.role\\)]: $\\($content.Substring\\(0, $len\\)\\)\" } } } catch {} })",
+      "PowerShell($lines = Get-Content 'C:\\\\Users\\\\titou\\\\.claude\\\\projects\\\\C--Users-titou-loyaltypass\\\\dde60228-0c1c-4fab-b1ab-8b79a907d8b3.jsonl'; $lines[-5..-1] | ForEach-Object { Write-Host $_.Substring\\(0, [Math]::Min\\(200, $_.Length\\)\\) })",
+      "PowerShell($content = Get-Content 'C:\\\\Users\\\\titou\\\\.claude\\\\projects\\\\C--Users-titou-loyaltypass\\\\dde60228-0c1c-4fab-b1ab-8b79a907d8b3.jsonl' -Raw; $lastChunk = $content.Substring\\([Math]::Max\\(0, $content.Length - 40000\\)\\); $lines = $lastChunk -split '\\\\n'; foreach \\($line in $lines\\) { try { $obj = $line | ConvertFrom-Json; if \\($obj.message.role -eq 'user' -and $obj.message.content\\) { $content2 = $obj.message.content; if \\($content2 -is [array]\\) { foreach \\($c in $content2\\) { if \\($c.type -eq 'text'\\) { Write-Host \"USER: $\\($c.text.Substring\\(0, [Math]::Min\\(500, $c.text.Length\\)\\)\\)\" } } } elseif \\($content2 -is [string]\\) { Write-Host \"USER: $\\($content2.Substring\\(0, [Math]::Min\\(500, $content2.Length\\)\\)\\)\" } } } catch {} })"
     ]
   }
 }

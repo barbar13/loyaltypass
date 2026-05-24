@@ -159,14 +159,14 @@ router.post('/register', async (req, res) => {
       dashboardUrl: `${baseUrl}/scanner`,
     }).catch(() => {});
 
-    // Create Stripe checkout so the merchant enters their card right after signup
-    let checkoutUrl = null;
-    try {
-      const { createCheckoutSession } = require('./billing');
-      checkoutUrl = await createCheckoutSession(merchant.email, merchant.id);
-    } catch {}
+    // TEMP: Stripe checkout disabled for testing
+    // let checkoutUrl = null;
+    // try {
+    //   const { createCheckoutSession } = require('./billing');
+    //   checkoutUrl = await createCheckoutSession(merchant.email, merchant.id);
+    // } catch {}
 
-    res.status(201).json({ merchant, token, checkoutUrl });
+    res.status(201).json({ merchant, token });
   } catch (err) {
     console.error('[register]', err.message);
     res.status(500).json({ error: 'Erreur serveur' });

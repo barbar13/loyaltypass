@@ -305,7 +305,7 @@
       if (data.checkoutUrl) {
         window.location.href = data.checkoutUrl;
       } else {
-        renderSuccess(data.merchant, data.token);
+        window.location.href = '/scanner';
       }
 
     } catch (err) {

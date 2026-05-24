@@ -42,7 +42,7 @@ router.post('/subscribe', async (req, res) => {
     } catch (_) { /* duplicate */ }
     res.json({ success: true });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Erreur serveur' });
   }
 });
 
@@ -140,7 +140,7 @@ async function sendToMerchantAudience(merchantId, audience, title, body) {
     return { sent };
   } catch (err) {
     console.error('[Notifications] sendToMerchantAudience:', err.message);
-    return { sent: 0, error: err.message };
+    return { sent: 0, error: 'Erreur envoi notifications' };
   }
 }
 

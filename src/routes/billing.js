@@ -42,7 +42,7 @@ router.post('/create-checkout', auth, async (req, res) => {
 
     res.json({ url: session.url });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Erreur serveur' });
   }
 });
 
@@ -61,7 +61,7 @@ router.post('/portal', auth, async (req, res) => {
     });
     res.json({ url: session.url });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Erreur serveur' });
   }
 });
 
@@ -121,7 +121,7 @@ async function webhookHandler(req, res) {
     res.json({ received: true });
   } catch (err) {
     console.error('[stripe] Webhook handler error:', err.message);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Erreur serveur' });
   }
 }
 

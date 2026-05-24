@@ -74,7 +74,7 @@ async function generateWalletPass(req, res) {
     const token = jwt.sign(claims, credentials.private_key, { algorithm: 'RS256' });
     res.json({ url: `https://pay.google.com/gp/v/save/${token}` });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Erreur serveur' });
   }
 }
 

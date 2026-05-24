@@ -13,6 +13,12 @@ router.post('/enroll', async (req, res) => {
   if (!merchant_id || !first_name || !phone) {
     return res.status(400).json({ error: 'merchant_id, first_name et phone sont requis' });
   }
+  if (typeof first_name !== 'string' || first_name.trim().length > 100) {
+    return res.status(400).json({ error: 'first_name invalide' });
+  }
+  if (typeof phone !== 'string' || phone.trim().length > 20) {
+    return res.status(400).json({ error: 'phone invalide' });
+  }
 
   try {
     const merchant = await db.one(
@@ -74,7 +80,7 @@ router.post('/enroll', async (req, res) => {
       is_new: isNew,
     });
   } catch (err) {
-    res.status(500).json({ error: 'Erreur serveur', detail: err.message });
+    res.status(500).json({ error: 'Erreur serveur' });
   }
 });
 
@@ -90,7 +96,7 @@ router.get('/lookup', async (req, res) => {
     if (!customer) return res.status(404).json({ error: 'Aucune carte trouvée pour ce numéro' });
     res.json({ first_name: customer.first_name, qr_code: customer.qr_code });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Erreur serveur' });
   }
 });
 
@@ -119,14 +125,12 @@ router.post('/join', async (req, res) => {
     }
     res.json({ customer: { id: customer.id, first_name: customer.first_name, phone: customer.phone, qr_code: customer.qr_code } });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Erreur serveur' });
   }
 });
 
 // POST /api/customers/recover — send card link to email on file
 router.post('/recover', async (req, res) => {
-  console.log('[recover] hit - RESEND_API_KEY:', process.env.RESEND_API_KEY ? 'loaded' : 'MISSING');
-  console.log('[recover] email received:', req.body.email);
   const { email: queryEmail, phone } = req.body;
   if (!queryEmail && !phone)
     return res.status(400).json({ error: 'email ou phone requis' });
@@ -142,19 +146,15 @@ router.post('/recover', async (req, res) => {
       customer = await db.one('SELECT * FROM customers WHERE phone = $1', [phone.trim()]);
     }
 
-    console.log('[recover] customer found:', customer ? 'yes' : 'no');
-
     if (customer?.email) {
-      console.log('[recover] attempting to send email to:', customer.email);
       const baseUrl = process.env.BASE_URL || 'https://fidelyzio.com';
       const cardUrl = `${baseUrl}/card/${customer.qr_code}`;
-      email.sendCardRecovery({ to: customer.email, firstName: customer.first_name, cardUrl }).catch((err) => console.error('[recover] email failed:', err));
-      console.log('[recover] email send attempted');
+      email.sendCardRecovery({ to: customer.email, firstName: customer.first_name, cardUrl }).catch((err) => console.error('[recover] email failed:', err.message));
     }
 
     res.json({ success: true });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Erreur serveur' });
   }
 });
 
@@ -207,7 +207,7 @@ router.get('/:qr_code', async (req, res) => {
 
     res.json({ customer, memberships: membershipsFull, redemptions });
   } catch (err) {
-    res.status(500).json({ error: 'Erreur serveur', detail: err.message });
+    res.status(500).json({ error: 'Erreur serveur' });
   }
 });
 

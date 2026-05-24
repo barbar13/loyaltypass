@@ -9,6 +9,12 @@ scanner/node_modules/
 loyaltypass.db
 loyaltypass.db-shm
 loyaltypass.db-wal
+fidelyzio.db
+fidelyzio.db-shm
+fidelyzio.db-wal
+*.db
+*.db-shm
+*.db-wal
 
 # Scanner build output — Railway rebuilds this on every deploy
 scanner/dist/

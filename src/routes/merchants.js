@@ -10,8 +10,11 @@ const { sendToMerchantAudience } = require('./notifications');
 
 const router      = express.Router();
 const SALT_ROUNDS = 12;
-const JWT_SECRET  = () => process.env.JWT_SECRET  || 'fidelyzio_dev_secret_change_in_prod';
+const JWT_SECRET  = () => process.env.JWT_SECRET;
 const JWT_EXPIRES = () => process.env.JWT_EXPIRES_IN || '90d';
+
+const HEX_COLOR_RE = /^#[0-9a-fA-F]{6}$/;
+const SAFE_URL_RE  = /^https?:\/\/.{1,200}$/;
 
 // ─── Public: nearby merchants ─────────────────────────────────────────────────
 
@@ -64,7 +67,7 @@ router.get('/nearby', async (req, res) => {
 
     res.json({ merchants: nearby });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Erreur serveur' });
   }
 });
 
@@ -79,7 +82,7 @@ router.get('/:id/enroll', async (req, res) => {
     if (!merchant) return res.status(404).json({ error: 'Marchand introuvable' });
     res.json({ merchant });
   } catch (err) {
-    res.status(500).json({ error: 'Erreur serveur', detail: err.message });
+    res.status(500).json({ error: 'Erreur serveur' });
   }
 });
 
@@ -100,7 +103,7 @@ router.get('/:id/enroll-qr', async (req, res) => {
     res.setHeader('Cache-Control', 'public, max-age=3600');
     res.send(buf);
   } catch (err) {
-    res.status(500).json({ error: 'Erreur génération QR', detail: err.message });
+    res.status(500).json({ error: 'Erreur génération QR' });
   }
 });
 
@@ -112,6 +115,15 @@ router.post('/register', async (req, res) => {
 
   if (!name || !merchantEmail || !password) {
     return res.status(400).json({ error: 'name, email et password sont requis' });
+  }
+  if (password.length < 8) {
+    return res.status(400).json({ error: 'Le mot de passe doit contenir au moins 8 caractères' });
+  }
+  if (logo_url && !SAFE_URL_RE.test(logo_url)) {
+    return res.status(400).json({ error: 'logo_url invalide' });
+  }
+  if (color && !HEX_COLOR_RE.test(color)) {
+    return res.status(400).json({ error: 'color doit être une couleur hexadécimale (#rrggbb)' });
   }
 
   try {
@@ -149,7 +161,8 @@ router.post('/register', async (req, res) => {
 
     res.status(201).json({ merchant, token });
   } catch (err) {
-    res.status(500).json({ error: 'Erreur serveur', detail: err.message });
+    console.error('[register]', err.message);
+    res.status(500).json({ error: 'Erreur serveur' });
   }
 });
 
@@ -180,7 +193,8 @@ router.post('/login', async (req, res) => {
 
     res.json({ merchant: merchantSafe, token });
   } catch (err) {
-    res.status(500).json({ error: 'Erreur serveur', detail: err.message });
+    console.error('[login]', err.message);
+    res.status(500).json({ error: 'Erreur serveur' });
   }
 });
 
@@ -269,7 +283,7 @@ router.get('/dashboard', auth, async (req, res) => {
       rewards,
     });
   } catch (err) {
-    res.status(500).json({ error: 'Erreur serveur', detail: err.message });
+    res.status(500).json({ error: 'Erreur serveur' });
   }
 });
 
@@ -295,7 +309,7 @@ router.post('/rewards', auth, async (req, res) => {
     const reward = await db.one('SELECT * FROM rewards WHERE id = $1', [id]);
     res.status(201).json({ reward });
   } catch (err) {
-    res.status(500).json({ error: 'Erreur serveur', detail: err.message });
+    res.status(500).json({ error: 'Erreur serveur' });
   }
 });
 
@@ -309,7 +323,7 @@ router.delete('/rewards/:id', auth, async (req, res) => {
     await db.run('UPDATE rewards SET active = 0 WHERE id = $1', [rewardId]);
     res.json({ success: true });
   } catch (err) {
-    res.status(500).json({ error: 'Erreur serveur', detail: err.message });
+    res.status(500).json({ error: 'Erreur serveur' });
   }
 });
 
@@ -337,14 +351,14 @@ router.post('/forgot-password', async (req, res) => {
 
     res.json(MSG);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Erreur serveur' });
   }
 });
 
 router.post('/reset-password', async (req, res) => {
   const { token, password } = req.body;
   if (!token || !password) return res.status(400).json({ error: 'token et password sont requis' });
-  if (password.length < 6) return res.status(400).json({ error: 'Minimum 6 caractères' });
+  if (password.length < 8) return res.status(400).json({ error: 'Minimum 8 caractères' });
   try {
     const merchant = await db.one(
       'SELECT * FROM merchants WHERE reset_token = $1 AND reset_token_exp > $2',
@@ -359,7 +373,7 @@ router.post('/reset-password', async (req, res) => {
     );
     res.json({ message: 'Mot de passe mis à jour.' });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Erreur serveur' });
   }
 });
 
@@ -378,7 +392,7 @@ router.post('/profile', auth, async (req, res) => {
       sets.push(`loyalty_mechanic = $${params.length}`);
     }
     if (password) {
-      if (password.length < 6) return res.status(400).json({ error: 'Minimum 6 caractères' });
+      if (password.length < 8) return res.status(400).json({ error: 'Minimum 8 caractères' });
       params.push(await bcrypt.hash(password, SALT_ROUNDS));
       sets.push(`password = $${params.length}`);
     }
@@ -390,7 +404,7 @@ router.post('/profile', auth, async (req, res) => {
     );
     res.json({ merchant: updated });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Erreur serveur' });
   }
 });
 
@@ -418,7 +432,7 @@ router.get('/scans', auth, async (req, res) => {
 
     res.json({ scans });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Erreur serveur' });
   }
 });
 
@@ -635,7 +649,7 @@ router.get('/analytics', auth, async (req, res) => {
     });
   } catch (err) {
     console.error('[Analytics] Error:', err.message);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Erreur serveur' });
   }
 });
 
@@ -672,7 +686,7 @@ router.get('/notifications', auth, async (req, res) => {
     );
     res.json({ notifications });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Erreur serveur' });
   }
 });
 

@@ -82,7 +82,7 @@ router.get('/:id/pass', async (req, res) => {
     res.setHeader('Content-Disposition', `attachment; filename="${merchant.name}-fidelite.pkpass"`);
     res.send(passBuffer);
   } catch (err) {
-    res.status(500).json({ error: 'Erreur génération du pass', detail: err.message });
+    res.status(500).json({ error: 'Erreur génération du pass' });
   }
 });
 
@@ -144,7 +144,7 @@ router.post('/scan', auth, (req, res) => {
     db.exec('COMMIT');
   } catch (err) {
     db.exec('ROLLBACK');
-    return res.status(500).json({ error: 'Erreur lors du scan', detail: err.message });
+    return res.status(500).json({ error: 'Erreur lors du scan' });
   }
 
   const updatedCard = db.prepare('SELECT * FROM cards WHERE id = ?').get(card.id);

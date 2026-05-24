@@ -43,7 +43,7 @@ router.get('/lookup/:customer_qr_code', auth, async (req, res) => {
       rewards,
     });
   } catch (err) {
-    res.status(500).json({ error: 'Erreur serveur', detail: err.message });
+    res.status(500).json({ error: 'Erreur serveur' });
   }
 });
 
@@ -189,7 +189,7 @@ router.post('/', auth, async (req, res) => {
       rewards,
     });
   } catch (err) {
-    res.status(500).json({ error: 'Erreur lors du scan', detail: err.message });
+    res.status(500).json({ error: 'Erreur lors du scan' });
   }
 });
 
@@ -245,7 +245,7 @@ router.post('/redeem', auth, async (req, res) => {
       points_deducted: reward.points_required,
     });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Erreur serveur' });
   }
 });
 

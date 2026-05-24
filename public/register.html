@@ -6,7 +6,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#0a0a0f">
   <title>Créer mon programme de fidélité — Fidelyzio</title>
-  <meta name="description" content="Inscrivez-vous gratuitement et créez votre programme de fidélité digital en 2 minutes. 14 jours d'essai sans carte bancaire.">
+  <meta name="description" content="Créez votre programme de fidélité digital en 2 minutes. 14 jours d'essai — aucun prélèvement pendant 14 jours.">
   <link rel="canonical" href="https://fidelyzio.com/register">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="apple-touch-icon" href="/favicon.svg">
@@ -93,7 +93,7 @@
       </svg>
     </div>
     <h1 class="text-white text-2xl font-bold">Créer votre programme</h1>
-    <p class="text-gray-500 text-sm mt-1">14 jours gratuits · Sans carte bancaire</p>
+    <p class="text-gray-500 text-sm mt-1">14 jours d'essai · Aucun prélèvement avant J+14</p>
   </div>
 
   <!-- Form card -->
@@ -118,7 +118,7 @@
       <div class="mb-5 animate-fade-up delay-3">
         <label class="block text-sm font-medium text-gray-400 mb-2">Mot de passe</label>
         <div class="relative">
-          <input id="inp-password" type="password" autocomplete="new-password" placeholder="Minimum 6 caractères"
+          <input id="inp-password" type="password" autocomplete="new-password" placeholder="Minimum 8 caractères"
                  class="field-input" style="padding-right:48px">
           <button type="button" onclick="togglePwd()" tabindex="-1"
                   class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition p-1">
@@ -274,7 +274,7 @@
 
     if (!name)               return showError('Veuillez saisir le nom de votre établissement.');
     if (!email)              return showError('Veuillez saisir votre adresse e-mail.');
-    if (password.length < 6) return showError('Le mot de passe doit contenir au moins 6 caractères.');
+    if (password.length < 8) return showError('Le mot de passe doit contenir au moins 8 caractères.');
     if (!document.getElementById('inp-rgpd').checked) return showError('Vous devez accepter les CGU pour continuer.');
 
     const btn = document.getElementById('submit-btn');
@@ -294,9 +294,19 @@
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Erreur lors de la création du compte');
 
-      registeredMerchant = data.merchant;
-      registeredToken    = data.token;
-      renderSuccess(data.merchant, data.token);
+      // Store auth so the scanner auto-logs in after the Stripe redirect
+      try {
+        localStorage.setItem('fidelyzio_auth', JSON.stringify({
+          merchant: data.merchant, token: data.token,
+          expires: Date.now() + 90 * 24 * 60 * 60 * 1000,
+        }));
+      } catch {}
+
+      if (data.checkoutUrl) {
+        window.location.href = data.checkoutUrl;
+      } else {
+        renderSuccess(data.merchant, data.token);
+      }
 
     } catch (err) {
       showError(err.message);

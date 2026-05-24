@@ -66,7 +66,7 @@ exports.sendTrialReminder = ({ to, merchantName, daysLeft, subscribeUrl }) =>
     <h2 style="margin:0 0 12px;color:#111827;font-size:22px;font-weight:800">${daysLeft <= 1 ? 'Derniers instants !' : `Plus que ${daysLeft} jours`}</h2>
     <p style="color:#6b7280;line-height:1.6;margin:0 0 20px">Bonjour ${merchantName}, votre période d'essai gratuite de 14 jours se termine ${daysLeft <= 1 ? 'demain' : `dans ${daysLeft} jours`}. Passez à Fidelyzio Pro pour continuer à fidéliser vos clients.</p>
     <div style="background:#fef3c7;border:1px solid #fcd34d;border-radius:10px;padding:16px;margin:0 0 24px">
-      <p style="color:#92400e;font-weight:600;margin:0;font-size:15px">Fidelyzio Pro — 19 €/mois</p>
+      <p style="color:#92400e;font-weight:600;margin:0;font-size:15px">Fidelyzio Pro — 29 €/mois</p>
       <p style="color:#92400e;margin:4px 0 0;font-size:13px">Scans illimités · Export CSV · Récompenses · Support</p>
     </div>
     ${btn(subscribeUrl, "S'abonner maintenant")}

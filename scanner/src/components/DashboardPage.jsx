@@ -136,7 +136,7 @@ function TrialBanner({ merchant, token }) {
         <p className="text-red-300/70 text-xs mb-3">Votre abonnement est inactif. Les scans sont bloqués.</p>
         <button onClick={handleSubscribe} disabled={loading}
           className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white font-semibold text-sm disabled:opacity-60 transition-all">
-          {loading ? 'Redirection…' : 'S\'abonner — 19 €/mois →'}
+          {loading ? 'Redirection…' : 'S\'abonner — 29 €/mois →'}
         </button>
       </div>
     );

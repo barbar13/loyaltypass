@@ -10,37 +10,34 @@ function getStripe() {
   return require('stripe')(process.env.STRIPE_SECRET_KEY);
 }
 
-const PLAN_PRICE_EUR = 1900; // 19.00 €
+const PRICE_ID = 'price_1TaZhXGgy4SouTrybrox7Oxg';
+
+// Creates a Stripe checkout session. Returns the URL or null if Stripe is not configured.
+async function createCheckoutSession(merchantEmail, merchantId) {
+  const stripe = getStripe();
+  if (!stripe) return null;
+  const session = await stripe.checkout.sessions.create({
+    payment_method_types: ['card'],
+    payment_method_collection: 'always',
+    mode: 'subscription',
+    customer_email: merchantEmail,
+    line_items: [{ price: PRICE_ID, quantity: 1 }],
+    subscription_data: { trial_period_days: 14 },
+    success_url: 'https://fidelyzio.com/scanner?subscribed=true',
+    cancel_url:  'https://fidelyzio.com/register',
+    metadata: { merchant_id: String(merchantId) },
+  });
+  return session.url;
+}
 
 // ── Checkout ──────────────────────────────────────────────────────────────────
 
 router.post('/create-checkout', auth, async (req, res) => {
-  const stripe = getStripe();
-  if (!stripe) return res.status(503).json({ error: 'Stripe non configuré (STRIPE_SECRET_KEY manquant)' });
-
   try {
-    const merchant = await db.one('SELECT * FROM merchants WHERE id = $1', [req.merchant.id]);
-    const baseUrl  = process.env.BASE_URL || `${req.protocol}://${req.get('host')}`;
-
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      mode: 'subscription',
-      customer_email: merchant.email,
-      line_items: [{
-        price_data: {
-          currency: 'eur',
-          product_data: { name: 'Fidelyzio Pro — Abonnement mensuel' },
-          unit_amount: PLAN_PRICE_EUR,
-          recurring: { interval: 'month' },
-        },
-        quantity: 1,
-      }],
-      success_url: `${baseUrl}/?subscription=success`,
-      cancel_url:  `${baseUrl}/subscribe?canceled=true`,
-      metadata: { merchant_id: String(merchant.id) },
-    });
-
-    res.json({ url: session.url });
+    const merchant = await db.one('SELECT id, email FROM merchants WHERE id = $1', [req.merchant.id]);
+    const url = await createCheckoutSession(merchant.email, merchant.id);
+    if (!url) return res.status(503).json({ error: 'Stripe non configuré (STRIPE_SECRET_KEY manquant)' });
+    res.json({ url });
   } catch (err) {
     res.status(500).json({ error: 'Erreur serveur' });
   }
@@ -125,4 +122,4 @@ async function webhookHandler(req, res) {
   }
 }
 
-module.exports = { router, webhookHandler };
+module.exports = { router, webhookHandler, createCheckoutSession };

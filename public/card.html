@@ -73,13 +73,13 @@
           </svg>
         </div>
       </div>
-      <h2 style="color:#f9fafb;font-size:20px;font-weight:800;text-align:center;margin-bottom:10px;letter-spacing:-.01em">Ajoutez votre carte à l'écran d'accueil</h2>
-      <p style="color:#9ca3af;font-size:14px;text-align:center;line-height:1.65;margin-bottom:6px">Accédez à vos points en 1 tap, sans ouvrir le navigateur. Comme une vraie app de fidélité.</p>
-      <p style="color:#6366f1;font-size:12px;font-weight:700;text-align:center;margin-bottom:24px;letter-spacing:.02em">VIVEMENT RECOMMANDÉ</p>
-      <button onclick="showHsTutorial()" style="display:block;width:100%;padding:15px;border-radius:14px;background:#6366f1;color:white;font-size:15px;font-weight:700;border:none;cursor:pointer;margin-bottom:10px;transition:filter .15s" onmouseover="this.style.filter='brightness(1.1)'" onmouseout="this.style.filter=''">
+      <h2 data-i18n="hs_title" style="color:#f9fafb;font-size:20px;font-weight:800;text-align:center;margin-bottom:10px;letter-spacing:-.01em">Ajoutez votre carte à l'écran d'accueil</h2>
+      <p data-i18n="hs_desc" style="color:#9ca3af;font-size:14px;text-align:center;line-height:1.65;margin-bottom:6px">Accédez à vos points en 1 tap, sans ouvrir le navigateur. Comme une vraie app de fidélité.</p>
+      <p data-i18n="hs_rec" style="color:#6366f1;font-size:12px;font-weight:700;text-align:center;margin-bottom:24px;letter-spacing:.02em">VIVEMENT RECOMMANDÉ</p>
+      <button data-i18n="hs_add_btn" onclick="showHsTutorial()" style="display:block;width:100%;padding:15px;border-radius:14px;background:#6366f1;color:white;font-size:15px;font-weight:700;border:none;cursor:pointer;margin-bottom:10px;transition:filter .15s" onmouseover="this.style.filter='brightness(1.1)'" onmouseout="this.style.filter=''">
         Ajouter à mon écran d'accueil
       </button>
-      <button onclick="dismissHs()" style="display:block;width:100%;padding:14px;border-radius:14px;background:transparent;color:#6b7280;font-size:14px;font-weight:500;border:1px solid #374151;cursor:pointer">
+      <button data-i18n="hs_skip" onclick="dismissHs()" style="display:block;width:100%;padding:14px;border-radius:14px;background:transparent;color:#6b7280;font-size:14px;font-weight:500;border:1px solid #374151;cursor:pointer">
         Continuer sans
       </button>
     </div>
@@ -101,28 +101,28 @@
         <div style="display:flex;align-items:flex-start;gap:12px">
           <div style="width:28px;height:28px;border-radius:50%;background:#6366f1;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:700;flex-shrink:0;margin-top:2px">1</div>
           <div>
-            <p style="color:#f9fafb;font-size:14px;font-weight:600;margin-bottom:4px">Appuyez sur le bouton Partager</p>
-            <p style="color:#6b7280;font-size:12px;line-height:1.5;margin-bottom:8px">Le carré avec une flèche vers le haut, en bas de Safari</p>
+            <p data-i18n="hs_ios_1_title" style="color:#f9fafb;font-size:14px;font-weight:600;margin-bottom:4px">Appuyez sur le bouton Partager</p>
+            <p data-i18n="hs_ios_1_sub" style="color:#6b7280;font-size:12px;line-height:1.5;margin-bottom:8px">Le carré avec une flèche vers le haut, en bas de Safari</p>
             <div style="display:inline-flex;align-items:center;gap:8px;background:#1f2937;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:8px 12px">
               <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#818cf8" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
-              <span style="color:#9ca3af;font-size:12px">Partager</span>
+              <span data-i18n="hs_ios_share_lbl" style="color:#9ca3af;font-size:12px">Partager</span>
             </div>
           </div>
         </div>
         <div style="display:flex;align-items:flex-start;gap:12px">
           <div style="width:28px;height:28px;border-radius:50%;background:#6366f1;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:700;flex-shrink:0;margin-top:2px">2</div>
           <div>
-            <p style="color:#f9fafb;font-size:14px;font-weight:600;margin-bottom:6px">Faites défiler et appuyez sur</p>
+            <p data-i18n="hs_ios_2_title" style="color:#f9fafb;font-size:14px;font-weight:600;margin-bottom:6px">Faites défiler et appuyez sur</p>
             <div style="display:inline-flex;align-items:center;gap:8px;background:#1f2937;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:8px 12px">
               <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#d1d5db" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-              <span style="color:white;font-size:12px;font-weight:600">Sur l'écran d'accueil</span>
+              <span data-i18n="hs_ios_2_btn" style="color:white;font-size:12px;font-weight:600">Sur l'écran d'accueil</span>
             </div>
           </div>
         </div>
         <div style="display:flex;align-items:flex-start;gap:12px">
           <div style="width:28px;height:28px;border-radius:50%;background:#6366f1;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:700;flex-shrink:0;margin-top:2px">3</div>
           <div>
-            <p style="color:#f9fafb;font-size:14px;font-weight:600">Appuyez sur <span style="color:#818cf8">"Ajouter"</span> en haut à droite</p>
+            <p data-i18n="hs_ios_3_title" style="color:#f9fafb;font-size:14px;font-weight:600">Appuyez sur <span style="color:#818cf8">"Ajouter"</span> en haut à droite</p>
           </div>
         </div>
         <div style="display:flex;align-items:flex-start;gap:12px">
@@ -130,8 +130,8 @@
             <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
           </div>
           <div>
-            <p style="color:#f9fafb;font-size:14px;font-weight:600">C'est fait !</p>
-            <p style="color:#6b7280;font-size:12px;margin-top:2px">L'icône Fidelyzio apparaît sur votre écran d'accueil</p>
+            <p data-i18n="hs_done_title" style="color:#f9fafb;font-size:14px;font-weight:600">C'est fait !</p>
+            <p data-i18n="hs_ios_done_sub" style="color:#6b7280;font-size:12px;margin-top:2px">L'icône Fidelyzio apparaît sur votre écran d'accueil</p>
           </div>
         </div>
       </div>
@@ -141,27 +141,27 @@
         <div style="display:flex;align-items:flex-start;gap:12px">
           <div style="width:28px;height:28px;border-radius:50%;background:#6366f1;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:700;flex-shrink:0;margin-top:2px">1</div>
           <div>
-            <p style="color:#f9fafb;font-size:14px;font-weight:600;margin-bottom:6px">Appuyez sur le menu Chrome</p>
+            <p data-i18n="hs_and_1_title" style="color:#f9fafb;font-size:14px;font-weight:600;margin-bottom:6px">Appuyez sur le menu Chrome</p>
             <div style="display:inline-flex;align-items:center;gap:8px;background:#1f2937;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:8px 12px">
               <svg width="16" height="16" fill="#9ca3af" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
-              <span style="color:#9ca3af;font-size:12px">3 points en haut à droite</span>
+              <span data-i18n="hs_and_1_lbl" style="color:#9ca3af;font-size:12px">3 points en haut à droite</span>
             </div>
           </div>
         </div>
         <div style="display:flex;align-items:flex-start;gap:12px">
           <div style="width:28px;height:28px;border-radius:50%;background:#6366f1;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:700;flex-shrink:0;margin-top:2px">2</div>
           <div>
-            <p style="color:#f9fafb;font-size:14px;font-weight:600;margin-bottom:6px">Appuyez sur</p>
+            <p data-i18n="hs_and_2_title" style="color:#f9fafb;font-size:14px;font-weight:600;margin-bottom:6px">Appuyez sur</p>
             <div style="display:inline-flex;align-items:center;gap:8px;background:#1f2937;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:8px 12px">
               <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#d1d5db" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-              <span style="color:white;font-size:12px;font-weight:600">Ajouter à l'écran d'accueil</span>
+              <span data-i18n="hs_and_2_btn" style="color:white;font-size:12px;font-weight:600">Ajouter à l'écran d'accueil</span>
             </div>
           </div>
         </div>
         <div style="display:flex;align-items:flex-start;gap:12px">
           <div style="width:28px;height:28px;border-radius:50%;background:#6366f1;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:700;flex-shrink:0;margin-top:2px">3</div>
           <div>
-            <p style="color:#f9fafb;font-size:14px;font-weight:600">Appuyez sur <span style="color:#818cf8">"Ajouter"</span> pour confirmer</p>
+            <p data-i18n="hs_and_3_title" style="color:#f9fafb;font-size:14px;font-weight:600">Appuyez sur <span style="color:#818cf8">"Ajouter"</span> pour confirmer</p>
           </div>
         </div>
         <div style="display:flex;align-items:flex-start;gap:12px">
@@ -169,13 +169,13 @@
             <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
           </div>
           <div>
-            <p style="color:#f9fafb;font-size:14px;font-weight:600">C'est fait !</p>
-            <p style="color:#6b7280;font-size:12px;margin-top:2px">L'icône Fidelyzio apparaît sur votre écran d'accueil</p>
+            <p data-i18n="hs_done_title" style="color:#f9fafb;font-size:14px;font-weight:600">C'est fait !</p>
+            <p data-i18n="hs_and_done_sub" style="color:#6b7280;font-size:12px;margin-top:2px">L'icône Fidelyzio apparaît sur votre écran d'accueil</p>
           </div>
         </div>
       </div>
 
-      <button onclick="dismissHs()" style="display:block;width:100%;padding:14px;border-radius:14px;background:#6366f1;color:white;font-size:14px;font-weight:700;border:none;cursor:pointer;margin-top:20px">
+      <button data-i18n="hs_done" onclick="dismissHs()" style="display:block;width:100%;padding:14px;border-radius:14px;background:#6366f1;color:white;font-size:14px;font-weight:700;border:none;cursor:pointer;margin-top:20px">
         J'ai ajouté ma carte →
       </button>
     </div>
@@ -196,7 +196,7 @@
 <div id="s-loading" style="min-height:100dvh" class="flex items-center justify-center">
   <div class="flex flex-col items-center gap-4">
     <div class="w-12 h-12 rounded-full border-2 border-white/10 border-t-white/60 animate-spin"></div>
-    <p class="text-gray-500 text-sm">Chargement…</p>
+    <p class="text-gray-500 text-sm" data-i18n="loading">Chargement…</p>
   </div>
 </div>
 
@@ -214,21 +214,30 @@
         </svg>
       </div>
       <h1 id="customer-name" class="text-2xl font-bold text-white"></h1>
-      <p class="text-gray-500 text-sm mt-1">Carte de fidélité universelle</p>
+      <p class="text-gray-500 text-sm mt-1" data-i18n="subtitle">Carte de fidélité universelle</p>
+    </div>
+
+    <!-- Notification opt-in -->
+    <div id="notif-btn-wrap" class="mb-4 text-center animate-fade-up delay-1" style="display:none">
+      <button id="notif-btn" onclick="requestNotifications()"
+              style="display:inline-flex;align-items:center;gap:8px;background:#d97706;color:white;border:none;border-radius:12px;padding:10px 20px;font-size:14px;font-weight:600;cursor:pointer;transition:background .15s"
+              onmouseover="if(!this.disabled)this.style.background='#b45309'" onmouseout="if(!this.disabled)this.style.background='#d97706'">
+        🔔 Activer les notifications
+      </button>
     </div>
 
     <!-- Universal QR -->
     <div class="bg-gray-900 border border-white/5 rounded-3xl p-6 text-center mb-5 animate-scale-in">
-      <p class="text-gray-500 text-xs font-semibold uppercase tracking-widest mb-1">Votre QR universel</p>
-      <p class="text-gray-600 text-xs mb-5">Présentez ce code dans tous les commerces partenaires</p>
+      <p class="text-gray-500 text-xs font-semibold uppercase tracking-widest mb-1" data-i18n="qr_title">Votre QR universel</p>
+      <p class="text-gray-600 text-xs mb-5" data-i18n="qr_sub">Présentez ce code dans tous les commerces partenaires</p>
       <div id="qr-universal" class="flex justify-center mb-3"></div>
-      <p class="text-gray-700 text-[10px]">Ce QR est votre identité Fidelyzio</p>
+      <p class="text-gray-700 text-[10px]" data-i18n="qr_footer">Ce QR est votre identité Fidelyzio</p>
     </div>
 
     <!-- Memberships section (accordion) -->
     <div class="mb-5 animate-fade-up delay-2">
       <div class="flex items-center justify-between mb-3">
-        <p class="text-gray-500 text-xs font-semibold uppercase tracking-widest">Mes commerces</p>
+        <p class="text-gray-500 text-xs font-semibold uppercase tracking-widest" data-i18n="stores_label">Mes commerces</p>
         <p id="last-updated" class="text-gray-700 text-[10px]"></p>
       </div>
       <div id="memberships-list" class="space-y-2"></div>
@@ -236,14 +245,14 @@
 
     <!-- Empty state -->
     <div id="no-memberships" style="display:none" class="text-center py-8 animate-fade-up delay-2">
-      <p class="text-gray-600 text-sm">Vous n'êtes encore inscrit(e) chez aucun commerce.</p>
-      <p class="text-gray-700 text-xs mt-2">Scannez le QR d'un commerçant partenaire pour commencer !</p>
+      <p class="text-gray-600 text-sm" data-i18n="no_stores">Vous n'êtes encore inscrit(e) chez aucun commerce.</p>
+      <p class="text-gray-700 text-xs mt-2" data-i18n="no_stores_sub">Scannez le QR d'un commerçant partenaire pour commencer !</p>
     </div>
 
     <!-- Redemption history -->
     <div id="redemptions-section" style="display:none" class="mb-5 animate-fade-up delay-3">
       <div class="flex items-center justify-between mb-3">
-        <p class="text-gray-500 text-xs font-semibold uppercase tracking-widest">Mes récompenses</p>
+        <p class="text-gray-500 text-xs font-semibold uppercase tracking-widest" data-i18n="rewards_label">Mes récompenses</p>
         <span id="redemptions-count" class="bg-emerald-500/15 text-emerald-400 text-[10px] font-semibold px-2.5 py-1 rounded-full"></span>
       </div>
       <div id="redemptions-list" class="space-y-2"></div>
@@ -260,8 +269,8 @@
         <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"/>
       </svg>
     </div>
-    <p id="error-msg" class="text-red-400 font-medium mb-6">Carte introuvable</p>
-    <a href="/home" class="px-6 py-3 bg-gray-800 hover:bg-gray-700 rounded-2xl text-white text-sm font-medium transition inline-block">
+    <p id="error-msg" class="text-red-400 font-medium mb-6" data-i18n="error_default">Carte introuvable</p>
+    <a href="/home" class="px-6 py-3 bg-gray-800 hover:bg-gray-700 rounded-2xl text-white text-sm font-medium transition inline-block" data-i18n="back_home">
       Retour à l'accueil
     </a>
   </div>
@@ -270,6 +279,97 @@
 <script>
   const $ = id => document.getElementById(id);
   const qrCode = window.location.pathname.split('/').filter(Boolean).pop();
+
+  // ── Translations ──────────────────────────────────────────────────────────
+  const T = {
+    fr: {
+      subtitle:'Carte de fidélité universelle', qr_title:'Votre QR universel',
+      qr_sub:'Présentez ce code dans tous les commerces partenaires',
+      qr_footer:'Ce QR est votre identité Fidelyzio',
+      stores_label:'Mes commerces', no_stores:'Vous n\'êtes encore inscrit(e) chez aucun commerce.',
+      no_stores_sub:'Scannez le QR d\'un commerçant partenaire pour commencer !',
+      rewards_label:'Mes récompenses', loading:'Chargement…',
+      error_default:'Carte introuvable', back_home:'Retour à l\'accueil',
+      ptr_pull:'Tirez pour actualiser', ptr_release:'Relâchez pour actualiser', ptr_loading:'Actualisation…',
+      just_updated:'Mis à jour à l\'instant',
+      notif_enable:'🔔 Activer les notifications', notif_done:'🔔 Notifications activées',
+      no_activity:'Aucune activité', reward_avail:'récompense dispo',
+      no_rewards_cfg:'Aucune récompense configurée', stamps_label:'Tampons', points_label:'Points',
+      stamp_abbr:'tamp.',
+      rewards_earned:(n) => `${n} ${n > 1 ? 'récompenses obtenues' : 'récompense obtenue'}`,
+      stamp_count:(n) => `${n} tampon${n !== 1 ? 's' : ''}`,
+      just_now:'À l\'instant', min_ago:(m) => `Il y a ${m} min`,
+      h_ago:(h) => `Il y a ${h}h`, d_ago:(d) => `Il y a ${d}j`,
+      hs_title:'Ajoutez votre carte à l\'écran d\'accueil',
+      hs_desc:'Accédez à vos points en 1 tap, sans ouvrir le navigateur. Comme une vraie app de fidélité.',
+      hs_rec:'VIVEMENT RECOMMANDÉ', hs_add_btn:'Ajouter à mon écran d\'accueil', hs_skip:'Continuer sans',
+      hs_done:'J\'ai ajouté ma carte →',
+      hs_ios_1_title:'Appuyez sur le bouton Partager',
+      hs_ios_1_sub:'Le carré avec une flèche vers le haut, en bas de Safari',
+      hs_ios_share_lbl:'Partager', hs_ios_2_title:'Faites défiler et appuyez sur',
+      hs_ios_2_btn:'Sur l\'écran d\'accueil',
+      hs_ios_3_title:'Appuyez sur <span style="color:#818cf8">"Ajouter"</span> en haut à droite',
+      hs_done_title:'C\'est fait !',
+      hs_ios_done_sub:'L\'icône Fidelyzio apparaît sur votre écran d\'accueil',
+      hs_and_1_title:'Appuyez sur le menu Chrome', hs_and_1_lbl:'3 points en haut à droite',
+      hs_and_2_title:'Appuyez sur', hs_and_2_btn:'Ajouter à l\'écran d\'accueil',
+      hs_and_3_title:'Appuyez sur <span style="color:#818cf8">"Ajouter"</span> pour confirmer',
+      hs_and_done_sub:'L\'icône Fidelyzio apparaît sur votre écran d\'accueil',
+    },
+    en: {
+      subtitle:'Universal loyalty card', qr_title:'Your universal QR',
+      qr_sub:'Show this code at all partner stores',
+      qr_footer:'This QR is your Fidelyzio identity',
+      stores_label:'My stores', no_stores:'You haven\'t joined any store yet.',
+      no_stores_sub:'Scan a partner store\'s QR to get started!',
+      rewards_label:'My rewards', loading:'Loading…',
+      error_default:'Card not found', back_home:'Back to home',
+      ptr_pull:'Pull to refresh', ptr_release:'Release to refresh', ptr_loading:'Updating…',
+      just_updated:'Just updated',
+      notif_enable:'🔔 Enable notifications', notif_done:'🔔 Notifications enabled',
+      no_activity:'No activity', reward_avail:'reward available',
+      no_rewards_cfg:'No rewards configured', stamps_label:'Stamps', points_label:'Points',
+      stamp_abbr:'stamp.',
+      rewards_earned:(n) => `${n} reward${n > 1 ? 's' : ''} earned`,
+      stamp_count:(n) => `${n} stamp${n !== 1 ? 's' : ''}`,
+      just_now:'Just now', min_ago:(m) => `${m} min ago`,
+      h_ago:(h) => `${h}h ago`, d_ago:(d) => `${d}d ago`,
+      hs_title:'Add your card to your home screen',
+      hs_desc:'Access your points in 1 tap, without opening the browser. Just like a real loyalty app.',
+      hs_rec:'HIGHLY RECOMMENDED', hs_add_btn:'Add to my home screen', hs_skip:'Continue without',
+      hs_done:'I\'ve added my card →',
+      hs_ios_1_title:'Tap the Share button',
+      hs_ios_1_sub:'The square with an arrow pointing up, at the bottom of Safari',
+      hs_ios_share_lbl:'Share', hs_ios_2_title:'Scroll down and tap',
+      hs_ios_2_btn:'Add to Home Screen',
+      hs_ios_3_title:'Tap <span style="color:#818cf8">"Add"</span> in the top right',
+      hs_done_title:'Done!',
+      hs_ios_done_sub:'The Fidelyzio icon appears on your home screen',
+      hs_and_1_title:'Tap the Chrome menu', hs_and_1_lbl:'3 dots in the top right',
+      hs_and_2_title:'Tap', hs_and_2_btn:'Add to Home Screen',
+      hs_and_3_title:'Tap <span style="color:#818cf8">"Add"</span> to confirm',
+      hs_and_done_sub:'The Fidelyzio icon appears on your home screen',
+    },
+  };
+
+  let lang = (() => { try { return localStorage.getItem('fidelyzio_lang') || 'fr'; } catch { return 'fr'; } })();
+  let lastData = null;
+
+  function applyStaticLang() {
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.dataset.i18n;
+      const val = T[lang][key];
+      if (val !== undefined && typeof val === 'string') el.innerHTML = val;
+    });
+    document.querySelectorAll('[data-lang-btn]').forEach(b => {
+      b.style.color      = b.dataset.langBtn === lang ? 'white' : '#6b7280';
+      b.style.fontWeight = b.dataset.langBtn === lang ? '700' : '400';
+    });
+    const notifBtn = $('notif-btn');
+    if (notifBtn) notifBtn.innerHTML = notifBtn.disabled ? T[lang].notif_done : T[lang].notif_enable;
+    const ptrLbl = $('ptr-label');
+    if (ptrLbl) ptrLbl.textContent = T[lang].ptr_pull;
+  }
 
   // ── Utilities ────────────────────────────────────────────────────────────────
   function show(id) {
@@ -283,11 +383,12 @@
     if (!iso) return null;
     const diff = Date.now() - new Date(iso).getTime();
     const m = Math.floor(diff/60000), h = Math.floor(m/60), d = Math.floor(h/24);
-    if (m  <  2) return 'À l\'instant';
-    if (m  < 60) return `Il y a ${m} min`;
-    if (h  < 24) return `Il y a ${h}h`;
-    if (d  <  7) return `Il y a ${d}j`;
-    return new Date(iso).toLocaleDateString('fr-FR', { day:'numeric', month:'short' });
+    const t = T[lang];
+    if (m  <  2) return t.just_now;
+    if (m  < 60) return t.min_ago(m);
+    if (h  < 24) return t.h_ago(h);
+    if (d  <  7) return t.d_ago(d);
+    return new Date(iso).toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US', { day:'numeric', month:'short' });
   }
 
   function esc(s) {
@@ -374,7 +475,7 @@
               ${m.unlocked ? '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>' : '<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#4b5563" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>'}
             </div>
             <span style="flex:1;font-size:12px;${m.unlocked ? 'font-weight:600;color:#fde68a' : 'color:#6b7280'}">${esc(m.description)}</span>
-            <span style="font-size:10px;font-weight:700;${m.unlocked ? 'color:#fbbf24' : 'color:#374151'}">${m.points_required} tamp.</span>
+            <span style="font-size:10px;font-weight:700;${m.unlocked ? 'color:#fbbf24' : 'color:#374151'}">${m.points_required} ${T[lang].stamp_abbr}</span>
           </div>`).join('')}
       </div>`;
   }
@@ -402,8 +503,8 @@
       // Summary line for collapsed header
       const parts = [];
       if (pts > 0 || ptRwds.length > 0) parts.push(`${pts} pt${pts !== 1 ? 's' : ''}`);
-      if (stamps > 0 || stRwds.length > 0) parts.push(`${stamps} tampon${stamps !== 1 ? 's' : ''}`);
-      const summary = parts.join(' · ') || 'Aucune activité';
+      if (stamps > 0 || stRwds.length > 0) parts.push(T[lang].stamp_count(stamps));
+      const summary = parts.join(' · ') || T[lang].no_activity;
 
       return `
         <div class="rounded-2xl overflow-hidden border ${hasAnyReward ? 'border-amber-400/20' : 'border-white/5'} animate-fade-up" style="animation-delay:${0.06 * i}s">
@@ -415,7 +516,7 @@
                  style="background:${color}">${initial}</div>
             <div class="flex-1 min-w-0">
               <p class="text-white font-semibold text-sm truncate">${esc(mb.merchant_name)}</p>
-              <p class="text-gray-600 text-xs mt-0.5">${summary}${hasAnyReward ? ' · <span style="color:#fbbf24">récompense dispo</span>' : ''}</p>
+              <p class="text-gray-600 text-xs mt-0.5">${summary}${hasAnyReward ? ` · <span style="color:#fbbf24">${T[lang].reward_avail}</span>` : ''}</p>
             </div>
             <svg id="mb-chev-${mb.id}" style="width:16px;height:16px;color:#4b5563;flex-shrink:0;transition:transform .2s" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
               <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/>
@@ -429,7 +530,7 @@
             <!-- Points section -->
             <div style="margin-bottom:${stRwds.length ? '20px' : '0'}">
               <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-                <span style="color:#6b7280;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em">Points</span>
+                <span style="color:#6b7280;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em">${T[lang].points_label}</span>
                 <span style="font-size:18px;font-weight:900;color:#ffffff">${pts}<span style="font-size:11px;color:#4b5563;font-weight:500"> pts</span></span>
               </div>
               ${buildProgressBar(pts, ptRwds, color)}
@@ -439,14 +540,14 @@
             <!-- Stamps section -->
             <div>
               <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-                <span style="color:#6b7280;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em">Tampons</span>
+                <span style="color:#6b7280;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em">${T[lang].stamps_label}</span>
                 <span style="font-size:18px;font-weight:900;color:#fbbf24">${stamps}<span style="font-size:11px;color:#4b5563;font-weight:500"> / ${stRwds[0].points_required}</span></span>
               </div>
               ${buildStampGrid(stamps, stRwds, color)}
             </div>` : ''}
 
             ${ptRwds.length === 0 && stRwds.length === 0 ? `
-            <p style="color:#4b5563;font-size:13px;text-align:center;padding:12px 0">Aucune récompense configurée</p>` : ''}
+            <p style="color:#4b5563;font-size:13px;text-align:center;padding:12px 0">${T[lang].no_rewards_cfg}</p>` : ''}
           </div>
         </div>`;
     }).join('');
@@ -459,11 +560,12 @@
       return;
     }
     $('redemptions-section').style.display = 'block';
-    $('redemptions-count').textContent =
-      `${redemptions.length} ${redemptions.length > 1 ? 'récompenses obtenues' : 'récompense obtenue'}`;
+    $('redemptions-count').textContent = T[lang].rewards_earned(redemptions.length);
 
     $('redemptions-list').innerHTML = redemptions.map(r => {
       const name = (r.note || '').replace(/^Récompense\s*:\s*/i, '') || 'Récompense';
+      const pts  = Math.abs(r.points);
+      const qty  = r.type === 'stamps' ? T[lang].stamp_count(pts) : `${pts} pts`;
       return `
         <div class="bg-gray-900 border border-white/5 rounded-xl px-4 py-3 flex items-center gap-3">
           <svg class="w-5 h-5 text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z"/></svg>
@@ -471,7 +573,7 @@
             <p class="text-white text-sm font-semibold truncate">${esc(name)}</p>
             <p class="text-gray-500 text-xs">${esc(r.merchant_name)} · ${fmtDate(r.created_at) || '—'}</p>
           </div>
-          <p class="text-red-400 text-xs font-semibold shrink-0">${(() => { const n = Math.abs(r.points); return r.type === 'stamps' ? `${n} tampon${n > 1 ? 's' : ''}` : `${n} pts`; })()}</p>
+          <p class="text-red-400 text-xs font-semibold shrink-0">${qty}</p>
         </div>`;
     }).join('');
   }
@@ -480,8 +582,10 @@
   async function init() {
     try {
       const res = await fetch(`/api/customers/${encodeURIComponent(qrCode)}`);
-      if (!res.ok) throw new Error('Carte introuvable');
-      const { customer, memberships, redemptions } = await res.json();
+      if (!res.ok) throw new Error(T[lang].error_default);
+      const data = await res.json();
+      lastData = data;
+      const { customer, memberships, redemptions } = data;
 
       $('customer-name').textContent = customer.first_name;
       $('qr-universal').innerHTML = `<img
@@ -494,6 +598,7 @@
       markUpdated();
       show('s-card');
       maybeShowHsPrompt();
+      initNotifButton();
     } catch (e) {
       $('error-msg').textContent = e.message;
       show('s-error');
@@ -505,16 +610,17 @@
     try {
       const res = await fetch(`/api/customers/${encodeURIComponent(qrCode)}`);
       if (!res.ok) return;
-      const { memberships, redemptions } = await res.json();
-      renderMemberships(memberships);
-      renderRedemptions(redemptions);
+      const data = await res.json();
+      lastData = data;
+      renderMemberships(data.memberships);
+      renderRedemptions(data.redemptions);
       markUpdated();
     } catch (_) {}
   }
 
   function markUpdated() {
     const el = $('last-updated');
-    if (el) el.textContent = 'Mis à jour à l\'instant';
+    if (el) el.textContent = T[lang].just_updated;
   }
 
   // Auto-refresh every 30 seconds
@@ -554,7 +660,7 @@
     if (dy > 0 && window.scrollY === 0) {
       const ratio = Math.min(dy / PTR_THRESHOLD, 1);
       ptrBar.style.transform = `translateY(${(ratio - 1) * 100}%)`;
-      ptrLabel.textContent   = dy >= PTR_THRESHOLD ? 'Relâchez pour actualiser' : 'Tirez pour actualiser';
+      ptrLabel.textContent   = dy >= PTR_THRESHOLD ? T[lang].ptr_release : T[lang].ptr_pull;
       ptrSpin.classList.remove('active');
     }
   }, { passive: true });
@@ -567,14 +673,14 @@
     if (dy >= PTR_THRESHOLD && window.scrollY === 0) {
       ptRefreshing = true;
       ptrBar.style.transform = 'translateY(0)';
-      ptrLabel.textContent   = 'Actualisation…';
+      ptrLabel.textContent   = T[lang].ptr_loading;
       ptrSpin.classList.add('active');
       await refresh();
       ptRefreshing = false;
     }
     ptrBar.style.transform = 'translateY(-100%)';
     ptrSpin.classList.remove('active');
-    ptrLabel.textContent   = 'Tirez pour actualiser';
+    ptrLabel.textContent   = T[lang].ptr_pull;
   }, { passive: true });
 
   // ── Homescreen prompt modal ───────────────────────────────────────────────
@@ -616,48 +722,89 @@
     if (e.target === this) dismissHs();
   });
 
+  // ── Push notifications ────────────────────────────────────────────────────
+  function initNotifButton() {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+    const wrap = $('notif-btn-wrap');
+    if (!wrap) return;
+    try {
+      if (localStorage.getItem('fidelyzio_notif_subscribed')) {
+        showNotifSubscribed();
+        wrap.style.display = 'block';
+        return;
+      }
+    } catch (_) {}
+    navigator.serviceWorker.register('/sw.js').then(reg =>
+      reg.pushManager.getSubscription().then(existing => {
+        if (existing) {
+          try { localStorage.setItem('fidelyzio_notif_subscribed', '1'); } catch (_) {}
+          showNotifSubscribed();
+          wrap.style.display = 'block';
+        } else if (Notification.permission !== 'denied') {
+          wrap.style.display = 'block';
+        }
+      })
+    ).catch(() => {});
+  }
+
+  function showNotifSubscribed() {
+    const btn = $('notif-btn');
+    if (!btn) return;
+    btn.disabled = true;
+    btn.style.background = '#374151';
+    btn.style.cursor = 'default';
+    btn.style.opacity = '0.7';
+    btn.innerHTML = T[lang].notif_done;
+  }
+
+  async function requestNotifications() {
+    const btn = $('notif-btn');
+    btn.disabled = true;
+    btn.textContent = '…';
+    try {
+      const vapidRes = await fetch('/api/notifications/vapid-public-key');
+      if (!vapidRes.ok) throw new Error();
+      const vapidKey = await vapidRes.text();
+      if (!vapidKey || !vapidKey.trim()) throw new Error();
+      const reg = await navigator.serviceWorker.register('/sw.js');
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') {
+        btn.disabled = false;
+        btn.innerHTML = T[lang].notif_enable;
+        return;
+      }
+      function urlBase64ToUint8Array(b64) {
+        const pad = '='.repeat((4 - b64.length % 4) % 4);
+        const raw = atob((b64 + pad).replace(/-/g, '+').replace(/_/g, '/'));
+        return Uint8Array.from(raw, c => c.charCodeAt(0));
+      }
+      const sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(vapidKey.trim()),
+      });
+      await fetch('/api/notifications/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ subscription: sub.toJSON(), customer_qr_code: qrCode }),
+      });
+      try { localStorage.setItem('fidelyzio_notif_subscribed', '1'); } catch (_) {}
+      showNotifSubscribed();
+    } catch (_) {
+      btn.disabled = false;
+      btn.innerHTML = T[lang].notif_enable;
+    }
+  }
+
   // ── Language toggle ───────────────────────────────────────────────────────
-  let lang = (() => { try { return localStorage.getItem('fidelyzio_lang') || 'fr'; } catch { return 'fr'; } })();
   function setLang(l) {
     lang = l;
     try { localStorage.setItem('fidelyzio_lang', l); } catch {}
-    document.querySelectorAll('[data-lang-btn]').forEach(b => {
-      b.style.color      = b.dataset.langBtn === l ? 'white' : '#6b7280';
-      b.style.fontWeight = b.dataset.langBtn === l ? '700' : '400';
-    });
-  }
-  // ── Push notifications ────────────────────────────────────────────────────
-  function setupPushNotifications() {
-    if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
-    // Fetch VAPID key first — skip entirely if not configured
-    fetch('/api/notifications/vapid-public-key')
-      .then(r => r.ok ? r.text() : null)
-      .then(vapidKey => {
-        if (!vapidKey || !vapidKey.trim()) return;
-        // Register SW without blocking; use registration promise directly
-        navigator.serviceWorker.register('/sw.js')
-          .then(reg => reg.pushManager.getSubscription().then(existing => {
-            if (existing) return;
-            return Notification.requestPermission().then(permission => {
-              if (permission !== 'granted') return;
-              function urlBase64ToUint8Array(b64) {
-                const pad = '='.repeat((4 - b64.length % 4) % 4);
-                const raw = atob((b64 + pad).replace(/-/g, '+').replace(/_/g, '/'));
-                return Uint8Array.from(raw, c => c.charCodeAt(0));
-              }
-              return reg.pushManager.subscribe({
-                userVisibleOnly: true,
-                applicationServerKey: urlBase64ToUint8Array(vapidKey.trim()),
-              }).then(sub => fetch('/api/notifications/subscribe', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ subscription: sub.toJSON(), customer_qr_code: qrCode }),
-              }));
-            });
-          }))
-          .catch(() => {});
-      })
-      .catch(() => {});
+    applyStaticLang();
+    if (lastData) {
+      renderMemberships(lastData.memberships);
+      renderRedemptions(lastData.redemptions);
+      markUpdated();
+    }
   }
 
   document.addEventListener('DOMContentLoaded', () => {
@@ -668,10 +815,8 @@
       tog.innerHTML = `<button data-lang-btn="fr" onclick="setLang('fr')" style="background:none;border:none;font-size:11px;cursor:pointer;color:#6b7280">FR</button><span style="color:#374151;font-size:11px">|</span><button data-lang-btn="en" onclick="setLang('en')" style="background:none;border:none;font-size:11px;cursor:pointer;color:#6b7280">EN</button>`;
       hdr.style.position = 'relative';
       hdr.appendChild(tog);
-      setLang(lang);
     }
-    // Ask push notification permission after card loads (small delay)
-    setTimeout(setupPushNotifications, 2000);
+    applyStaticLang();
   });
 
   init();

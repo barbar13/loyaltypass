@@ -102,6 +102,11 @@
       box-shadow: 0 4px 14px rgba(240,180,41,.35);
     }
     .btn-nav-amber:hover { background: #e8a81e; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(240,180,41,.45); }
+    @media(max-width: 600px) {
+      .btn-nav-ghost { display: none; }
+      .btn-nav-indigo { font-size: 13px; padding: 8px 12px; }
+      .btn-nav-amber  { font-size: 13px; padding: 8px 14px; }
+    }
 
     /* ── Buttons ───────────────────────────────────────────────────────────── */
     .btn-navy {
@@ -299,6 +304,7 @@
     .feat-item { display: flex; align-items: center; gap: 10px; color: rgba(250,250,248,.75); font-size: 14px; }
     .feat-check { color: var(--gold); flex-shrink: 0; }
     @media(max-width: 600px) { .pricing-card { padding: 36px 24px; } .price-main { font-size: 52px; } }
+    @media(max-width: 400px) { .pricing-card { padding: 28px 16px; } .wrap { padding: 0 16px; } }
 
     /* ── Contact / CTA ─────────────────────────────────────────────────────── */
     .contact-section { background: var(--navy); }

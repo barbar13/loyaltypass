@@ -450,16 +450,25 @@
   // Build stamp grid HTML (stamps-based rewards)
   function buildStampGrid(stamps, stRewards, color) {
     if (!stRewards.length) return '';
-    const threshold = stRewards[0].points_required;
-    const total  = Math.max(threshold, 1);
+    const sorted = [...stRewards].sort((a, b) => a.points_required - b.points_required);
+    const nextReward = sorted.find(r => stamps < r.points_required) || sorted[sorted.length - 1];
+    const total  = Math.max(nextReward.points_required, 1);
     const filled = Math.min(stamps, total);
+    const curPct = Math.min(100, Math.round((filled / total) * 100));
     const cols   = total <= 5 ? total : 5;
     const size   = cols <= 5 ? 44 : 36;
-    const ms = stRewards.map(r => ({
-      ...r, pct: Math.min(100, Math.round((r.points_required / total) * 100)),
-      unlocked: stamps >= r.points_required,
-    }));
+    const ms = sorted.map(r => ({ ...r, unlocked: stamps >= r.points_required }));
     return `
+      <div style="margin-bottom:4px">
+        <div style="position:relative;height:28px;margin-bottom:6px">
+          <div style="position:absolute;inset:0;height:8px;border-radius:9999px;background:#1f2937;top:13px"></div>
+          <div style="position:absolute;left:0;height:8px;border-radius:9999px;top:13px;width:${curPct}%;background:${color};transition:width .6s ease"></div>
+          <div style="position:absolute;width:16px;height:16px;border-radius:50%;left:${curPct}%;top:11px;transform:translateX(-50%);background:white;box-shadow:0 0 0 2px #111827,0 2px 8px rgba(0,0,0,.5)"></div>
+        </div>
+        <div style="position:relative;height:14px;margin-bottom:8px">
+          <span style="position:absolute;font-size:9px;left:100%;transform:translateX(-50%);color:#374151">${total}</span>
+        </div>
+      </div>
       <div style="display:grid;grid-template-columns:repeat(${cols},1fr);gap:8px;margin-bottom:10px">
         ${Array.from({length: total}, (_, i) => {
           const done = i < filled;
@@ -541,7 +550,7 @@
             <div>
               <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
                 <span style="color:#6b7280;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em">${T[lang].stamps_label}</span>
-                <span style="font-size:18px;font-weight:900;color:#fbbf24">${stamps}<span style="font-size:11px;color:#4b5563;font-weight:500"> / ${stRwds[0].points_required}</span></span>
+                <span style="font-size:18px;font-weight:900;color:#fbbf24">${stamps}<span style="font-size:11px;color:#4b5563;font-weight:500"> / ${([...stRwds].sort((a,b)=>a.points_required-b.points_required).find(r=>stamps<r.points_required)||stRwds[stRwds.length-1]).points_required}</span></span>
               </div>
               ${buildStampGrid(stamps, stRwds, color)}
             </div>` : ''}
@@ -742,17 +751,17 @@
 
   // ── Push notifications ────────────────────────────────────────────────────
   function initNotifButton() {
-    if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
     const wrap = $('notif-btn-wrap');
     if (!wrap) return;
-    // Always show the button — check subscription state async without blocking visibility
-    wrap.style.display = 'block';
     try {
       if (localStorage.getItem('fidelyzio_notif_subscribed')) {
+        wrap.style.display = 'block';
         showNotifSubscribed();
         return;
       }
     } catch (_) {}
+    wrap.style.display = 'block';
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
     navigator.serviceWorker.register('/sw.js').then(reg =>
       reg.pushManager.getSubscription().then(existing => {
         if (existing) {

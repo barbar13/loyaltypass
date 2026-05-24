@@ -22,7 +22,7 @@ function buildPassJson({ card, customer, merchant }) {
     labelColor:         'rgba(255, 255, 255, 0.7)',
     storeCard: {
       headerFields: [
-        { key: 'program', label: 'PROGRAMME', value: 'LOYALTYPASS' },
+        { key: 'program', label: 'PROGRAMME', value: 'FIDELYZIO' },
       ],
       primaryFields: [
         { key: 'points', label: 'POINTS', value: String(card.points), textAlignment: 'PKTextAlignmentCenter' },

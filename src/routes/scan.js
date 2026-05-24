@@ -150,29 +150,43 @@ router.post('/', auth, async (req, res) => {
           }).catch(() => {});
         }
 
-        // Check if reward just became available (either type)
-        const unlockedReward = rewards.find(r =>
-          r.mechanic === 'stamps' ? newStamps >= r.points_required : newPts >= r.points_required
-        );
         const oldPts = newPts - (isStamps ? 0 : pts);
+        const oldStamps = newStamps - (isStamps ? 1 : 0);
 
         let pushTitle, pushBody;
-        if (unlockedReward) {
-          pushTitle = `Récompense disponible chez ${merchant.name} !`;
-          pushBody  = `${unlockedReward.description} — ${newPts} pts`;
-        } else {
-          // Check if customer just crossed 80% of any reward threshold
-          const nearReward = rewards.find(r => {
-            const thresh = r.points_required;
-            return newPts >= thresh * 0.8 && oldPts < thresh * 0.8;
-          });
-          if (nearReward) {
-            const remaining = nearReward.points_required - newPts;
-            pushTitle = `Plus que ${remaining} points !`;
-            pushBody  = `Encore ${remaining} pts pour "${nearReward.description}" chez ${merchant.name} !`;
+        if (isStamps) {
+          // Stamp scan — check if a stamp reward just unlocked
+          const unlockedStampReward = rewards
+            .filter(r => r.mechanic === 'stamps')
+            .find(r => newStamps >= r.points_required && oldStamps < r.points_required);
+          if (unlockedStampReward) {
+            pushTitle = `Récompense disponible chez ${merchant.name} !`;
+            pushBody  = `${unlockedStampReward.description} — ${newStamps} tampon${newStamps !== 1 ? 's' : ''}`;
           } else {
-            pushTitle = `+${pts} points chez ${merchant.name} !`;
-            pushBody  = `Votre solde : ${newPts} pts`;
+            pushTitle = `+1 tampon chez ${merchant.name} !`;
+            pushBody  = `Votre solde : ${newStamps} tampon${newStamps !== 1 ? 's' : ''}`;
+          }
+        } else {
+          // Points scan — check if a points reward just unlocked
+          const unlockedPtsReward = rewards
+            .filter(r => (r.mechanic || 'points') === 'points')
+            .find(r => newPts >= r.points_required && oldPts < r.points_required);
+          if (unlockedPtsReward) {
+            pushTitle = `Récompense disponible chez ${merchant.name} !`;
+            pushBody  = `${unlockedPtsReward.description} — ${newPts} pts`;
+          } else {
+            // Check if customer just crossed 80% of any points reward threshold
+            const nearReward = rewards
+              .filter(r => (r.mechanic || 'points') === 'points')
+              .find(r => newPts >= r.points_required * 0.8 && oldPts < r.points_required * 0.8);
+            if (nearReward) {
+              const remaining = nearReward.points_required - newPts;
+              pushTitle = `Plus que ${remaining} points !`;
+              pushBody  = `Encore ${remaining} pts pour "${nearReward.description}" chez ${merchant.name} !`;
+            } else {
+              pushTitle = `+${pts} points chez ${merchant.name} !`;
+              pushBody  = `Votre solde : ${newPts} pts`;
+            }
           }
         }
 

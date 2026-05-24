@@ -686,6 +686,16 @@
   // ── Homescreen prompt modal ───────────────────────────────────────────────
   const HS_KEY = 'fidelyzio_homescreen_prompted';
 
+  let deferredInstallPrompt = null;
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+  });
+  window.addEventListener('appinstalled', () => {
+    deferredInstallPrompt = null;
+    dismissHs();
+  });
+
   function maybeShowHsPrompt() {
     const isStandalone = window.navigator.standalone === true ||
       window.matchMedia('(display-mode: standalone)').matches;
@@ -701,6 +711,14 @@
   }
 
   function showHsTutorial() {
+    if (deferredInstallPrompt) {
+      deferredInstallPrompt.prompt();
+      deferredInstallPrompt.userChoice.then(choice => {
+        deferredInstallPrompt = null;
+        if (choice.outcome === 'accepted') dismissHs();
+      });
+      return;
+    }
     $('hs-prompt').style.display = 'none';
     $('hs-tutorial').style.display = 'block';
     const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
@@ -727,10 +745,11 @@
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
     const wrap = $('notif-btn-wrap');
     if (!wrap) return;
+    // Always show the button — check subscription state async without blocking visibility
+    wrap.style.display = 'block';
     try {
       if (localStorage.getItem('fidelyzio_notif_subscribed')) {
         showNotifSubscribed();
-        wrap.style.display = 'block';
         return;
       }
     } catch (_) {}
@@ -739,9 +758,6 @@
         if (existing) {
           try { localStorage.setItem('fidelyzio_notif_subscribed', '1'); } catch (_) {}
           showNotifSubscribed();
-          wrap.style.display = 'block';
-        } else if (Notification.permission !== 'denied') {
-          wrap.style.display = 'block';
         }
       })
     ).catch(() => {});

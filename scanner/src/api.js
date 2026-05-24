@@ -114,3 +114,16 @@ export function getAnalytics(token, { dateFrom, dateTo } = {}) {
     headers: { Authorization: `Bearer ${token}` },
   });
 }
+
+export function getSubscriptionStatus(token) {
+  return request('/merchants/subscription-status', {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+export function getBillingPortal(token) {
+  return request('/billing/portal', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}

@@ -294,6 +294,28 @@ router.get('/dashboard', auth, async (req, res) => {
   }
 });
 
+// ─── Authenticated: subscription status ──────────────────────────────────────
+
+router.get('/subscription-status', auth, async (req, res) => {
+  try {
+    const merchant = await db.one(
+      'SELECT subscription_status, trial_ends_at, stripe_customer_id FROM merchants WHERE id = $1',
+      [req.merchant.id]
+    );
+    const trialDaysLeft = merchant.trial_ends_at
+      ? Math.max(0, Math.ceil((new Date(merchant.trial_ends_at) - new Date()) / 86400000))
+      : null;
+    res.json({
+      status:          merchant.subscription_status,
+      trial_days_left: trialDaysLeft,
+      trial_ends_at:   merchant.trial_ends_at || null,
+      has_stripe:      !!merchant.stripe_customer_id,
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
 // ─── Authenticated: rewards ───────────────────────────────────────────────────
 
 router.post('/rewards', auth, async (req, res) => {

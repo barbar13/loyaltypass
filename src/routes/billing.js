@@ -49,12 +49,11 @@ router.post('/portal', auth, async (req, res) => {
   const stripe = getStripe();
   if (!stripe) return res.status(503).json({ error: 'Stripe non configuré' });
   try {
-    const merchant = await db.one('SELECT * FROM merchants WHERE id = $1', [req.merchant.id]);
+    const merchant = await db.one('SELECT stripe_customer_id FROM merchants WHERE id = $1', [req.merchant.id]);
     if (!merchant.stripe_customer_id) return res.status(400).json({ error: 'Aucun abonnement actif' });
-    const baseUrl = process.env.BASE_URL || `${req.protocol}://${req.get('host')}`;
     const session = await stripe.billingPortal.sessions.create({
       customer: merchant.stripe_customer_id,
-      return_url: `${baseUrl}/`,
+      return_url: 'https://fidelyzio.com/scanner',
     });
     res.json({ url: session.url });
   } catch (err) {

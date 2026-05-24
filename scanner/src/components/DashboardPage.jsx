@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Chart, registerables } from 'chart.js';
 
 import ScanModal  from './ScanModal.jsx';
-import { addReward, deleteReward, redeemReward, updateProfile, getScans, createCheckout, getAnalytics, sendNotification, getNotifications } from '../api.js';
+import { addReward, deleteReward, redeemReward, updateProfile, getScans, createCheckout, getAnalytics, sendNotification, getNotifications, getBillingPortal, getSubscriptionStatus } from '../api.js';
 
 Chart.register(...registerables);
 
@@ -856,11 +856,57 @@ function SettingsTab({ merchant, token, onRefresh }) {
   const [saving, setSaving] = useState(false);
   const [msg,    setMsg]    = useState('');
   const [err,    setErr]    = useState('');
+  const [subStatus,     setSubStatus]     = useState(null);
+  const [portalLoading, setPortalLoading] = useState(false);
+  const [portalErr,     setPortalErr]     = useState('');
+
+  useEffect(() => {
+    getSubscriptionStatus(token)
+      .then(d => setSubStatus(d))
+      .catch(() => setSubStatus({
+        status: merchant.subscription_status,
+        trial_days_left: merchant.trial_days_left,
+        trial_ends_at: null,
+        has_stripe: merchant.has_stripe,
+      }));
+  }, []); // eslint-disable-line
+
+  const status    = subStatus?.status    ?? merchant.subscription_status;
+  const trialDays = subStatus?.trial_days_left ?? merchant.trial_days_left;
+  const trialEnds = subStatus?.trial_ends_at;
+  const hasStripe = subStatus?.has_stripe ?? merchant.has_stripe;
+
+  let statusBadge;
+  if (status === 'active') {
+    statusBadge = { label: 'Abonné', cls: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/25' };
+  } else if (status === 'trial') {
+    const d = trialDays ?? 0;
+    statusBadge = {
+      label: d > 0 ? `Essai gratuit — ${d} jour${d > 1 ? 's' : ''} restant${d > 1 ? 's' : ''}` : 'Essai expiré',
+      cls: d > 3 ? 'bg-indigo-500/15 text-indigo-400 border-indigo-500/25' : 'bg-amber-500/15 text-amber-400 border-amber-500/25',
+    };
+  } else {
+    statusBadge = { label: 'Suspendu', cls: 'bg-red-500/15 text-red-400 border-red-500/25' };
+  }
+
+  async function handlePortal() {
+    setPortalLoading(true); setPortalErr('');
+    try {
+      const { url } = await getBillingPortal(token);
+      if (url) window.location.href = url;
+    } catch (e) { setPortalErr(e.message); }
+    finally { setPortalLoading(false); }
+  }
+
+  function handleLogout() {
+    localStorage.removeItem('fidelyzio_auth');
+    window.location.href = '/login';
+  }
 
   async function handleSave(e) {
     e.preventDefault();
     if (pwd && pwd !== pwd2) { setErr('Les mots de passe ne correspondent pas.'); return; }
-    if (pwd && pwd.length < 6) { setErr('Minimum 6 caractères.'); return; }
+    if (pwd && pwd.length < 8) { setErr('Minimum 8 caractères.'); return; }
     setSaving(true); setErr(''); setMsg('');
     try {
       const payload = { name: name.trim(), color, loyalty_mechanic: mechanic };
@@ -933,6 +979,44 @@ function SettingsTab({ merchant, token, onRefresh }) {
           {saving ? 'Enregistrement…' : 'Enregistrer les modifications'}
         </button>
       </form>
+
+      {/* ── Abonnement ── */}
+      <div className="mt-5 bg-[#0e0e18] border border-white/5 rounded-2xl p-5 space-y-3">
+        <p className="text-gray-400 text-sm font-semibold">Abonnement</p>
+
+        {subStatus === null
+          ? <div className="h-6 w-48 bg-white/[0.06] rounded-full animate-pulse" />
+          : (
+            <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-semibold ${statusBadge.cls}`}>
+              <span className="w-1.5 h-1.5 rounded-full bg-current shrink-0" />
+              {statusBadge.label}
+            </span>
+          )
+        }
+
+        {status === 'trial' && trialEnds && (
+          <p className="text-gray-600 text-xs">
+            Première facturation le {new Date(trialEnds).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+          </p>
+        )}
+
+        {hasStripe && (
+          <>
+            {portalErr && <p className="text-red-400 text-xs">{portalErr}</p>}
+            <button type="button" onClick={handlePortal} disabled={portalLoading}
+              className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:scale-[.98] disabled:opacity-60 text-white text-sm font-semibold transition-all flex items-center justify-center gap-2">
+              {portalLoading
+                ? <><svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>Redirection…</>
+                : 'Gérer mon abonnement →'}
+            </button>
+          </>
+        )}
+
+        <button type="button" onClick={handleLogout}
+          className="w-full py-3 rounded-xl border border-white/[0.08] hover:bg-white/[0.05] active:scale-[.98] text-gray-500 hover:text-white text-sm font-medium transition-all">
+          Se déconnecter
+        </button>
+      </div>
     </div>
   );
 }

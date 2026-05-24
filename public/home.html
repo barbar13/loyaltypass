@@ -102,10 +102,15 @@
       box-shadow: 0 4px 14px rgba(240,180,41,.35);
     }
     .btn-nav-amber:hover { background: #e8a81e; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(240,180,41,.45); }
-    @media(max-width: 600px) {
-      .btn-nav-ghost { display: none; }
-      .btn-nav-indigo { font-size: 13px; padding: 8px 12px; }
-      .btn-nav-amber  { font-size: 13px; padding: 8px 14px; }
+    @media(max-width: 768px) {
+      .nav-inner      { gap: 6px; }
+      .btn-nav-ghost  { font-size: 12px; padding: 6px 8px; }
+      .btn-nav-indigo { font-size: 12px; padding: 7px 10px; }
+      .btn-nav-amber  { font-size: 12px; padding: 7px 12px; }
+    }
+    @media(max-width: 380px) {
+      .nav-logo    { font-size: 16px; }
+      .nav-actions { flex-wrap: wrap; justify-content: flex-end; gap: 4px; }
     }
 
     /* ── Buttons ───────────────────────────────────────────────────────────── */
@@ -306,6 +311,39 @@
     @media(max-width: 600px) { .pricing-card { padding: 36px 24px; } .price-main { font-size: 52px; } }
     @media(max-width: 400px) { .pricing-card { padding: 28px 16px; } .wrap { padding: 0 16px; } }
 
+    /* ── Mobile responsive ─────────────────────────────────────────────────── */
+    @media(max-width: 768px) {
+      /* Hero headline */
+      .hero-h1 { font-size: 2.5rem !important; line-height: 1.1; }
+      .hero-subtext { max-width: 100%; font-size: 1rem; }
+
+      /* Hero stats: 2×2 grid */
+      .hero-stats {
+        display: grid !important; grid-template-columns: 1fr 1fr;
+        gap: 16px 20px; flex-wrap: unset;
+      }
+      .hero-stat { flex: unset !important; white-space: normal !important; }
+      .hero-stat-val { font-size: 14px; }
+
+      /* Hero CTA buttons: full width stacked */
+      .hero-ctas { flex-direction: column !important; align-items: stretch !important; gap: 10px !important; }
+      .hero-ctas > * { width: 100% !important; justify-content: center !important; text-align: center !important; }
+      .hero-ctas .btn-gold { display: flex; }
+
+      /* Section headings cap */
+      .section-h2 { font-size: clamp(1.5rem, 6vw, 2rem); }
+
+      /* Cards & steps */
+      .step-card    { padding: 20px; gap: 14px; }
+      .problem-card { padding: 24px 20px; }
+
+      /* Pricing: full width */
+      .pricing-card { max-width: 100%; }
+
+      /* Strip: already 2×2 via its own rule at 640px, ensure labels wrap */
+      .strip-lbl { font-size: 11px; }
+    }
+
     /* ── Contact / CTA ─────────────────────────────────────────────────────── */
     .contact-section { background: var(--navy); }
     .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
@@ -375,7 +413,7 @@
           Fidelyzio transforme chaque passage en caisse en une relation durable. Carte digitale, points automatiques, notifications intelligentes — sans application.
         </p>
 
-        <div class="au d3" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+        <div class="au d3 hero-ctas" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
           <a href="/register" class="btn-gold">
             Essayer gratuitement 14 jours
             <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">

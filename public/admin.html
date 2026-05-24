@@ -8,33 +8,30 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; }
-    html, body { margin:0; height:100%; background:#080810; color:#e5e7eb;
+    html, body { margin:0; height:100%; background:#0a0a0a; color:#e5e7eb;
       font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
     ::-webkit-scrollbar { width:4px; height:4px; }
     ::-webkit-scrollbar-track { background:transparent; }
-    ::-webkit-scrollbar-thumb { background:#2d2d3a; border-radius:2px; }
+    ::-webkit-scrollbar-thumb { background:#2a2a2a; border-radius:2px; }
 
-    /* ── Layout ──────────────────────────────────────────────────────────── */
     #sidebar {
-      position:fixed; top:0; left:0; bottom:0; width:216px;
-      background:#0c0c14; border-right:1px solid rgba(255,255,255,0.05);
+      position:fixed; top:0; left:0; bottom:0; width:220px;
+      background:#111111; border-right:1px solid rgba(255,255,255,0.05);
       display:none; flex-direction:column; z-index:40;
     }
     #bottom-nav {
       position:fixed; bottom:0; left:0; right:0; height:62px;
-      background:#0c0c14; border-top:1px solid rgba(255,255,255,0.05);
+      background:#111111; border-top:1px solid rgba(255,255,255,0.05);
       display:flex; z-index:40;
-      padding-bottom: env(safe-area-inset-bottom, 0);
+      padding-bottom:env(safe-area-inset-bottom, 0);
     }
     #main-content { padding-bottom:70px; }
-
     @media (min-width:768px) {
       #sidebar { display:flex; }
       #bottom-nav { display:none; }
-      #main-content { margin-left:216px; padding-bottom:0; }
+      #main-content { margin-left:220px; padding-bottom:0; }
     }
 
-    /* ── Navigation ──────────────────────────────────────────────────────── */
     .nav-item {
       display:flex; align-items:center; gap:10px;
       padding:9px 12px; border-radius:10px;
@@ -42,27 +39,25 @@
       cursor:pointer; transition:all .15s; user-select:none;
     }
     .nav-item:hover { background:rgba(255,255,255,0.04); color:#d1d5db; }
-    .nav-item.active { background:rgba(99,102,241,0.13); color:#a5b4fc; }
+    .nav-item.active { background:rgba(245,158,11,0.12); color:#F59E0B; }
     .nav-item .nav-ic { color:inherit; flex-shrink:0; }
 
     .bnav-btn {
       flex:1; display:flex; flex-direction:column; align-items:center;
       justify-content:center; gap:3px; color:#6b7280;
-      font-size:10px; font-weight:500; cursor:pointer;
-      transition:color .15s; background:none; border:none; padding:6px 0;
+      font-size:9px; font-weight:500; cursor:pointer;
+      transition:color .15s; background:none; border:none; padding:4px 0;
     }
-    .bnav-btn svg { width:20px; height:20px; }
-    .bnav-btn.active { color:#818cf8; }
+    .bnav-btn svg { width:19px; height:19px; }
+    .bnav-btn.active { color:#F59E0B; }
 
-    /* ── Toggle switch ───────────────────────────────────────────────────── */
     .tog { position:relative; display:inline-block; width:34px; height:19px; cursor:pointer; flex-shrink:0; }
     .tog input { opacity:0; width:0; height:0; position:absolute; }
-    .tog-t { position:absolute; inset:0; border-radius:10px; background:#2d2d3a; transition:background .2s; }
+    .tog-t { position:absolute; inset:0; border-radius:10px; background:#2d2d2d; transition:background .2s; }
     .tog input:checked ~ .tog-t { background:#22c55e; }
     .tog-th { position:absolute; top:2px; left:2px; width:15px; height:15px; border-radius:50%; background:white; transition:left .2s; }
     .tog input:checked ~ .tog-th { left:17px; }
 
-    /* ── Animations ──────────────────────────────────────────────────────── */
     @keyframes fade-up  { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
     @keyframes fade-in  { from{opacity:0} to{opacity:1} }
     @keyframes scale-in { from{opacity:0;transform:scale(.96)} to{opacity:1;transform:scale(1)} }
@@ -71,13 +66,24 @@
     .si { animation:scale-in .2s cubic-bezier(.16,1,.3,1) both; }
     .d1{animation-delay:.05s}.d2{animation-delay:.1s}.d3{animation-delay:.15s}.d4{animation-delay:.2s}
 
-    /* ── Misc ────────────────────────────────────────────────────────────── */
     .row-hover { cursor:pointer; }
-    .row-hover:hover td { background:rgba(255,255,255,0.018); }
-    .chart-wrap { position:relative; height:190px; }
-    .detail-panel { background:#0a0a12; }
+    .row-hover:hover td { background:rgba(255,255,255,0.015); }
+    .chart-wrap { position:relative; height:180px; }
+    .detail-panel { background:#0d0d0d; }
     .spin { animation:spin .7s linear infinite; }
     @keyframes spin { to{transform:rotate(360deg)} }
+
+    .card { background:#111111; border:1px solid rgba(255,255,255,0.05); border-radius:16px; }
+    .sf-btn { padding:5px 12px; border-radius:8px; font-size:12px; font-weight:500;
+      cursor:pointer; border:1px solid rgba(255,255,255,0.06); background:transparent;
+      color:#6b7280; transition:all .15s; }
+    .sf-btn:hover { background:rgba(255,255,255,0.04); color:#d1d5db; }
+    .sf-btn.active { background:rgba(245,158,11,0.12); color:#F59E0B; border-color:rgba(245,158,11,0.25); }
+
+    .heatmap-row { display:flex; align-items:center; margin-bottom:2px; }
+    .heatmap-label { width:32px; font-size:10px; color:#6b7280; text-align:right; padding-right:6px; flex-shrink:0; }
+    .heatmap-cell { flex:1; height:13px; border-radius:2px; min-width:14px; margin-right:1px; }
+    .heatmap-h { flex:1; font-size:9px; color:#4b5563; text-align:center; min-width:14px; }
   </style>
 </head>
 <body>
@@ -86,22 +92,22 @@
 <div id="s-login" style="min-height:100vh" class="flex items-center justify-center px-4">
   <div class="w-full max-w-sm au">
     <div class="text-center mb-8">
-      <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-indigo-600/12 border border-indigo-500/20 mb-5">
-        <svg class="w-8 h-8 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+      <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 mb-5">
+        <svg class="w-8 h-8 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
           <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z"/>
         </svg>
       </div>
       <h1 class="text-white text-2xl font-bold">Fidelyzio Admin</h1>
       <p class="text-gray-500 text-sm mt-1">Accès réservé</p>
     </div>
-    <div class="bg-gray-900/50 border border-white/5 rounded-2xl p-6">
+    <div class="bg-white/[0.03] border border-white/5 rounded-2xl p-6">
       <label class="block text-sm font-medium text-gray-400 mb-2">Mot de passe</label>
       <input id="pwd-input" type="password" placeholder="••••••••" autocomplete="current-password"
-             class="w-full bg-gray-800/80 border border-gray-700/60 rounded-xl px-4 py-3 text-white placeholder-gray-600 text-sm mb-4 transition focus:outline-none focus:ring-2 focus:ring-indigo-500"
+             class="w-full bg-white/[0.04] border border-white/8 rounded-xl px-4 py-3 text-white placeholder-gray-600 text-sm mb-4 transition focus:outline-none focus:ring-2 focus:ring-amber-500/50"
              onkeydown="if(event.key==='Enter')login()">
       <div id="login-error" class="hidden mb-4 px-3 py-2.5 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm"></div>
       <button onclick="login()" id="login-btn"
-              class="w-full py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:scale-[.98] text-white text-sm font-semibold transition-all">
+              class="w-full py-3.5 rounded-xl bg-amber-500 hover:bg-amber-400 active:scale-[.98] text-black text-sm font-bold transition-all">
         Se connecter
       </button>
     </div>
@@ -115,10 +121,8 @@
   <aside id="sidebar">
     <div class="px-4 py-5 border-b border-white/5 shrink-0">
       <div class="flex items-center gap-2.5">
-        <div class="w-8 h-8 rounded-lg bg-indigo-600/18 border border-indigo-500/22 flex items-center justify-center shrink-0">
-          <svg class="w-4 h-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z"/>
-          </svg>
+        <div class="w-8 h-8 rounded-lg bg-amber-500/15 border border-amber-500/20 flex items-center justify-center shrink-0">
+          <div class="w-2.5 h-2.5 rounded-full bg-amber-400"></div>
         </div>
         <div class="leading-none">
           <p class="text-white font-semibold text-sm">Fidelyzio</p>
@@ -128,45 +132,35 @@
     </div>
     <nav class="flex-1 px-3 py-3 space-y-0.5 overflow-y-auto">
       <button class="nav-item w-full active" id="snav-dashboard" onclick="showTab('dashboard')">
-        <svg class="nav-ic w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z"/>
-        </svg>
+        <svg class="nav-ic w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z"/></svg>
         Dashboard
       </button>
-      <button class="nav-item w-full" id="snav-merchants" onclick="showTab('merchants')">
-        <svg class="nav-ic w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016c.896 0 1.7-.393 2.25-1.015a3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72M6.75 18h3.75a.75.75 0 0 0 .75-.75V13.5a.75.75 0 0 0-.75-.75H6.75a.75.75 0 0 0-.75.75v3.75c0 .414.336.75.75.75Z"/>
-        </svg>
-        Marchands
+      <button class="nav-item w-full" id="snav-business" onclick="showTab('business')">
+        <svg class="nav-ic w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 0 1 5.814-5.518l2.74-1.22m0 0-5.94-2.281m5.94 2.28-2.28 5.941"/></svg>
+        Business
       </button>
-      <button class="nav-item w-full" id="snav-customers" onclick="showTab('customers')">
-        <svg class="nav-ic w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"/>
-        </svg>
+      <button class="nav-item w-full" id="snav-merchants" onclick="showTab('merchants')">
+        <svg class="nav-ic w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016c.896 0 1.7-.393 2.25-1.015a3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72M6.75 18h3.75a.75.75 0 0 0 .75-.75V13.5a.75.75 0 0 0-.75-.75H6.75a.75.75 0 0 0-.75.75v3.75c0 .414.336.75.75.75Z"/></svg>
+        Commerçants
+      </button>
+      <button class="nav-item w-full" id="snav-clients" onclick="showTab('clients')">
+        <svg class="nav-ic w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"/></svg>
         Clients
       </button>
-      <button class="nav-item w-full" id="snav-fraud" onclick="showTab('fraud')">
-        <svg class="nav-ic w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"/>
-        </svg>
-        Fraude
+      <button class="nav-item w-full" id="snav-analytics" onclick="showTab('analytics')">
+        <svg class="nav-ic w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0 0 20.25 18V6A2.25 2.25 0 0 0 18 3.75H6A2.25 2.25 0 0 0 3.75 6v12A2.25 2.25 0 0 0 6 20.25Z"/></svg>
+        Analytics
         <span id="fraud-badge" class="hidden ml-auto px-1.5 py-0.5 bg-red-500/20 text-red-400 text-[10px] font-bold rounded-full min-w-[20px] text-center leading-none py-1"></span>
       </button>
     </nav>
     <div class="px-3 py-3 border-t border-white/5 space-y-0.5 shrink-0">
       <button class="nav-item w-full" onclick="loadAll()">
-        <svg class="nav-ic w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"/>
-        </svg>
+        <svg class="nav-ic w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
         Actualiser
-        <svg id="spin-sidebar" class="spin hidden w-3.5 h-3.5 ml-auto text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <path stroke-linecap="round" d="M12 3a9 9 0 1 0 9 9"/>
-        </svg>
+        <svg id="spin-sidebar" class="spin hidden w-3.5 h-3.5 ml-auto text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" d="M12 3a9 9 0 1 0 9 9"/></svg>
       </button>
-      <button class="nav-item w-full text-red-400/80 hover:text-red-300" onclick="logout()">
-        <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3H15"/>
-        </svg>
+      <button class="nav-item w-full text-red-400/70 hover:text-red-300" onclick="logout()">
+        <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3H15"/></svg>
         Déconnexion
       </button>
     </div>
@@ -176,29 +170,23 @@
   <div id="main-content" class="flex flex-col min-h-screen">
 
     <!-- Mobile header -->
-    <header class="md:hidden sticky top-0 z-30 bg-[#080810]/95 backdrop-blur border-b border-white/5 px-4 flex items-center justify-between shrink-0" style="height:52px">
+    <header class="md:hidden sticky top-0 z-30 bg-[#0a0a0a]/95 backdrop-blur border-b border-white/5 px-4 flex items-center justify-between shrink-0" style="height:52px">
       <div class="flex items-center gap-2.5">
-        <div class="w-7 h-7 rounded-lg bg-indigo-600/15 border border-indigo-500/20 flex items-center justify-center">
-          <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z"/>
-          </svg>
+        <div class="w-7 h-7 rounded-lg bg-amber-500/15 border border-amber-500/20 flex items-center justify-center">
+          <div class="w-2 h-2 rounded-full bg-amber-400"></div>
         </div>
         <span id="mob-title" class="text-white font-semibold text-sm">Dashboard</span>
       </div>
-      <button onclick="loadAll()" class="w-8 h-8 rounded-lg bg-gray-900 border border-white/5 flex items-center justify-center text-gray-400 hover:text-white active:scale-90 transition-all">
-        <svg id="spin-mobile" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"/>
-        </svg>
+      <button onclick="loadAll()" class="w-8 h-8 rounded-lg bg-white/[0.04] border border-white/5 flex items-center justify-center text-gray-400 hover:text-white active:scale-90 transition-all">
+        <svg id="spin-mobile" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
       </button>
     </header>
 
     <!-- Desktop header -->
-    <header class="hidden md:flex sticky top-0 z-30 bg-[#080810]/95 backdrop-blur border-b border-white/5 px-6 items-center justify-between shrink-0" style="height:54px">
+    <header class="hidden md:flex sticky top-0 z-30 bg-[#0a0a0a]/95 backdrop-blur border-b border-white/5 px-6 items-center justify-between shrink-0" style="height:54px">
       <div class="flex items-center gap-3">
         <h1 id="desk-title" class="text-white font-semibold text-base">Dashboard</h1>
-        <svg id="spin-desktop" class="spin hidden w-4 h-4 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <path stroke-linecap="round" d="M12 3a9 9 0 1 0 9 9"/>
-        </svg>
+        <svg id="spin-desktop" class="spin hidden w-4 h-4 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" d="M12 3a9 9 0 1 0 9 9"/></svg>
       </div>
       <div class="flex items-center gap-3">
         <span id="last-refresh" class="text-gray-600 text-xs"></span>
@@ -209,112 +197,168 @@
     <!-- Tab content -->
     <div class="flex-1 px-4 md:px-6 py-5 md:py-6">
 
-      <!-- ── DASHBOARD ───────────────────────────────────────────────────── -->
+      <!-- ── DASHBOARD ──────────────────────────────────────────────────── -->
       <div id="tab-dashboard">
-        <div id="stat-cards" class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5"></div>
-        <div id="inactive-alert" class="hidden mb-5"></div>
-        <div class="grid grid-cols-1 lg:grid-cols-5 gap-4 mb-5">
-          <div class="lg:col-span-3 bg-[#0e0e18] border border-white/5 rounded-2xl p-5 au d1">
+        <div id="dash-kpi" class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5"></div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
+          <div class="lg:col-span-2 card p-5 au d1">
             <div class="flex items-center justify-between mb-4">
-              <p class="text-white text-sm font-semibold">Scans par jour</p>
-              <span class="text-gray-600 text-xs">30 derniers jours</span>
+              <p class="text-white text-sm font-semibold">Inscriptions</p>
+              <span class="text-gray-600 text-xs">12 dernières semaines</span>
             </div>
-            <div class="chart-wrap"><canvas id="chart-scan"></canvas></div>
+            <div class="chart-wrap"><canvas id="chart-growth"></canvas></div>
           </div>
-          <div class="lg:col-span-2 bg-[#0e0e18] border border-white/5 rounded-2xl p-5 au d2">
-            <div class="flex items-center justify-between mb-4">
-              <p class="text-white text-sm font-semibold">Nouveaux clients</p>
-              <span class="text-gray-600 text-xs">Par semaine</span>
-            </div>
-            <div class="chart-wrap"><canvas id="chart-cust"></canvas></div>
+          <div class="card p-5 au d2">
+            <p class="text-white text-sm font-semibold mb-4">Répartition</p>
+            <div id="dash-funnel" class="space-y-2.5"></div>
           </div>
         </div>
-        <div class="bg-[#0e0e18] border border-white/5 rounded-2xl p-5 au d3">
-          <p class="text-white text-sm font-semibold mb-4">Top marchands — 30 jours</p>
-          <div id="top-merchants"></div>
+        <div class="card p-5 au d3">
+          <p class="text-white text-sm font-semibold mb-4">Activité récente</p>
+          <div id="live-feed" class="space-y-2"></div>
         </div>
       </div>
 
-      <!-- ── MERCHANTS ──────────────────────────────────────────────────── -->
-      <div id="tab-merchants" style="display:none">
-        <div class="flex items-center gap-3 mb-5">
-          <div class="relative flex-1">
-            <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
-            </svg>
-            <input id="merchant-search" type="search" placeholder="Rechercher un marchand…"
-                   oninput="filterMerchants(this.value)"
-                   class="w-full bg-gray-900/60 border border-white/6 rounded-xl pl-10 pr-4 py-3 text-gray-200 placeholder-gray-600 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+      <!-- ── BUSINESS ───────────────────────────────────────────────────── -->
+      <div id="tab-business" style="display:none">
+        <div id="biz-kpi" class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5"></div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
+          <div class="lg:col-span-2 card p-5 au d1">
+            <div class="flex items-center justify-between mb-4">
+              <p class="text-white text-sm font-semibold">Évolution MRR</p>
+              <span class="text-gray-600 text-xs">6 derniers mois</span>
+            </div>
+            <div class="chart-wrap"><canvas id="chart-mrr"></canvas></div>
           </div>
-          <span id="merchant-count" class="text-gray-600 text-xs shrink-0 whitespace-nowrap"></span>
+          <div class="card p-5 au d2">
+            <p class="text-white text-sm font-semibold mb-3">Essais expirant bientôt</p>
+            <div id="biz-atrisk" class="space-y-2"></div>
+          </div>
+        </div>
+        <div class="card p-5 au d3">
+          <p class="text-white text-sm font-semibold mb-4">Top 10 marchands — 30 jours</p>
+          <div id="biz-top"></div>
+        </div>
+      </div>
+
+      <!-- ── COMMERÇANTS ────────────────────────────────────────────────── -->
+      <div id="tab-merchants" style="display:none">
+        <div class="flex flex-col sm:flex-row gap-3 mb-4">
+          <div class="relative flex-1">
+            <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
+            <input id="merchant-search" type="search" placeholder="Rechercher un commerçant…"
+                   oninput="applyMerchantFilter()"
+                   class="w-full bg-white/[0.03] border border-white/6 rounded-xl pl-10 pr-4 py-2.5 text-gray-200 placeholder-gray-600 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/40 transition">
+          </div>
+          <span id="merchant-count" class="text-gray-600 text-xs self-center shrink-0 whitespace-nowrap"></span>
+        </div>
+        <div class="flex gap-2 flex-wrap mb-4">
+          <button class="sf-btn active" id="sf-all" onclick="setStatusFilter('')">Tous</button>
+          <button class="sf-btn" id="sf-trial" onclick="setStatusFilter('trial')">Trial</button>
+          <button class="sf-btn" id="sf-active" onclick="setStatusFilter('active')">Actifs</button>
+          <button class="sf-btn" id="sf-suspended" onclick="setStatusFilter('suspended')">Suspendus</button>
+          <button class="sf-btn" id="sf-canceled" onclick="setStatusFilter('canceled')">Annulés</button>
         </div>
         <div id="merchants-list" class="space-y-2.5"></div>
-        <div id="merchants-empty" class="hidden py-16 text-center text-gray-600 text-sm">Aucun marchand.</div>
+        <div id="merchants-empty" class="hidden py-16 text-center text-gray-600 text-sm">Aucun commerçant.</div>
       </div>
 
-      <!-- ── CUSTOMERS ──────────────────────────────────────────────────── -->
-      <div id="tab-customers" style="display:none">
-        <div class="flex items-center gap-3 mb-5">
-          <div class="relative flex-1">
-            <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
-            </svg>
-            <input id="customer-search" type="search" placeholder="Rechercher par prénom ou téléphone…"
-                   oninput="debounceCustomerSearch(this.value)"
-                   class="w-full bg-gray-900/60 border border-white/6 rounded-xl pl-11 pr-4 py-3.5 text-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+      <!-- ── CLIENTS ────────────────────────────────────────────────────── -->
+      <div id="tab-clients" style="display:none">
+        <div id="cust-kpi" class="grid grid-cols-2 gap-3 mb-5"></div>
+        <div class="card p-5 mb-4 au d1" id="cust-chart-card" style="display:none">
+          <div class="flex items-center justify-between mb-4">
+            <p class="text-white text-sm font-semibold">Nouveaux clients</p>
+            <span class="text-gray-600 text-xs">8 dernières semaines</span>
           </div>
-          <span id="customer-count" class="text-gray-600 text-xs shrink-0 whitespace-nowrap"></span>
+          <div class="chart-wrap"><canvas id="chart-new-cust"></canvas></div>
         </div>
-        <div class="bg-[#0e0e18] border border-white/5 rounded-2xl overflow-hidden">
+        <div class="card mb-4" id="cust-top-card" style="display:none">
+          <p class="text-white text-sm font-semibold px-5 py-4 border-b border-white/5">Top clients</p>
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead><tr class="border-b border-white/5">
+                <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Client</th>
+                <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-28">Points</th>
+                <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-28 hidden sm:table-cell">Commerces</th>
+                <th class="text-right px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-36 hidden md:table-cell">Activité</th>
+              </tr></thead>
+              <tbody id="cust-top-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <div class="px-5 py-4 border-b border-white/5 flex items-center gap-3">
+            <div class="relative flex-1">
+              <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
+              <input id="customer-search" type="search" placeholder="Rechercher par prénom ou téléphone…"
+                     oninput="debounceCustomerSearch(this.value)"
+                     class="w-full bg-white/[0.03] border border-white/6 rounded-xl pl-10 pr-4 py-2.5 text-gray-200 placeholder-gray-600 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/40 transition">
+            </div>
+            <span id="customer-count" class="text-gray-600 text-xs shrink-0 whitespace-nowrap"></span>
+          </div>
           <div id="customers-table-wrap" style="display:none" class="overflow-x-auto">
             <table class="w-full">
-              <thead>
-                <tr class="border-b border-white/5">
-                  <th class="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Client</th>
-                  <th class="text-right px-4 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider w-28">Points</th>
-                  <th class="text-right px-4 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider w-28 hidden sm:table-cell">Commerces</th>
-                  <th class="text-right px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider w-36 hidden md:table-cell">Dernière activité</th>
-                </tr>
-              </thead>
+              <thead><tr class="border-b border-white/5">
+                <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Client</th>
+                <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-28">Points</th>
+                <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-28 hidden sm:table-cell">Commerces</th>
+                <th class="text-right px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-36 hidden md:table-cell">Activité</th>
+              </tr></thead>
               <tbody id="customers-tbody"></tbody>
             </table>
           </div>
-          <div id="customers-empty" class="px-5 py-16 text-center">
-            <svg class="w-10 h-10 text-gray-700 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
-            </svg>
+          <div id="customers-empty" class="px-5 py-14 text-center">
+            <svg class="w-10 h-10 text-gray-700 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
             <p class="text-gray-600 text-sm">Recherchez un client par prénom ou téléphone.</p>
           </div>
         </div>
       </div>
 
-      <!-- ── FRAUD ──────────────────────────────────────────────────────── -->
-      <div id="tab-fraud" style="display:none">
-        <div class="mb-5 bg-amber-500/7 border border-amber-500/18 rounded-2xl px-5 py-4">
-          <p class="text-amber-300/80 text-sm leading-relaxed">
-            Clients avec <strong class="text-amber-300">3 tentatives bloquées ou plus</strong> sur les dernières 24h.
-            Le blocage se déclenche quand un client tente d'obtenir des points plusieurs fois le même jour.
-          </p>
-        </div>
-        <div class="bg-[#0e0e18] border border-white/5 rounded-2xl overflow-hidden">
-          <div id="fraud-table-wrap" style="display:none" class="overflow-x-auto">
-            <table class="w-full">
-              <thead>
-                <tr class="border-b border-white/5">
-                  <th class="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Client</th>
-                  <th class="text-right px-4 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider w-36">Tentatives</th>
-                  <th class="text-right px-4 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider w-28 hidden sm:table-cell">Commerces</th>
-                  <th class="text-right px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider w-36 hidden md:table-cell">Dernière tentative</th>
-                </tr>
-              </thead>
-              <tbody id="fraud-tbody"></tbody>
-            </table>
+      <!-- ── ANALYTICS ──────────────────────────────────────────────────── -->
+      <div id="tab-analytics" style="display:none">
+        <div id="ana-kpi" class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5"></div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
+          <div class="lg:col-span-2 card p-5 au d1">
+            <div class="flex items-center justify-between mb-4">
+              <p class="text-white text-sm font-semibold">Activité par heure</p>
+              <span class="text-gray-600 text-xs">30 derniers jours</span>
+            </div>
+            <div class="overflow-x-auto">
+              <div style="min-width:460px">
+                <div class="flex mb-1" style="padding-left:32px" id="heatmap-hours"></div>
+                <div id="heatmap-grid"></div>
+              </div>
+            </div>
           </div>
-          <div id="fraud-empty" class="px-5 py-16 text-center">
-            <svg class="w-12 h-12 text-emerald-500/18 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-            </svg>
-            <p class="text-gray-600 text-sm">Aucune activité suspecte détectée.</p>
+          <div class="card p-5 au d2">
+            <p class="text-white text-sm font-semibold mb-4">Géographie</p>
+            <div id="ana-cities" class="space-y-2.5"></div>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+          <div class="card p-5 au d3">
+            <p class="text-white text-sm font-semibold mb-3">Marchands inactifs <span class="text-xs text-gray-500 font-normal ml-1">aucun scan depuis 7j</span></p>
+            <div id="ana-atrisk" class="space-y-2"></div>
+          </div>
+          <div class="card p-5 au d4">
+            <p class="text-white text-sm font-semibold mb-3">Détection fraude <span class="text-xs text-gray-500 font-normal ml-1">3+ tentatives bloquées / 24h</span></p>
+            <div class="card overflow-hidden">
+              <div id="fraud-table-wrap" style="display:none" class="overflow-x-auto">
+                <table class="w-full">
+                  <thead><tr class="border-b border-white/5">
+                    <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Client</th>
+                    <th class="text-right px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-24">Tentatives</th>
+                    <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-32 hidden sm:table-cell">Dernière</th>
+                  </tr></thead>
+                  <tbody id="fraud-tbody"></tbody>
+                </table>
+              </div>
+              <div id="fraud-empty" class="px-5 py-10 text-center">
+                <svg class="w-10 h-10 text-emerald-500/15 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+                <p class="text-gray-600 text-sm">Aucune activité suspecte.</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -325,28 +369,24 @@
   <!-- Bottom nav (mobile) -->
   <nav id="bottom-nav">
     <button class="bnav-btn active" id="bnav-dashboard" onclick="showTab('dashboard')">
-      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z"/>
-      </svg>
-      Dashboard
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z"/></svg>
+      Accueil
+    </button>
+    <button class="bnav-btn" id="bnav-business" onclick="showTab('business')">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 0 1 5.814-5.518l2.74-1.22m0 0-5.94-2.281m5.94 2.28-2.28 5.941"/></svg>
+      Business
     </button>
     <button class="bnav-btn" id="bnav-merchants" onclick="showTab('merchants')">
-      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016c.896 0 1.7-.393 2.25-1.015a3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72M6.75 18h3.75a.75.75 0 0 0 .75-.75V13.5a.75.75 0 0 0-.75-.75H6.75a.75.75 0 0 0-.75.75v3.75c0 .414.336.75.75.75Z"/>
-      </svg>
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016c.896 0 1.7-.393 2.25-1.015a3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72M6.75 18h3.75a.75.75 0 0 0 .75-.75V13.5a.75.75 0 0 0-.75-.75H6.75a.75.75 0 0 0-.75.75v3.75c0 .414.336.75.75.75Z"/></svg>
       Marchands
     </button>
-    <button class="bnav-btn" id="bnav-customers" onclick="showTab('customers')">
-      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"/>
-      </svg>
+    <button class="bnav-btn" id="bnav-clients" onclick="showTab('clients')">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"/></svg>
       Clients
     </button>
-    <button class="bnav-btn" id="bnav-fraud" onclick="showTab('fraud')">
-      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"/>
-      </svg>
-      Fraude
+    <button class="bnav-btn" id="bnav-analytics" onclick="showTab('analytics')">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0 0 20.25 18V6A2.25 2.25 0 0 0 18 3.75H6A2.25 2.25 0 0 0 3.75 6v12A2.25 2.25 0 0 0 6 20.25Z"/></svg>
+      Analytics
     </button>
   </nav>
 
@@ -354,29 +394,25 @@
 
 <!-- ═══════════════════════════════ MODALS ══════════════════════════════════ -->
 
-<!-- Confirm -->
 <div id="confirm-modal" class="fixed inset-0 z-50 hidden ai">
-  <div class="absolute inset-0 bg-black/65 backdrop-blur-sm" onclick="G('confirm-modal').classList.add('hidden')"></div>
-  <div class="absolute inset-x-4 bottom-4 sm:inset-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-full sm:max-w-sm bg-[#13131f] border border-white/8 rounded-2xl p-6 shadow-2xl si">
+  <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="G('confirm-modal').classList.add('hidden')"></div>
+  <div class="absolute inset-x-4 bottom-4 sm:inset-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-full sm:max-w-sm bg-[#1a1a1a] border border-white/8 rounded-2xl p-6 shadow-2xl si">
     <h3 id="confirm-title" class="text-white font-semibold text-base mb-2"></h3>
     <p id="confirm-msg" class="text-gray-400 text-sm mb-6 leading-relaxed"></p>
     <div class="flex gap-3">
-      <button id="confirm-cancel" class="flex-1 py-3 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-300 font-semibold text-sm transition active:scale-[.98]">Annuler</button>
+      <button id="confirm-cancel" class="flex-1 py-3 rounded-xl bg-white/[0.06] hover:bg-white/10 text-gray-300 font-semibold text-sm transition active:scale-[.98]">Annuler</button>
       <button id="confirm-ok" class="flex-1 py-3 rounded-xl bg-red-600 hover:bg-red-500 text-white font-semibold text-sm transition active:scale-[.98]">Confirmer</button>
     </div>
   </div>
 </div>
 
-<!-- Transaction history -->
 <div id="tx-modal" class="fixed inset-0 z-50 hidden ai">
-  <div class="absolute inset-0 bg-black/65 backdrop-blur-sm" onclick="closeTxModal()"></div>
-  <div class="absolute inset-x-0 bottom-0 sm:inset-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-full sm:max-w-md bg-[#13131f] border border-white/8 rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col si" style="max-height:85vh">
+  <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="closeTxModal()"></div>
+  <div class="absolute inset-x-0 bottom-0 sm:inset-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-full sm:max-w-md bg-[#1a1a1a] border border-white/8 rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col si" style="max-height:85vh">
     <div class="flex items-center justify-between px-6 py-4 border-b border-white/5 shrink-0">
       <h3 id="tx-title" class="text-white font-semibold text-base"></h3>
-      <button onclick="closeTxModal()" class="w-8 h-8 rounded-xl bg-gray-800 hover:bg-gray-700 active:scale-90 flex items-center justify-center text-gray-400 hover:text-white transition-all">
-        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>
-        </svg>
+      <button onclick="closeTxModal()" class="w-8 h-8 rounded-xl bg-white/[0.06] hover:bg-white/10 active:scale-90 flex items-center justify-center text-gray-400 hover:text-white transition-all">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
       </button>
     </div>
     <div id="tx-body" class="overflow-y-auto flex-1 px-6 py-4"></div>
@@ -385,19 +421,21 @@
 
 <!-- ═══════════════════════════════ SCRIPT ══════════════════════════════════ -->
 <script>
-// ── State ─────────────────────────────────────────────────────────────────────
 const SK = 'fidelyzio_admin_pwd';
 let adminPwd = '';
+let currentTab = 'dashboard';
 let allMerchants = [];
-let stats = null;
-let scanChart = null;
-let custChart = null;
+let dashData = null, bizData = null, analyticsData = null, custStatsData = null;
+let fraudData = [];
+let analyticsLoaded = false, custStatsLoaded = false;
+let merchantStatusFilter = '';
+const CHARTS = {};
 let openMerchant = null;
+let searchTimer = null;
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
 function G(id) { return document.getElementById(id); }
 function esc(s) {
-  return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 function fmtDate(iso) {
   if (!iso) return '—';
@@ -426,6 +464,24 @@ function statusBadge(m) {
   const lbl = { trial:'Trial', active:'Actif', suspended:'Suspendu', canceled:'Annulé' };
   return `<span class="inline-flex px-2 py-0.5 rounded-md text-[10px] font-semibold ${cfg[s]||cfg.trial} leading-4">${lbl[s]||'Trial'}</span>`;
 }
+function mkChart(id, config) {
+  if (CHARTS[id]) { CHARTS[id].destroy(); delete CHARTS[id]; }
+  const el = G(id);
+  if (!el) return;
+  CHARTS[id] = new Chart(el, config);
+}
+
+const CHART_OPTS = {
+  responsive: true, maintainAspectRatio: false,
+  plugins: { legend:{display:false}, tooltip:{
+    backgroundColor:'#1c1c1c', titleColor:'#9ca3af', bodyColor:'#f9fafb',
+    borderColor:'#333', borderWidth:1, padding:10, displayColors:false,
+  }},
+  scales: {
+    x: { grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'#6b7280',font:{size:10}}, border:{display:false} },
+    y: { grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'#6b7280',font:{size:10},precision:0}, border:{display:false}, beginAtZero:true },
+  },
+};
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
 async function login() {
@@ -447,7 +503,6 @@ async function login() {
 }
 function logout() {
   localStorage.removeItem(SK);
-  // Clear server-side admin session cookie then reload to the login page
   window.location.href = '/admin-logout';
 }
 
@@ -462,7 +517,6 @@ async function api(path, pwd, opts = {}) {
   } catch { return { error:'Impossible de contacter le serveur.' }; }
 }
 
-// ── Spinners ──────────────────────────────────────────────────────────────────
 function setLoading(on) {
   ['spin-sidebar','spin-mobile','spin-desktop'].forEach(id => {
     const el = G(id); if (!el) return;
@@ -473,112 +527,218 @@ function setLoading(on) {
 // ── Load all ──────────────────────────────────────────────────────────────────
 async function loadAll() {
   setLoading(true);
+  analyticsLoaded = false;
+  custStatsLoaded = false;
   try {
-    const [mRes, sRes, fRes] = await Promise.all([
-      api('/admin/merchants'), api('/admin/stats'), api('/admin/fraud'),
+    const [dashRes, mRes, bRes, fRes] = await Promise.all([
+      api('/admin/dashboard'),
+      api('/admin/merchants'),
+      api('/admin/business'),
+      api('/admin/fraud'),
     ]);
+    if (dashRes.kpi) { dashData = dashRes; renderDashboard(); }
     if (mRes.merchants) { allMerchants = mRes.merchants; renderMerchants(); }
-    if (sRes.scans_per_day) { stats = sRes; renderDashboard(); }
-    if (fRes.flagged) renderFraud(fRes.flagged);
+    if (bRes.mrr !== undefined) { bizData = bRes; renderBusiness(); }
+    if (fRes.flagged) { fraudData = fRes.flagged; updateFraudBadge(fRes.flagged.length); }
     const lr = G('last-refresh');
     if (lr) lr.textContent = 'Mis à jour ' + new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
   } finally { setLoading(false); }
 }
 
 // ── Tabs ──────────────────────────────────────────────────────────────────────
-const TABS   = ['dashboard','merchants','customers','fraud'];
-const TITLES = { dashboard:'Dashboard', merchants:'Marchands', customers:'Clients', fraud:'Fraude' };
+const TABS   = ['dashboard','business','merchants','clients','analytics'];
+const TITLES = { dashboard:'Dashboard', business:'Business', merchants:'Commerçants', clients:'Clients', analytics:'Analytics' };
 
 function showTab(id) {
+  currentTab = id;
   TABS.forEach(t => {
-    G(`tab-${t}`).style.display = t === id ? 'block' : 'none';
+    const panel = G(`tab-${t}`);
+    if (panel) panel.style.display = t === id ? 'block' : 'none';
     const s = G(`snav-${t}`); if (s) s.classList.toggle('active', t === id);
     const b = G(`bnav-${t}`); if (b) b.classList.toggle('active', t === id);
   });
   const title = TITLES[id] || '';
   const mt = G('mob-title');  if (mt) mt.textContent = title;
   const dt = G('desk-title'); if (dt) dt.textContent = title;
-  if (id === 'customers' && !G('customers-tbody').innerHTML) loadCustomers('');
+  if (id === 'clients' && !custStatsLoaded) loadCustStats();
+  if (id === 'analytics' && !analyticsLoaded) loadAnalytics();
+  if (id === 'clients' && !G('customers-tbody').innerHTML) loadCustomers('');
 }
 
 // ── Dashboard ─────────────────────────────────────────────────────────────────
 function renderDashboard() {
-  if (!stats) return;
-  const totalC = allMerchants.reduce((s, m) => s + Number(m.customer_count), 0);
-  const totalP = allMerchants.reduce((s, m) => s + Number(m.total_points), 0);
+  if (!dashData) return;
+  const { kpi, funnel, growth_weeks, live_feed } = dashData;
 
-  const cards = [
-    { label:'Marchands',        value: allMerchants.length,            color:'indigo',
-      icon:'M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016c.896 0 1.7-.393 2.25-1.015a3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72M6.75 18h3.75a.75.75 0 0 0 .75-.75V13.5a.75.75 0 0 0-.75-.75H6.75a.75.75 0 0 0-.75.75v3.75c0 .414.336.75.75.75Z' },
-    { label:'Clients fidélisés', value: totalC.toLocaleString('fr-FR'), color:'emerald',
-      icon:'M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z' },
-    { label:'Points distribués', value: totalP.toLocaleString('fr-FR'), color:'amber',
-      icon:'M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z' },
-    { label:"Scans aujourd'hui", value: (stats.scans_today||0).toLocaleString('fr-FR'), color:'blue',
-      icon:'M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5Z M6.75 6.75h.75v.75h-.75v-.75ZM6.75 16.5h.75v.75h-.75V16.5ZM16.5 6.75h.75v.75h-.75v-.75ZM13.5 13.5h.75v.75h-.75v-.75ZM13.5 19.5h.75v.75h-.75v-.75ZM19.5 13.5h.75v.75h-.75v-.75ZM19.5 19.5h.75v.75h-.75v-.75ZM16.5 16.5h.75v.75h-.75v-.75Z' },
+  const kpiCards = [
+    { label:'Actifs payants', value: kpi.active, sub: null, color:'emerald',
+      icon:'M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z' },
+    { label:'MRR', value: `${kpi.mrr}€`, sub: `ARR ~${kpi.mrr*12}€`, color:'amber',
+      icon:'M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm3 0h.008v.008H18V10.5Zm-12 0h.008v.008H6V10.5Z' },
+    { label:'Nouveaux ce mois', value: kpi.new_this_month, sub: null, color:'blue',
+      icon:'M12 4.5v15m7.5-7.5h-15' },
+    { label:'En trial', value: kpi.trial, sub: kpi.churn_rate > 0 ? `Churn ${kpi.churn_rate}%` : null, color:'yellow',
+      icon:'M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z' },
   ];
   const CC = {
-    indigo:  {bg:'bg-indigo-500/10',  bd:'border-indigo-500/18',  ic:'text-indigo-400'},
-    emerald: {bg:'bg-emerald-500/10', bd:'border-emerald-500/18', ic:'text-emerald-400'},
-    amber:   {bg:'bg-amber-500/10',   bd:'border-amber-500/18',   ic:'text-amber-400'},
-    blue:    {bg:'bg-blue-500/10',    bd:'border-blue-500/18',    ic:'text-blue-400'},
+    emerald:{bg:'bg-emerald-500/10',bd:'border-emerald-500/20',ic:'text-emerald-400'},
+    amber:  {bg:'bg-amber-500/10', bd:'border-amber-500/20', ic:'text-amber-400'},
+    blue:   {bg:'bg-blue-500/10',  bd:'border-blue-500/20',  ic:'text-blue-400'},
+    yellow: {bg:'bg-yellow-500/10',bd:'border-yellow-500/20',ic:'text-yellow-400'},
   };
-  G('stat-cards').innerHTML = cards.map((c, i) => {
+  G('dash-kpi').innerHTML = kpiCards.map((c, i) => {
     const cl = CC[c.color];
-    return `<div class="bg-[#0e0e18] border border-white/5 rounded-2xl p-5 au d${i+1}">
-      <div class="flex items-start justify-between mb-4">
+    return `<div class="card p-5 au d${i+1}">
+      <div class="flex items-start justify-between mb-3">
         <p class="text-gray-500 text-xs font-medium uppercase tracking-wider leading-tight">${c.label}</p>
-        <div class="w-9 h-9 rounded-xl ${cl.bg} border ${cl.bd} flex items-center justify-center shrink-0 ml-2">
-          <svg class="w-4.5 h-4.5 w-5 h-5 ${cl.ic}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-            <path stroke-linecap="round" stroke-linejoin="round" d="${c.icon}"/>
-          </svg>
+        <div class="w-8 h-8 rounded-xl ${cl.bg} border ${cl.bd} flex items-center justify-center shrink-0 ml-2">
+          <svg class="w-4 h-4 ${cl.ic}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="${c.icon}"/></svg>
         </div>
       </div>
       <p class="text-3xl font-black text-white">${c.value}</p>
+      ${c.sub ? `<p class="text-gray-500 text-xs mt-1">${c.sub}</p>` : ''}
     </div>`;
   }).join('');
 
-  // Inactive alert
-  const inactive = stats.inactive_merchants || [];
-  if (inactive.length > 0) {
-    G('inactive-alert').classList.remove('hidden');
-    G('inactive-alert').innerHTML = `<div class="bg-red-500/7 border border-red-500/18 rounded-2xl p-4">
-      <p class="text-red-300/80 text-xs font-semibold uppercase tracking-wider mb-3">
-        ${inactive.length} marchand${inactive.length>1?'s':''} inactif${inactive.length>1?'s':''} depuis plus de 7 jours
-      </p>
-      <div class="flex flex-wrap gap-2">
-        ${inactive.map(m => `<div class="flex items-center gap-2 bg-red-500/8 border border-red-500/12 rounded-xl px-3 py-2">
-          <div class="w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs font-bold shrink-0" style="background:${m.color||'#6366f1'}">${esc(m.name).charAt(0)}</div>
-          <div>
-            <p class="text-white text-xs font-medium leading-none">${esc(m.name)}</p>
-            <p class="text-red-400/60 text-[10px] mt-0.5">${m.last_scan ? fmtRel(m.last_scan) : 'Jamais'}</p>
-          </div>
-        </div>`).join('')}
+  // Growth chart
+  mkChart('chart-growth', {
+    type: 'bar',
+    data: {
+      labels: growth_weeks.map(w => w.label),
+      datasets: [{ data: growth_weeks.map(w => w.count),
+        backgroundColor:'rgba(245,158,11,0.5)', hoverBackgroundColor:'rgba(245,158,11,0.8)',
+        borderRadius:4, borderSkipped:false }],
+    },
+    options: { ...CHART_OPTS,
+      scales: { ...CHART_OPTS.scales,
+        x: { ...CHART_OPTS.scales.x, ticks:{...CHART_OPTS.scales.x.ticks, maxRotation:30, maxTicksLimit:12} } }
+    },
+  });
+
+  // Funnel
+  const total = funnel.total || 1;
+  const funnelItems = [
+    { label:'Total inscrits', count: funnel.total, pct:100, color:'#6b7280' },
+    { label:'En trial',       count: funnel.trial, pct: Math.round(funnel.trial/total*100), color:'#EAB308' },
+    { label:'Actifs',         count: funnel.active, pct: Math.round(funnel.active/total*100), color:'#22c55e' },
+    { label:'Suspendus',      count: funnel.suspended, pct: Math.round(funnel.suspended/total*100), color:'#ef4444' },
+  ];
+  G('dash-funnel').innerHTML = funnelItems.map(f => `
+    <div>
+      <div class="flex items-center justify-between mb-1">
+        <span class="text-gray-400 text-xs">${f.label}</span>
+        <span class="text-white text-xs font-semibold">${f.count}</span>
       </div>
+      <div class="h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
+        <div class="h-full rounded-full transition-all" style="width:${f.pct}%;background:${f.color}"></div>
+      </div>
+    </div>`).join('');
+
+  // Live feed
+  if (!live_feed || !live_feed.length) {
+    G('live-feed').innerHTML = '<p class="text-gray-600 text-sm">Aucune activité récente.</p>';
+    return;
+  }
+  G('live-feed').innerHTML = live_feed.map(tx => `
+    <div class="flex items-center gap-3 py-2.5 border-b border-white/[0.04] last:border-0">
+      <div class="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-bold shrink-0" style="background:${tx.color||'#333'}">${esc(tx.merchant_name||'?').charAt(0)}</div>
+      <div class="flex-1 min-w-0">
+        <p class="text-white text-sm font-medium truncate">${esc(tx.customer_name)} chez ${esc(tx.merchant_name)}</p>
+        <p class="text-gray-600 text-xs">${fmtRel(tx.created_at)}</p>
+      </div>
+      <span class="text-amber-400 font-semibold text-sm shrink-0">+${tx.points || 1}</span>
+    </div>`).join('');
+}
+
+// ── Business ──────────────────────────────────────────────────────────────────
+function renderBusiness() {
+  if (!bizData) return;
+  const { mrr, arr, active, trial, conversion_rate, churn_rate, at_risk, top_merchants, mrr_evolution } = bizData;
+
+  const kpiCards = [
+    { label:'MRR', value:`${mrr}€`, sub:`${active} abonnés × 29€`, color:'amber' },
+    { label:'ARR', value:`${arr}€`, sub:'Projection annuelle', color:'emerald' },
+    { label:'Conversion trial', value:`${conversion_rate}%`, sub:`${active} actifs / ${active+trial} total`, color:'blue' },
+    { label:'Taux de churn', value:`${churn_rate}%`, sub:'Annulés / total', color: churn_rate > 15 ? 'red' : 'gray' },
+  ];
+  const CC = {
+    amber:  {bg:'bg-amber-500/10', bd:'border-amber-500/20', ic:'text-amber-400'},
+    emerald:{bg:'bg-emerald-500/10',bd:'border-emerald-500/20',ic:'text-emerald-400'},
+    blue:   {bg:'bg-blue-500/10',  bd:'border-blue-500/20',  ic:'text-blue-400'},
+    red:    {bg:'bg-red-500/10',   bd:'border-red-500/20',   ic:'text-red-400'},
+    gray:   {bg:'bg-gray-500/10',  bd:'border-gray-500/20',  ic:'text-gray-400'},
+  };
+  const icons = {
+    amber: 'M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm3 0h.008v.008H18V10.5Zm-12 0h.008v.008H6V10.5Z',
+    emerald:'M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 0 1 5.814-5.518l2.74-1.22m0 0-5.94-2.281m5.94 2.28-2.28 5.941',
+    blue:   'M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z',
+    red:    'M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z',
+    gray:   'M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 0 1 5.814-5.518l2.74-1.22m0 0-5.94-2.281m5.94 2.28-2.28 5.941',
+  };
+  G('biz-kpi').innerHTML = kpiCards.map((c, i) => {
+    const cl = CC[c.color] || CC.gray;
+    return `<div class="card p-5 au d${i+1}">
+      <div class="flex items-start justify-between mb-3">
+        <p class="text-gray-500 text-xs font-medium uppercase tracking-wider leading-tight">${c.label}</p>
+        <div class="w-8 h-8 rounded-xl ${cl.bg} border ${cl.bd} flex items-center justify-center shrink-0 ml-2">
+          <svg class="w-4 h-4 ${cl.ic}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="${icons[c.color]||icons.gray}"/></svg>
+        </div>
+      </div>
+      <p class="text-3xl font-black text-white">${c.value}</p>
+      <p class="text-gray-500 text-xs mt-1">${c.sub}</p>
     </div>`;
+  }).join('');
+
+  // MRR evolution
+  mkChart('chart-mrr', {
+    type: 'line',
+    data: {
+      labels: mrr_evolution.map(m => m.label),
+      datasets: [{ data: mrr_evolution.map(m => m.mrr),
+        borderColor:'#F59E0B', backgroundColor:'rgba(245,158,11,0.08)',
+        fill:true, tension:0.4, pointRadius:3, pointBackgroundColor:'#F59E0B',
+        pointHoverRadius:5, borderWidth:2 }],
+    },
+    options: { ...CHART_OPTS,
+      scales: { ...CHART_OPTS.scales,
+        y: { ...CHART_OPTS.scales.y, ticks:{ ...CHART_OPTS.scales.y.ticks,
+          callback: v => `${v}€` } } }
+    },
+  });
+
+  // At risk
+  if (!at_risk.length) {
+    G('biz-atrisk').innerHTML = '<p class="text-gray-600 text-sm py-2">Aucun essai expirant bientôt.</p>';
   } else {
-    G('inactive-alert').classList.add('hidden');
+    G('biz-atrisk').innerHTML = at_risk.map(m => `
+      <div class="flex items-center gap-3 py-2.5 border-b border-white/[0.04] last:border-0">
+        <div class="flex-1 min-w-0">
+          <p class="text-white text-sm font-medium truncate">${esc(m.name)}</p>
+          <p class="text-gray-600 text-xs truncate">${esc(m.email)}</p>
+        </div>
+        <span class="text-yellow-400 text-xs font-semibold shrink-0">${m.days_left}j</span>
+      </div>`).join('');
   }
 
-  renderCharts(stats.scans_per_day, stats.customers_per_day);
-
   // Top merchants
-  const top = stats.top_merchants || [];
-  if (!top.length) { G('top-merchants').innerHTML = '<p class="text-gray-600 text-sm">Aucune donnée.</p>'; return; }
-  const maxScans = Math.max(...top.map(x => x.scan_count), 1);
-  G('top-merchants').innerHTML = `<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-    ${top.map((m, i) => {
+  if (!top_merchants.length) {
+    G('biz-top').innerHTML = '<p class="text-gray-600 text-sm">Aucune donnée.</p>';
+    return;
+  }
+  const maxScans = Math.max(...top_merchants.map(m => m.scan_count), 1);
+  G('biz-top').innerHTML = `<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+    ${top_merchants.map((m, i) => {
       const pct = Math.round((m.scan_count / maxScans) * 100);
-      return `<div class="flex items-center gap-3 bg-[#0b0b14] border border-white/5 rounded-xl px-4 py-3">
+      return `<div class="flex items-center gap-3 bg-white/[0.02] border border-white/5 rounded-xl px-4 py-3">
         <span class="text-gray-600 text-xs font-semibold w-4 shrink-0 text-right">${i+1}</span>
-        <div class="w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm font-bold shrink-0" style="background:${m.color||'#6366f1'}">${esc(m.name).charAt(0)}</div>
+        <div class="w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm font-bold shrink-0" style="background:${m.color||'#555'}">${esc(m.name).charAt(0)}</div>
         <div class="flex-1 min-w-0">
           <div class="flex items-center justify-between mb-1.5">
             <span class="text-white text-sm font-medium truncate mr-2">${esc(m.name)}</span>
             <span class="text-gray-500 text-xs shrink-0">${m.scan_count} scans</span>
           </div>
-          <div class="h-1.5 rounded-full bg-gray-800 overflow-hidden">
-            <div class="h-full rounded-full" style="width:${pct}%;background:${m.color||'#6366f1'}"></div>
+          <div class="h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
+            <div class="h-full rounded-full bg-amber-500" style="width:${pct}%"></div>
           </div>
         </div>
       </div>`;
@@ -586,73 +746,26 @@ function renderDashboard() {
   </div>`;
 }
 
-function renderCharts(scansData, customersData) {
-  const OPTS = {
-    responsive: true, maintainAspectRatio: false,
-    plugins: { legend:{display:false}, tooltip:{
-      backgroundColor:'#1c1c28', titleColor:'#9ca3af', bodyColor:'#f9fafb',
-      borderColor:'#2d2d3a', borderWidth:1, padding:10, displayColors:false,
-    }},
-    scales: {
-      x: { grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'#6b7280',font:{size:10}}, border:{display:false} },
-      y: { grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'#6b7280',font:{size:10},precision:0}, border:{display:false}, beginAtZero:true },
-    },
-  };
-
-  const days  = fillDays(scansData, 30);
-  if (scanChart) { scanChart.destroy(); scanChart = null; }
-  const sc = G('chart-scan');
-  if (sc) scanChart = new Chart(sc, {
-    type:'line',
-    data:{ labels: days.map(d=>d.day.slice(5)), datasets:[{
-      data: days.map(d=>d.count), borderColor:'#6366f1',
-      backgroundColor:'rgba(99,102,241,0.08)', fill:true, tension:0.4,
-      pointRadius:0, pointHoverRadius:4, pointHoverBackgroundColor:'#6366f1', borderWidth:2,
-    }]},
-    options:{ ...OPTS, scales:{ ...OPTS.scales, x:{...OPTS.scales.x, ticks:{...OPTS.scales.x.ticks, maxTicksLimit:7}} } },
+// ── Commerçants ───────────────────────────────────────────────────────────────
+function applyMerchantFilter() {
+  const q = (G('merchant-search')?.value || '').trim().toLowerCase();
+  let list = allMerchants;
+  if (merchantStatusFilter) list = list.filter(m => (m.subscription_status||'trial') === merchantStatusFilter);
+  if (q) list = list.filter(m => m.name.toLowerCase().includes(q) || m.email.toLowerCase().includes(q));
+  renderMerchants(list);
+}
+function setStatusFilter(s) {
+  merchantStatusFilter = s;
+  ['all','trial','active','suspended','canceled'].forEach(k => {
+    const el = G(`sf-${k}`);
+    if (el) el.classList.toggle('active', (k==='all'&&s==='') || k===s);
   });
-
-  const weeks = groupByWeek(customersData, 8);
-  if (custChart) { custChart.destroy(); custChart = null; }
-  const cc = G('chart-cust');
-  if (cc) custChart = new Chart(cc, {
-    type:'bar',
-    data:{ labels: weeks.map(w=>w.label), datasets:[{
-      data: weeks.map(w=>w.count),
-      backgroundColor:'rgba(34,197,94,0.55)', hoverBackgroundColor:'rgba(34,197,94,0.8)',
-      borderRadius:4, borderSkipped:false,
-    }]},
-    options:{ ...OPTS, scales:{ ...OPTS.scales, x:{...OPTS.scales.x, ticks:{...OPTS.scales.x.ticks, maxRotation:30, maxTicksLimit:8}} } },
-  });
+  applyMerchantFilter();
 }
 
-function fillDays(data, n) {
-  const r = [];
-  for (let i = n-1; i >= 0; i--) {
-    const d = new Date(Date.now() - i*86400000);
-    const day = d.toISOString().slice(0,10);
-    const hit = data.find(x => String(x.day).slice(0,10) === day);
-    r.push({ day, count: hit ? Number(hit.count) : 0 });
-  }
-  return r;
-}
-function groupByWeek(data, nW) {
-  const today = new Date(); today.setHours(0,0,0,0);
-  return Array.from({length:nW}, (_,i) => {
-    const ws = new Date(today); ws.setDate(today.getDate() - (nW-i)*7);
-    const we = new Date(ws);    we.setDate(ws.getDate() + 7);
-    const s  = ws.toISOString().slice(0,10);
-    const e  = we.toISOString().slice(0,10);
-    const count = data.filter(d => String(d.day).slice(0,10) >= s && String(d.day).slice(0,10) < e)
-      .reduce((n,d) => n+Number(d.count), 0);
-    return { label: ws.toLocaleDateString('fr-FR',{day:'numeric',month:'short'}), count };
-  });
-}
-
-// ── Merchants ─────────────────────────────────────────────────────────────────
 function renderMerchants(data) {
   const list = data ?? allMerchants;
-  G('merchant-count').textContent = `${list.length} marchand${list.length>1?'s':''}`;
+  G('merchant-count').textContent = `${list.length} commerçant${list.length>1?'s':''}`;
   if (!list.length) {
     G('merchants-empty').classList.remove('hidden');
     G('merchants-list').innerHTML = '';
@@ -662,11 +775,10 @@ function renderMerchants(data) {
 
   G('merchants-list').innerHTML = list.map(m => {
     const initial    = (m.name||'?').charAt(0).toUpperCase();
-    const color      = m.color || '#6366f1';
+    const color      = m.color || '#555';
     const isDisabled = Number(m.disabled) === 1;
     return `
-    <div class="bg-[#0e0e18] border border-white/5 rounded-2xl overflow-hidden" id="mcard-${m.id}">
-      <!-- Header -->
+    <div class="card overflow-hidden" id="mcard-${m.id}">
       <div class="flex items-center gap-3 px-4 py-4 cursor-pointer hover:bg-white/[0.02] transition-colors select-none"
            onclick="toggleMerchant(${m.id})">
         <div class="w-11 h-11 rounded-xl flex items-center justify-center text-white text-sm font-bold shrink-0 ${isDisabled?'opacity-35':''}"
@@ -692,11 +804,14 @@ function renderMerchants(data) {
           <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/>
         </svg>
       </div>
-      <!-- Action bar -->
-      <div class="border-t border-white/5 px-4 py-3 flex items-center gap-2.5 flex-wrap">
+      <div class="border-t border-white/5 px-4 py-3 flex items-center gap-2 flex-wrap">
         <select onchange="updatePlan(${m.id}, this.value)"
-                class="bg-gray-800/70 border border-gray-700/50 rounded-lg px-2.5 py-1.5 text-gray-300 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer">
+                class="bg-white/[0.04] border border-white/8 rounded-lg px-2.5 py-1.5 text-gray-300 text-xs focus:outline-none cursor-pointer">
           ${['free','pro','enterprise'].map(p=>`<option value="${p}"${m.plan===p?' selected':''}>${p.charAt(0).toUpperCase()+p.slice(1)}</option>`).join('')}
+        </select>
+        <select onchange="updateStatus(${m.id}, this.value)"
+                class="bg-white/[0.04] border border-white/8 rounded-lg px-2.5 py-1.5 text-gray-300 text-xs focus:outline-none cursor-pointer">
+          ${['trial','active','suspended','canceled'].map(s=>`<option value="${s}"${(m.subscription_status||'trial')===s?' selected':''}>${{trial:'Trial',active:'Actif',suspended:'Suspendu',canceled:'Annulé'}[s]}</option>`).join('')}
         </select>
         <div class="flex items-center gap-2">
           <label class="tog">
@@ -707,32 +822,20 @@ function renderMerchants(data) {
         </div>
         <button onclick="extendTrial(${m.id},'${esc(m.name)}')"
                 class="flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-lg bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500/18 transition active:scale-[.97]">
-          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-          </svg>
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
           +7j trial
         </button>
         <button onclick="confirmDelete(${m.id},'${esc(m.name)}')"
                 class="ml-auto flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/18 transition active:scale-[.97]">
-          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/>
-          </svg>
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/></svg>
           Supprimer
         </button>
       </div>
-      <!-- Customers panel -->
       <div id="detail-${m.id}" class="hidden border-t border-white/5 detail-panel">
         <div id="dcont-${m.id}" class="p-4"></div>
       </div>
     </div>`;
   }).join('');
-}
-
-function filterMerchants(q) {
-  const lq = q.trim().toLowerCase();
-  renderMerchants(lq ? allMerchants.filter(m =>
-    m.name.toLowerCase().includes(lq) || m.email.toLowerCase().includes(lq)
-  ) : allMerchants);
 }
 
 async function toggleMerchant(id) {
@@ -755,7 +858,6 @@ async function toggleMerchant(id) {
   const data = await api(`/admin/merchants/${id}/customers`);
   if (!data.customers) { cont.innerHTML = '<p class="text-red-400 text-sm py-2">Erreur de chargement.</p>'; return; }
   if (!data.customers.length) { cont.innerHTML = '<p class="text-gray-600 text-sm py-2">Aucun client inscrit.</p>'; return; }
-
   cont.innerHTML = `<p class="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-3">${data.customers.length} client${data.customers.length>1?'s':''}</p>
     <div class="overflow-x-auto">
       <table class="w-full">
@@ -768,14 +870,14 @@ async function toggleMerchant(id) {
           ${data.customers.map(c => `<tr class="border-t border-white/[0.03] hover:bg-white/[0.02]">
             <td class="py-3 pr-4">
               <div class="flex items-center gap-2.5">
-                <div class="w-7 h-7 rounded-lg bg-gray-700/60 flex items-center justify-center text-white text-xs font-semibold shrink-0">${esc(c.first_name).charAt(0).toUpperCase()}</div>
+                <div class="w-7 h-7 rounded-lg bg-white/[0.06] flex items-center justify-center text-white text-xs font-semibold shrink-0">${esc(c.first_name).charAt(0).toUpperCase()}</div>
                 <div>
                   <p class="text-white text-sm font-medium">${esc(c.first_name)}</p>
                   <p class="text-gray-600 text-xs">${esc(c.phone||'')}</p>
                 </div>
               </div>
             </td>
-            <td class="py-3 px-3 text-right"><span class="text-white font-bold text-sm">${c.points}</span><span class="text-gray-600 text-xs"> pts</span></td>
+            <td class="py-3 px-3 text-right"><span class="text-amber-400 font-bold text-sm">${c.points}</span><span class="text-gray-600 text-xs"> pts</span></td>
             <td class="py-3 text-right text-gray-500 text-xs hidden sm:table-cell">${fmtRel(c.last_visit)}</td>
           </tr>`).join('')}
         </tbody>
@@ -787,14 +889,16 @@ async function updatePlan(id, plan) {
   const r = await api(`/admin/merchants/${id}`, null, {method:'PATCH', body:JSON.stringify({plan})});
   if (!r.error) { const m = allMerchants.find(x=>x.id===id); if (m) m.plan = plan; }
 }
+async function updateStatus(id, subscription_status) {
+  const r = await api(`/admin/merchants/${id}`, null, {method:'PATCH', body:JSON.stringify({subscription_status})});
+  if (!r.error) { const m = allMerchants.find(x=>x.id===id); if (m) { m.subscription_status = subscription_status; } renderMerchants(); }
+}
 async function toggleDisabled(id, disable) {
   const r = await api(`/admin/merchants/${id}`, null, {method:'PATCH', body:JSON.stringify({disabled:disable})});
-  if (!r.error) { const m = allMerchants.find(x=>x.id===id); if(m) m.disabled = disable?1:0; renderMerchants(); }
+  if (!r.error) { const m = allMerchants.find(x=>x.id===id); if(m) m.disabled = disable?1:0; renderMerchants(); applyMerchantFilter(); }
 }
 function extendTrial(id, name) {
-  showConfirm(
-    `Prolonger le trial de ${name} ?`,
-    'Ajoute 7 jours supplémentaires. Le statut repassera en "Trial" si suspendu.',
+  showConfirm(`Prolonger le trial de ${name} ?`, 'Ajoute 7 jours. Le statut repassera en "Trial" si suspendu.',
     async () => {
       const r = await api(`/admin/merchants/${id}/trial`, null, {method:'PATCH', body:JSON.stringify({days:7})});
       if (!r.error) {
@@ -806,21 +910,72 @@ function extendTrial(id, name) {
   );
 }
 function confirmDelete(id, name) {
-  showConfirm(
-    `Supprimer ${name} ?`,
-    'Action irréversible. Toutes les données seront supprimées.',
+  showConfirm(`Supprimer ${name} ?`, 'Action irréversible. Toutes les données seront supprimées.',
     async () => {
       const r = await api(`/admin/merchants/${id}`, null, {method:'DELETE'});
-      if (!r.error) { allMerchants = allMerchants.filter(m=>m.id!==id); renderMerchants(); if(stats) renderDashboard(); }
+      if (!r.error) { allMerchants = allMerchants.filter(m=>m.id!==id); applyMerchantFilter(); if(dashData) renderDashboard(); }
     }
   );
 }
 
-// ── Customers ─────────────────────────────────────────────────────────────────
-let searchTimer = null;
+// ── Clients ───────────────────────────────────────────────────────────────────
+async function loadCustStats() {
+  custStatsLoaded = true;
+  const r = await api('/admin/customers/stats');
+  if (r.total !== undefined) { custStatsData = r; renderCustStats(r); }
+}
+function renderCustStats(data) {
+  const weeklyNew = data.new_per_week ? data.new_per_week.reduce((s, w) => s + w.count, 0) : 0;
+  const lastWeek  = data.new_per_week ? (data.new_per_week[data.new_per_week.length-1]||{}).count||0 : 0;
+  G('cust-kpi').innerHTML = `
+    <div class="card p-5 au d1">
+      <p class="text-gray-500 text-xs font-medium uppercase tracking-wider mb-3">Total clients</p>
+      <p class="text-3xl font-black text-white">${(data.total||0).toLocaleString('fr-FR')}</p>
+    </div>
+    <div class="card p-5 au d2">
+      <p class="text-gray-500 text-xs font-medium uppercase tracking-wider mb-3">Nouveaux cette semaine</p>
+      <p class="text-3xl font-black text-white">${lastWeek}</p>
+      <p class="text-gray-500 text-xs mt-1">${weeklyNew} sur 8 semaines</p>
+    </div>`;
+
+  if (data.new_per_week && data.new_per_week.length) {
+    G('cust-chart-card').style.display = 'block';
+    mkChart('chart-new-cust', {
+      type: 'bar',
+      data: {
+        labels: data.new_per_week.map(w => w.label),
+        datasets: [{ data: data.new_per_week.map(w => w.count),
+          backgroundColor:'rgba(245,158,11,0.45)', hoverBackgroundColor:'rgba(245,158,11,0.7)',
+          borderRadius:4, borderSkipped:false }],
+      },
+      options: { ...CHART_OPTS,
+        scales: { ...CHART_OPTS.scales,
+          x: { ...CHART_OPTS.scales.x, ticks:{...CHART_OPTS.scales.x.ticks, maxRotation:30} } }
+      },
+    });
+  }
+
+  if (data.top_customers && data.top_customers.length) {
+    G('cust-top-card').style.display = 'block';
+    G('cust-top-tbody').innerHTML = data.top_customers.map(c => `
+      <tr class="border-b border-white/[0.04] last:border-0 row-hover" onclick="openTxModal(${c.id},'${esc(c.first_name)}')">
+        <td class="px-5 py-3.5">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-xl bg-white/[0.06] flex items-center justify-center text-white text-sm font-bold shrink-0">${esc(c.first_name).charAt(0).toUpperCase()}</div>
+            <div><p class="text-white font-semibold text-sm">${esc(c.first_name)}</p><p class="text-gray-500 text-xs">${esc(c.phone||'')}</p></div>
+          </div>
+        </td>
+        <td class="px-4 py-3.5 text-right"><span class="text-amber-400 font-bold">${c.total_points.toLocaleString('fr-FR')}</span><span class="text-gray-600 text-xs"> pts</span></td>
+        <td class="px-4 py-3.5 text-right hidden sm:table-cell"><span class="text-gray-300">${c.merchant_count}</span><span class="text-gray-600 text-xs"> commerces</span></td>
+        <td class="px-5 py-3.5 text-right text-gray-500 text-xs hidden md:table-cell">${fmtRel(c.last_activity)}</td>
+      </tr>`).join('');
+  }
+}
+
+let searchTimer2 = null;
 function debounceCustomerSearch(q) {
-  clearTimeout(searchTimer);
-  searchTimer = setTimeout(() => loadCustomers(q), 300);
+  clearTimeout(searchTimer2);
+  searchTimer2 = setTimeout(() => loadCustomers(q), 300);
 }
 async function loadCustomers(q) {
   const r = await api(`/admin/customers?q=${encodeURIComponent(q)}`);
@@ -838,21 +993,12 @@ function renderCustomers(customers) {
     <tr class="border-b border-white/[0.04] last:border-0 row-hover" onclick="openTxModal(${c.id},'${esc(c.first_name)}')">
       <td class="px-5 py-4">
         <div class="flex items-center gap-3">
-          <div class="w-9 h-9 rounded-xl bg-gray-800/80 flex items-center justify-center text-white text-sm font-bold shrink-0">${esc(c.first_name).charAt(0).toUpperCase()}</div>
-          <div class="min-w-0">
-            <p class="text-white font-semibold text-sm">${esc(c.first_name)}</p>
-            <p class="text-gray-500 text-xs mt-0.5">${esc(c.phone||'')}</p>
-          </div>
+          <div class="w-9 h-9 rounded-xl bg-white/[0.06] flex items-center justify-center text-white text-sm font-bold shrink-0">${esc(c.first_name).charAt(0).toUpperCase()}</div>
+          <div><p class="text-white font-semibold text-sm">${esc(c.first_name)}</p><p class="text-gray-500 text-xs">${esc(c.phone||'')}</p></div>
         </div>
       </td>
-      <td class="px-4 py-4 text-right">
-        <span class="text-white font-bold text-base">${Number(c.total_points).toLocaleString('fr-FR')}</span>
-        <span class="text-gray-600 text-xs"> pts</span>
-      </td>
-      <td class="px-4 py-4 text-right hidden sm:table-cell">
-        <span class="text-gray-300 font-medium text-sm">${Number(c.merchant_count)}</span>
-        <span class="text-gray-600 text-xs"> commerces</span>
-      </td>
+      <td class="px-4 py-4 text-right"><span class="text-white font-bold">${Number(c.total_points).toLocaleString('fr-FR')}</span><span class="text-gray-600 text-xs"> pts</span></td>
+      <td class="px-4 py-4 text-right hidden sm:table-cell"><span class="text-gray-300 font-medium">${Number(c.merchant_count)}</span><span class="text-gray-600 text-xs"> commerces</span></td>
       <td class="px-5 py-4 text-right text-gray-500 text-xs hidden md:table-cell">${fmtRel(c.last_activity)}</td>
     </tr>`).join('');
 }
@@ -867,8 +1013,8 @@ async function openTxModal(id, name) {
   G('tx-body').innerHTML = data.history.map(tx => {
     const blocked = Number(tx.blocked) === 1;
     return `<div class="flex items-center gap-3 py-3 border-b border-white/[0.04] last:border-0">
-      <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${blocked?'bg-red-500/15':'bg-emerald-500/10'}">
-        <svg class="w-4 h-4 ${blocked?'text-red-400':'text-emerald-400'}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+      <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${blocked?'bg-red-500/15':'bg-amber-500/10'}">
+        <svg class="w-4 h-4 ${blocked?'text-red-400':'text-amber-400'}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
           <path stroke-linecap="round" stroke-linejoin="round" d="${blocked?'M6 18 18 6M6 6l12 12':'M4.5 12.75l6 6 9-13.5'}"/>
         </svg>
       </div>
@@ -876,36 +1022,127 @@ async function openTxModal(id, name) {
         <p class="text-white text-sm font-medium truncate">${esc(tx.merchant_name)}</p>
         <p class="text-gray-600 text-xs mt-0.5">${fmtDate(tx.created_at)}</p>
       </div>
-      <p class="font-bold text-sm shrink-0 ${blocked?'text-red-400':'text-emerald-400'}">${blocked?'Bloqué':`+${tx.points} pts`}</p>
+      <p class="font-bold text-sm shrink-0 ${blocked?'text-red-400':'text-amber-400'}">${blocked?'Bloqué':`+${tx.points} pts`}</p>
     </div>`;
   }).join('');
 }
 function closeTxModal() { G('tx-modal').classList.add('hidden'); }
 
-// ── Fraud ─────────────────────────────────────────────────────────────────────
+// ── Analytics ─────────────────────────────────────────────────────────────────
+async function loadAnalytics() {
+  analyticsLoaded = true;
+  const [aRes, fRes] = await Promise.all([api('/admin/analytics'), api('/admin/fraud')]);
+  if (aRes.heatmap) { analyticsData = aRes; renderAnalytics(aRes); }
+  if (fRes.flagged) { fraudData = fRes.flagged; renderFraud(fRes.flagged); updateFraudBadge(fRes.flagged.length); }
+}
+
+function renderAnalytics(data) {
+  const total = (data.points_count||0) + (data.stamps_count||0);
+  const pPct  = total > 0 ? Math.round(data.points_count/total*100) : 0;
+  const sPct  = total > 0 ? Math.round(data.stamps_count/total*100) : 0;
+  G('ana-kpi').innerHTML = `
+    <div class="card p-5 au d1">
+      <p class="text-gray-500 text-xs font-medium uppercase tracking-wider mb-3">Points distribués</p>
+      <p class="text-3xl font-black text-white">${(data.points_count||0).toLocaleString('fr-FR')}</p>
+      <p class="text-gray-500 text-xs mt-1">${pPct}% des transactions</p>
+    </div>
+    <div class="card p-5 au d2">
+      <p class="text-gray-500 text-xs font-medium uppercase tracking-wider mb-3">Tampons distribués</p>
+      <p class="text-3xl font-black text-white">${(data.stamps_count||0).toLocaleString('fr-FR')}</p>
+      <p class="text-gray-500 text-xs mt-1">${sPct}% des transactions</p>
+    </div>
+    <div class="card p-5 au d3">
+      <p class="text-gray-500 text-xs font-medium uppercase tracking-wider mb-3">Moy. scans / jour</p>
+      <p class="text-3xl font-black text-white">${data.avg_scans_per_day||0}</p>
+      <p class="text-gray-500 text-xs mt-1">30 derniers jours</p>
+    </div>
+    <div class="card p-5 au d4">
+      <p class="text-gray-500 text-xs font-medium uppercase tracking-wider mb-3">Taux de rédemption</p>
+      <p class="text-3xl font-black text-white">${data.redemption_rate||0}%</p>
+      <p class="text-gray-500 text-xs mt-1">Récompenses échangées</p>
+    </div>`;
+
+  // Heatmap
+  renderHeatmap(data.heatmap || []);
+
+  // Cities
+  const cities = data.city_distribution || [];
+  if (!cities.length) {
+    G('ana-cities').innerHTML = '<p class="text-gray-600 text-sm">Données insuffisantes.</p>';
+  } else {
+    const maxCnt = Math.max(...cities.map(c => c.cnt), 1);
+    G('ana-cities').innerHTML = cities.map(c => `
+      <div>
+        <div class="flex items-center justify-between mb-1">
+          <span class="text-gray-300 text-xs truncate mr-2">${esc(c.city)}</span>
+          <span class="text-white text-xs font-semibold shrink-0">${c.cnt}</span>
+        </div>
+        <div class="h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
+          <div class="h-full rounded-full bg-amber-500/60" style="width:${Math.round(c.cnt/maxCnt*100)}%"></div>
+        </div>
+      </div>`).join('');
+  }
+
+  // At-risk merchants
+  const atRisk = data.at_risk_merchants || [];
+  if (!atRisk.length) {
+    G('ana-atrisk').innerHTML = '<p class="text-emerald-400/60 text-sm py-2">Tous les marchands sont actifs.</p>';
+  } else {
+    G('ana-atrisk').innerHTML = atRisk.map(m => `
+      <div class="flex items-center gap-3 py-2.5 border-b border-white/[0.04] last:border-0">
+        <div class="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-bold shrink-0" style="background:${m.color||'#555'}">${esc(m.name).charAt(0)}</div>
+        <div class="flex-1 min-w-0">
+          <p class="text-white text-sm font-medium truncate">${esc(m.name)}</p>
+          <p class="text-gray-600 text-xs">${m.last_scan ? fmtRel(m.last_scan) : 'Jamais scanné'}</p>
+        </div>
+      </div>`).join('');
+  }
+}
+
+function renderHeatmap(heatmap) {
+  if (!heatmap || !heatmap.length) {
+    G('heatmap-grid').innerHTML = '<p class="text-gray-600 text-sm">Données insuffisantes.</p>';
+    return;
+  }
+  const DAYS = ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+  const maxVal = Math.max(...heatmap.flat(), 1);
+
+  const hourLabels = Array.from({length:24}, (_, h) => {
+    return `<span class="heatmap-h">${h % 4 === 0 ? h+'h' : ''}</span>`;
+  }).join('');
+  G('heatmap-hours').innerHTML = hourLabels;
+
+  G('heatmap-grid').innerHTML = heatmap.map((dayData, di) => {
+    const cells = dayData.map((val, h) => {
+      const bg = val > 0
+        ? `rgba(245,158,11,${Math.max(0.12, val/maxVal).toFixed(2)})`
+        : 'rgba(255,255,255,0.04)';
+      return `<div class="heatmap-cell" style="background:${bg}" title="${DAYS[di]} ${h}h — ${val} scan${val>1?'s':''}"></div>`;
+    }).join('');
+    return `<div class="heatmap-row"><span class="heatmap-label">${DAYS[di]}</span>${cells}</div>`;
+  }).join('');
+}
+
 function renderFraud(flagged) {
-  const badge = G('fraud-badge');
-  if (flagged.length) { badge.textContent = flagged.length; badge.classList.remove('hidden'); }
-  else badge.classList.add('hidden');
   G('fraud-empty').style.display      = flagged.length ? 'none'  : 'block';
   G('fraud-table-wrap').style.display = flagged.length ? 'block' : 'none';
   G('fraud-tbody').innerHTML = flagged.map(f => `
     <tr class="border-b border-white/[0.04] last:border-0">
-      <td class="px-5 py-4">
+      <td class="px-4 py-3.5">
         <div class="flex items-center gap-3">
-          <div class="w-9 h-9 rounded-xl bg-red-500/15 flex items-center justify-center text-red-400 text-sm font-bold shrink-0">${esc(f.first_name).charAt(0).toUpperCase()}</div>
-          <div>
-            <p class="text-white font-semibold text-sm">${esc(f.first_name)}</p>
-            <p class="text-gray-500 text-xs mt-0.5">${esc(f.phone||'')}</p>
-          </div>
+          <div class="w-8 h-8 rounded-xl bg-red-500/15 flex items-center justify-center text-red-400 text-sm font-bold shrink-0">${esc(f.first_name).charAt(0).toUpperCase()}</div>
+          <div><p class="text-white font-semibold text-sm">${esc(f.first_name)}</p><p class="text-gray-500 text-xs">${esc(f.phone||'')}</p></div>
         </div>
       </td>
-      <td class="px-4 py-4 text-right">
-        <span class="inline-flex px-2.5 py-1 rounded-lg bg-red-500/15 text-red-400 font-bold text-sm">${f.blocked_count}</span>
-      </td>
-      <td class="px-4 py-4 text-right text-gray-400 text-sm hidden sm:table-cell">${f.merchant_count}</td>
-      <td class="px-5 py-4 text-right text-gray-500 text-xs hidden md:table-cell">${fmtRel(f.last_attempt)}</td>
+      <td class="px-3 py-3.5 text-right"><span class="inline-flex px-2 py-0.5 rounded-md bg-red-500/15 text-red-400 font-bold text-sm">${f.blocked_count}</span></td>
+      <td class="px-4 py-3.5 text-right text-gray-500 text-xs hidden sm:table-cell">${fmtRel(f.last_attempt)}</td>
     </tr>`).join('');
+}
+
+function updateFraudBadge(count) {
+  const badge = G('fraud-badge');
+  if (count > 0) { badge.textContent = count; badge.classList.remove('hidden'); }
+  else badge.classList.add('hidden');
 }
 
 // ── Confirm dialog ────────────────────────────────────────────────────────────
@@ -913,7 +1150,7 @@ function showConfirm(title, msg, onOk, okLabel='Supprimer', isDanger=true) {
   G('confirm-title').textContent = title;
   G('confirm-msg').textContent   = msg;
   G('confirm-ok').textContent    = okLabel;
-  G('confirm-ok').className = `flex-1 py-3 rounded-xl ${isDanger?'bg-red-600 hover:bg-red-500':'bg-indigo-600 hover:bg-indigo-500'} text-white font-semibold text-sm transition active:scale-[.98]`;
+  G('confirm-ok').className = `flex-1 py-3 rounded-xl ${isDanger?'bg-red-600 hover:bg-red-500':'bg-amber-500 hover:bg-amber-400 text-black'} text-white font-semibold text-sm transition active:scale-[.98]`;
   const modal = G('confirm-modal');
   modal.classList.remove('hidden');
   const close = () => modal.classList.add('hidden');

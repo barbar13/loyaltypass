@@ -9,6 +9,7 @@ if (process.env.NODE_ENV === 'production' && !process.env.JWT_SECRET) {
 const express    = require('express');
 const path       = require('path');
 const fs         = require('fs');
+const crypto     = require('crypto');
 const QRCode     = require('qrcode');
 const rateLimit  = require('express-rate-limit');
 
@@ -105,6 +106,37 @@ app.use('/api/customers/recover',          enrollLimiter);
 app.use('/api/contact',                    enrollLimiter);
 app.use('/api/',                            generalLimiter);
 
+// ── Admin page server-side auth ───────────────────────────────────────────────
+
+function adminSessionToken(password) {
+  return crypto.createHmac('sha256', password).update('fidelyzio-admin-session-v1').digest('hex');
+}
+
+function parseCookie(req, name) {
+  return (req.headers.cookie || '').split(';')
+    .map(c => c.trim()).find(c => c.startsWith(name + '='))
+    ?.slice(name.length + 1) ?? null;
+}
+
+function adminPageAuth(req, res, next) {
+  const password = process.env.ADMIN_PASSWORD;
+  if (!password) return next(); // dev: no password set → open
+  const cookie = parseCookie(req, 'admin_tok');
+  if (cookie && crypto.timingSafeEqual(
+    Buffer.from(cookie),
+    Buffer.from(adminSessionToken(password))
+  )) return next();
+  return res.redirect('/admin-login');
+}
+
+const adminLoginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: 'Trop de tentatives.',
+});
+
 // ── Static pages ──────────────────────────────────────────────────────────────
 const PUBLIC       = path.join(__dirname, '../public');
 const SCANNER_DIST = path.join(__dirname, '../scanner/dist');
@@ -112,7 +144,25 @@ const SCANNER_DIST = path.join(__dirname, '../scanner/dist');
 app.get('/enroll/:merchantId',  (_req, res) => res.sendFile(path.join(PUBLIC, 'enroll.html')));
 app.get('/card/:qrCode',        (_req, res) => res.sendFile(path.join(PUBLIC, 'card.html')));
 app.get('/my-card',             (_req, res) => res.sendFile(path.join(PUBLIC, 'my-card.html')));
-app.get('/admin',               (_req, res) => res.sendFile(path.join(PUBLIC, 'admin.html')));
+app.get('/admin',               adminPageAuth, (_req, res) => res.sendFile(path.join(PUBLIC, 'admin.html')));
+app.get('/admin-login',         (_req, res) => res.sendFile(path.join(PUBLIC, 'admin-login.html')));
+app.post('/admin-login', express.urlencoded({ extended: false }), adminLoginLimiter, (req, res) => {
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  const { password }  = req.body;
+  if (!adminPassword || !password || password !== adminPassword) {
+    return res.redirect('/admin-login?error=1');
+  }
+  const token  = adminSessionToken(adminPassword);
+  const isProd = process.env.NODE_ENV === 'production';
+  res.setHeader('Set-Cookie',
+    `admin_tok=${token}; HttpOnly; SameSite=Strict; Max-Age=${8 * 3600}; Path=/${isProd ? '; Secure' : ''}`
+  );
+  res.redirect('/admin');
+});
+app.get('/admin-logout', (_req, res) => {
+  res.setHeader('Set-Cookie', 'admin_tok=; HttpOnly; SameSite=Strict; Max-Age=0; Path=/');
+  res.redirect('/admin-login');
+});
 app.get('/login',               (_req, res) => res.sendFile(path.join(PUBLIC, 'login.html')));
 app.get('/register',            (_req, res) => res.sendFile(path.join(PUBLIC, 'register.html')));
 app.get('/forgot-password',     (_req, res) => res.sendFile(path.join(PUBLIC, 'forgot-password.html')));

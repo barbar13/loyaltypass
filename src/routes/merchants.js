@@ -368,8 +368,8 @@ router.post('/reset-password', async (req, res) => {
 
     const hashed = await bcrypt.hash(password, SALT_ROUNDS);
     await db.run(
-      'UPDATE merchants SET password = $1, reset_token = NULL, reset_token_exp = NULL WHERE id = $2',
-      [hashed, merchant.id]
+      'UPDATE merchants SET password = $1, reset_token = NULL, reset_token_exp = NULL, password_changed_at = $3 WHERE id = $2',
+      [hashed, merchant.id, new Date().toISOString()]
     );
     res.json({ message: 'Mot de passe mis à jour.' });
   } catch (err) {
@@ -395,6 +395,8 @@ router.post('/profile', auth, async (req, res) => {
       if (password.length < 8) return res.status(400).json({ error: 'Minimum 8 caractères' });
       params.push(await bcrypt.hash(password, SALT_ROUNDS));
       sets.push(`password = $${params.length}`);
+      params.push(new Date().toISOString());
+      sets.push(`password_changed_at = $${params.length}`);
     }
     if (!sets.length) return res.status(400).json({ error: 'Rien à mettre à jour' });
     params.push(merchantId);

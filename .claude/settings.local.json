@@ -49,7 +49,20 @@
       "Bash(git checkout *)",
       "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\titou\\\\loyaltypass\" -Recurse -ErrorAction SilentlyContinue)",
       "Bash(Select-Object -First 20)",
-      "Bash(npx web-push *)"
+      "Bash(npx web-push *)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\titou\\\\loyaltypass\" -Depth 0 | Where-Object {$_.PSIsContainer} | Select-Object Name)",
+      "Bash(grep -E \"\\\\.env$|\\\\.env\\\\.\")",
+      "Bash(npm audit *)",
+      "Bash(node -e \"const d=require\\('fs'\\).readFileSync\\('/dev/stdin','utf8'\\); try { const j=JSON.parse\\(d\\); const v=j.vulnerabilities||{}; const keys=Object.keys\\(v\\); if\\(!keys.length\\){console.log\\('No vulnerabilities found'\\)}else{keys.slice\\(0,20\\).forEach\\(k=>{const vul=v[k]; console.log\\(vul.severity.toUpperCase\\(\\)+' | '+k+' | '+vul.title\\)}\\)} } catch\\(e\\) { console.log\\(d.slice\\(0,500\\)\\); }\")",
+      "Bash(sed -i \"s/res.status\\(500\\).json\\({ error: 'Erreur serveur', detail: err.message }\\)/res.status\\(500\\).json\\({ error: 'Erreur serveur' }\\)/g\" src/routes/customers.js src/routes/scan.js)",
+      "Bash(sed -i \"s/res.status\\(500\\).json\\({ error: 'Erreur lors du scan', detail: err.message }\\)/res.status\\(500\\).json\\({ error: 'Erreur lors du scan' }\\)/g\" src/routes/scan.js)",
+      "Bash(sed -i \"s/res.status\\(500\\).json\\({ error: err.message }\\)/res.status\\(500\\).json\\({ error: 'Erreur serveur' }\\)/g\" src/routes/billing.js src/routes/google-wallet.js src/routes/notifications.js)",
+      "Bash(sed -i \"s/res.status\\(500\\).json\\({ error: 'Erreur génération du pass', detail: err.message }\\)/res.status\\(500\\).json\\({ error: 'Erreur génération du pass' }\\)/g\" src/routes/cards.js)",
+      "Bash(sed -i \"s/return res.status\\(500\\).json\\({ error: 'Erreur lors du scan', detail: err.message }\\)/return res.status\\(500\\).json\\({ error: 'Erreur lors du scan' }\\)/g\" src/routes/cards.js)",
+      "Bash(node -e \"require\\('./src/index.js'\\)\")",
+      "Bash(node --check src/middleware/auth.js)",
+      "Bash(node --check src/index.js)",
+      "Bash(node --check src/routes/merchants.js)"
     ]
   }
 }

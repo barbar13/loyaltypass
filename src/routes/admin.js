@@ -37,7 +37,7 @@ router.patch('/merchants/:id/trial', adminAuth, async (req, res) => {
     );
     const updated = await db.one('SELECT id, name, subscription_status, trial_ends_at FROM merchants WHERE id = $1', [id]);
     res.json({ merchant: updated });
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) { res.status(500).json({ error: 'Erreur serveur' }); }
 });
 
 // GET /api/admin/merchants
@@ -69,7 +69,7 @@ router.get('/merchants', adminAuth, async (req, res) => {
 
     res.json({ merchants, totals });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Erreur serveur' });
   }
 });
 
@@ -94,7 +94,7 @@ router.patch('/merchants/:id', adminAuth, async (req, res) => {
     );
     res.json({ merchant: updated });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Erreur serveur' });
   }
 });
 
@@ -107,7 +107,7 @@ router.delete('/merchants/:id', adminAuth, async (req, res) => {
     await db.run('DELETE FROM merchants WHERE id = $1', [id]);
     res.json({ success: true });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Erreur serveur' });
   }
 });
 
@@ -129,7 +129,7 @@ router.get('/merchants/:id/customers', adminAuth, async (req, res) => {
     `, [id, id]);
     res.json({ customers });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Erreur serveur' });
   }
 });
 
@@ -189,7 +189,7 @@ router.get('/stats', adminAuth, async (req, res) => {
       scans_today: Number(total_scans_today),
     });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Erreur serveur' });
   }
 });
 
@@ -216,7 +216,7 @@ router.get('/customers', adminAuth, async (req, res) => {
 
     res.json({ customers });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Erreur serveur' });
   }
 });
 
@@ -255,7 +255,7 @@ router.get('/customers/:id/transactions', adminAuth, async (req, res) => {
 
     res.json({ customer, history });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Erreur serveur' });
   }
 });
 
@@ -281,7 +281,7 @@ router.get('/fraud', adminAuth, async (req, res) => {
 
     res.json({ flagged: flagged.map(f => ({ ...f, blocked_count: Number(f.blocked_count), merchant_count: Number(f.merchant_count) })) });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Erreur serveur' });
   }
 });
 

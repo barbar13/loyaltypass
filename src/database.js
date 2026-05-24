@@ -11,7 +11,10 @@ if (process.env.DATABASE_URL) {
   const { Pool } = pg;
   const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    // Render's managed PostgreSQL requires SSL; skip cert verification for self-signed certs
+    // rejectUnauthorized: false is required by Render's free PostgreSQL tier which uses
+    // self-signed certificates. Render manages the network perimeter (no public DB exposure),
+    // so MitM risk is acceptable here. Switch to { rejectUnauthorized: true, ca: ... }
+    // if you move to a provider that supplies a trusted CA certificate.
     ssl: process.env.DATABASE_URL.includes('localhost') ? false : { rejectUnauthorized: false },
     max: 10,
   });
@@ -119,6 +122,7 @@ if (process.env.DATABASE_URL) {
       ['city',                   'TEXT'],
       ['lat',                    'DOUBLE PRECISION'],
       ['lng',                    'DOUBLE PRECISION'],
+      ['password_changed_at',    'TIMESTAMPTZ'],
     ];
     const customerMigrations    = [['email', 'TEXT'], ['cgu_accepted_at', 'TIMESTAMPTZ']];
     const membershipMigrations  = [['stamps_count', 'INTEGER NOT NULL DEFAULT 0']];
@@ -273,6 +277,7 @@ if (process.env.DATABASE_URL) {
   mcAdd('city',                   'TEXT');
   mcAdd('lat',                    'REAL');
   mcAdd('lng',                    'REAL');
+  mcAdd('password_changed_at',    'DATETIME');
 
   // memberships extra columns
   const mbCols = sqlite.prepare('PRAGMA table_info(memberships)').all();

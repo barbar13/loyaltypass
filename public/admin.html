@@ -447,9 +447,8 @@ async function login() {
 }
 function logout() {
   localStorage.removeItem(SK);
-  G('s-login').style.display = 'flex';
-  G('s-dashboard').style.display = 'none';
-  G('pwd-input').value = ''; adminPwd = '';
+  // Clear server-side admin session cookie then reload to the login page
+  window.location.href = '/admin-logout';
 }
 
 // ── API ───────────────────────────────────────────────────────────────────────

@@ -1317,8 +1317,9 @@ function TopClientsTable({ customers }) {
   const [page,    setPage]    = useState(0);
   const PAGE = 10;
 
-  const d30 = new Date(Date.now() - 30 * 86400000).toISOString();
-  const maxPts = customers.length > 0 ? Math.max(...customers.map(c => c.points), 1) : 1;
+  const d30      = new Date(Date.now() - 30 * 86400000).toISOString();
+  const maxPts   = customers.length > 0 ? Math.max(...customers.map(c => c.points), 1) : 1;
+  const hasStamps = customers.some(c => (c.stamps_count ?? 0) > 0);
 
   function status(c) {
     const isActive = c.last_visit && c.last_visit > d30;
@@ -1404,6 +1405,7 @@ function TopClientsTable({ customers }) {
                 <ThCol col="first_name">Nom</ThCol>
                 <th className="text-left px-3 md:px-4 py-3 md:py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Téléphone</th>
                 <ThCol col="points">Points</ThCol>
+                {hasStamps && <ThCol col="stamps_count" className="hidden sm:table-cell">Tampons</ThCol>}
                 <ThCol col="visit_count" className="hidden md:table-cell">Visites</ThCol>
                 <ThCol col="last_visit">Dernière visite</ThCol>
                 <th className="text-left px-3 md:px-4 py-3 md:py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Statut</th>
@@ -1426,6 +1428,12 @@ function TopClientsTable({ customers }) {
                       <span className="text-white font-bold text-sm">{Number(c.points).toLocaleString('fr-FR')}</span>
                       <span className="text-gray-600 text-xs"> pts</span>
                     </td>
+                    {hasStamps && (
+                      <td className="px-3 md:px-4 py-3 md:py-3.5 hidden sm:table-cell">
+                        <span className="text-amber-300 font-bold text-sm">{Number(c.stamps_count ?? 0).toLocaleString('fr-FR')}</span>
+                        <span className="text-gray-600 text-xs"> t.</span>
+                      </td>
+                    )}
                     <td className="px-3 md:px-4 py-3 md:py-3.5 text-gray-300 text-sm hidden md:table-cell">{c.visit_count ?? '—'}</td>
                     <td className="px-3 md:px-4 py-3 md:py-3.5 text-gray-500 text-xs">{fmtDate(c.last_visit)}</td>
                     <td className="px-3 md:px-4 py-3 md:py-3.5">
@@ -1705,12 +1713,25 @@ function AnalyticsTab({ token, color }) {
       )}
 
       {/* ── Row 1: KPI cards ─────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <KpiCard label="Total clients"     value={totalCustomers.toLocaleString('fr-FR')} sub="inscrits" borderColor={CHART_COLORS.indigo} />
-        <KpiCard label="Scans"             value={periodScans.toLocaleString('fr-FR')} sub={periodLabel} borderColor={CHART_COLORS.amber} />
-        <KpiCard label="Points distribués" value={ptsDist.toLocaleString('fr-FR')} sub={periodLabel} borderColor={CHART_COLORS.emerald} />
-        <KpiCard label="Récompenses"       value={data.total_redeemed.toLocaleString('fr-FR')} sub={periodLabel} borderColor={CHART_COLORS.rose} />
-      </div>
+      {(() => {
+        const kpiCards = [
+          { label: 'Total clients',     value: totalCustomers.toLocaleString('fr-FR'), sub: 'inscrits',   borderColor: CHART_COLORS.indigo  },
+          { label: 'Scans',             value: periodScans.toLocaleString('fr-FR'),    sub: periodLabel,  borderColor: CHART_COLORS.amber   },
+          { label: 'Points distribués', value: ptsDist.toLocaleString('fr-FR'),        sub: periodLabel,  borderColor: CHART_COLORS.emerald },
+          stDist > 0
+            ? { label: 'Tampons distribués', value: stDist.toLocaleString('fr-FR'), sub: periodLabel, borderColor: CHART_COLORS.violet }
+            : null,
+          { label: 'Récompenses',       value: data.total_redeemed.toLocaleString('fr-FR'), sub: periodLabel, borderColor: CHART_COLORS.rose },
+        ].filter(Boolean);
+        const gridCls = kpiCards.length === 5
+          ? 'grid-cols-2 md:grid-cols-5'
+          : 'grid-cols-2 md:grid-cols-4';
+        return (
+          <div className={`grid ${gridCls} gap-3`}>
+            {kpiCards.map(c => <KpiCard key={c.label} label={c.label} value={c.value} sub={c.sub} borderColor={c.borderColor} />)}
+          </div>
+        );
+      })()}
 
       {/* ── Row 2: Scans/day (3/5) + Weekday (2/5) ───────────────────────────── */}
       <div className="grid md:grid-cols-5 gap-3 md:gap-4">

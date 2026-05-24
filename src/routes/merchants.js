@@ -507,7 +507,7 @@ router.get('/analytics', auth, async (req, res) => {
 
     const [memberships, allTxns] = await Promise.all([
       db.all(`
-        SELECT mb.customer_id, mb.points, mb.joined_at,
+        SELECT mb.customer_id, mb.points, mb.stamps_count, mb.joined_at,
                c.first_name, c.phone,
                MAX(CASE WHEN t.points > 0 THEN t.created_at END) AS last_visit,
                COUNT(CASE WHEN t.points > 0 THEN 1 END)          AS visit_count
@@ -516,7 +516,7 @@ router.get('/analytics', auth, async (req, res) => {
         LEFT JOIN transactions t
           ON t.merchant_id = mb.merchant_id AND t.customer_id = mb.customer_id
         WHERE mb.merchant_id = $1
-        GROUP BY mb.customer_id, mb.points, mb.joined_at, c.first_name, c.phone
+        GROUP BY mb.customer_id, mb.points, mb.stamps_count, mb.joined_at, c.first_name, c.phone
       `, [merchantId]),
       db.all(
         'SELECT id, customer_id, points, type, note, created_at FROM transactions WHERE merchant_id = $1 ORDER BY created_at',
@@ -543,8 +543,9 @@ router.get('/analytics', auth, async (req, res) => {
 
     const topCustomers = memberships
       .map(m => ({ first_name: m.first_name, phone: m.phone, points: Number(m.points),
+                   stamps_count: Number(m.stamps_count || 0),
                    visit_count: Number(m.visit_count), last_visit: m.last_visit }))
-      .sort((a, b) => b.points - a.points).slice(0, 50);
+      .sort((a, b) => b.points - a.points || b.stamps_count - a.stamps_count).slice(0, 50);
 
     const lostCustomers = inactiveCustomers
       .sort((a, b) => (toTs(a.last_visit) || 0) - (toTs(b.last_visit) || 0)).slice(0, 20)

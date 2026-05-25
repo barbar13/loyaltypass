@@ -9,16 +9,29 @@
   <title>Ma carte Fidelyzio</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="apple-touch-icon" href="/favicon.svg">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="/css/fidelyzio-design.css">
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          keyframes: {
+            'fade-up':  { from: { opacity:'0', transform:'translateY(14px)' }, to: { opacity:'1', transform:'translateY(0)' } },
+            'scale-in': { from: { opacity:'0', transform:'scale(0.92)' },      to: { opacity:'1', transform:'scale(1)' }      },
+            'pop':      { '0%':{ transform:'scale(0.8)',opacity:'0' }, '70%':{ transform:'scale(1.05)' }, '100%':{ transform:'scale(1)',opacity:'1' } },
+          },
+          animation: {
+            'fade-up':  'fade-up 0.4s cubic-bezier(0.16,1,0.3,1) both',
+            'scale-in': 'scale-in 0.35s cubic-bezier(0.16,1,0.3,1) both',
+            'pop':      'pop 0.4s cubic-bezier(0.34,1.56,0.64,1) both',
+          },
+        },
+      },
+    };
+  </script>
   <style>
     *, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     html, body { min-height: 100%; overscroll-behavior: none; }
-    body { background: var(--bg); color: var(--ink);
-      font-family: "Geist", ui-sans-serif, system-ui, -apple-system, "Helvetica Neue", sans-serif;
-      -webkit-font-smoothing: antialiased; }
+    body { background: #0f0f14; color: white; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
     .pt-safe { padding-top: max(1.5rem, env(safe-area-inset-top)); }
     .pb-safe { padding-bottom: max(1.5rem, env(safe-area-inset-bottom)); }
     .delay-1 { animation-delay:.06s; } .delay-2 { animation-delay:.12s; }
@@ -32,7 +45,7 @@
     #ptr-bar {
       position: fixed; top: 0; left: 0; right: 0; z-index: 200;
       height: 48px; display: flex; align-items: center; justify-content: center; gap: 8px;
-      background: rgba(250,246,238,.97); border-bottom: 1px solid var(--line);
+      background: rgba(10,10,20,.95); border-bottom: 1px solid rgba(99,102,241,.2);
       transform: translateY(-100%); transition: transform .25s cubic-bezier(.16,1,.3,1);
       pointer-events: none;
     }
@@ -40,141 +53,129 @@
     #ptr-spinner { animation: ptr-spin 0.8s linear infinite; display: none; }
     #ptr-spinner.active { display: block; }
     @keyframes ptr-spin { to { transform: rotate(360deg); } }
-
-    /* Override Tailwind dark utilities for page chrome */
-    .text-white { color: var(--ink) !important; }
-    .text-gray-300 { color: var(--ink-2) !important; }
-    .text-gray-400, .text-gray-500 { color: var(--muted) !important; }
-    .text-gray-600, .text-gray-700 { color: var(--muted) !important; }
-    .bg-gray-900 { background: var(--card) !important; }
-    .border-white\/5 { border-color: var(--line) !important; }
-    .border-t-white\/60 { border-top-color: rgba(26,20,16,0.25) !important; }
-    .border-white\/10 { border-color: rgba(26,20,16,0.1) !important; }
-    /* Redemption amber stays amber — don't override text-amber-400 */
-    .text-amber-400 { color: var(--amber-2) !important; }
-    .bg-emerald-500\/15 { background: rgba(31,122,77,.1) !important; }
-    .text-emerald-400 { color: var(--green) !important; }
   </style>
 </head>
 <body>
 
-<!-- ── Homescreen prompt modal ── -->
-<div id="hs-overlay" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.5);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)">
-  <div style="position:absolute;bottom:0;left:0;right:0;background:var(--card);border-radius:28px 28px 0 0;padding:28px 20px max(28px,env(safe-area-inset-bottom)) 20px;max-height:90dvh;overflow-y:auto;font-family:'Geist',ui-sans-serif,system-ui,-apple-system,sans-serif">
+<!-- ── Homescreen prompt modal ─────────────────────────────────────────────── -->
+<div id="hs-overlay" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.65);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)">
+  <div style="position:absolute;bottom:0;left:0;right:0;background:#111827;border-radius:28px 28px 0 0;padding:28px 20px max(28px,env(safe-area-inset-bottom)) 20px;max-height:90dvh;overflow-y:auto">
 
-    <div style="width:36px;height:4px;background:var(--line);border-radius:9999px;margin:0 auto 24px"></div>
+    <!-- Drag handle -->
+    <div style="width:36px;height:4px;background:#374151;border-radius:9999px;margin:0 auto 24px"></div>
 
     <!-- Phase 1: Prompt -->
     <div id="hs-prompt">
       <div style="display:flex;justify-content:center;margin-bottom:16px">
-        <div style="width:60px;height:60px;border-radius:16px;background:var(--amber-soft);border:2px solid rgba(245,158,11,.3);display:flex;align-items:center;justify-content:center">
-          <svg width="30" height="30" fill="none" viewBox="0 0 24 24" stroke="var(--amber-2)" stroke-width="2">
+        <div style="width:60px;height:60px;border-radius:16px;background:#6366f1;display:flex;align-items:center;justify-content:center;box-shadow:0 12px 32px rgba(99,102,241,.4)">
+          <svg width="30" height="30" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/>
           </svg>
         </div>
       </div>
-      <h2 data-i18n="hs_title" style="color:var(--ink);font-size:20px;font-weight:700;text-align:center;margin-bottom:10px;letter-spacing:-.01em">Ajoutez votre carte à l'écran d'accueil</h2>
-      <p data-i18n="hs_desc" style="color:var(--muted);font-size:14px;text-align:center;line-height:1.65;margin-bottom:6px">Accédez à vos points en 1 tap, sans ouvrir le navigateur. Comme une vraie app de fidélité.</p>
-      <p data-i18n="hs_rec" style="color:var(--amber-2);font-size:12px;font-weight:700;text-align:center;margin-bottom:24px;letter-spacing:.04em">VIVEMENT RECOMMANDÉ</p>
-      <button data-i18n="hs_add_btn" onclick="showHsTutorial()" style="display:block;width:100%;padding:15px;border-radius:14px;background:var(--ink);color:#FFF8EA;font-size:15px;font-weight:600;border:none;cursor:pointer;margin-bottom:10px;font-family:inherit;transition:background .15s" onmouseover="this.style.background='#2A211B'" onmouseout="this.style.background='var(--ink)'">
+      <h2 data-i18n="hs_title" style="color:#f9fafb;font-size:20px;font-weight:800;text-align:center;margin-bottom:10px;letter-spacing:-.01em">Ajoutez votre carte à l'écran d'accueil</h2>
+      <p data-i18n="hs_desc" style="color:#9ca3af;font-size:14px;text-align:center;line-height:1.65;margin-bottom:6px">Accédez à vos points en 1 tap, sans ouvrir le navigateur. Comme une vraie app de fidélité.</p>
+      <p data-i18n="hs_rec" style="color:#6366f1;font-size:12px;font-weight:700;text-align:center;margin-bottom:24px;letter-spacing:.02em">VIVEMENT RECOMMANDÉ</p>
+      <button data-i18n="hs_add_btn" onclick="showHsTutorial()" style="display:block;width:100%;padding:15px;border-radius:14px;background:#6366f1;color:white;font-size:15px;font-weight:700;border:none;cursor:pointer;margin-bottom:10px;transition:filter .15s" onmouseover="this.style.filter='brightness(1.1)'" onmouseout="this.style.filter=''">
         Ajouter à mon écran d'accueil
       </button>
-      <button data-i18n="hs_skip" onclick="dismissHs()" style="display:block;width:100%;padding:14px;border-radius:14px;background:transparent;color:var(--muted);font-size:14px;font-weight:500;border:1px solid var(--line-2);cursor:pointer;font-family:inherit">
+      <button data-i18n="hs_skip" onclick="dismissHs()" style="display:block;width:100%;padding:14px;border-radius:14px;background:transparent;color:#6b7280;font-size:14px;font-weight:500;border:1px solid #374151;cursor:pointer">
         Continuer sans
       </button>
     </div>
 
-    <!-- Phase 2: Tutorial -->
+    <!-- Phase 2: Tutorial (hidden until "Ajouter" chosen) -->
     <div id="hs-tutorial" style="display:none">
-      <div style="display:flex;background:var(--bg-2);border-radius:12px;padding:3px;gap:3px;margin-bottom:20px">
-        <button id="hs-tab-ios" onclick="hsShowOs('ios')" style="flex:1;padding:8px;border-radius:9px;border:none;cursor:pointer;font-size:12px;font-weight:600;transition:all .15s;font-family:inherit">
+      <!-- OS tab switcher -->
+      <div style="display:flex;background:#1f2937;border-radius:12px;padding:4px;gap:4px;margin-bottom:20px">
+        <button id="hs-tab-ios" onclick="hsShowOs('ios')" style="flex:1;padding:8px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:600;transition:all .15s">
           iPhone / Safari
         </button>
-        <button id="hs-tab-android" onclick="hsShowOs('android')" style="flex:1;padding:8px;border-radius:9px;border:none;cursor:pointer;font-size:12px;font-weight:600;transition:all .15s;font-family:inherit">
+        <button id="hs-tab-android" onclick="hsShowOs('android')" style="flex:1;padding:8px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:600;transition:all .15s">
           Android / Chrome
         </button>
       </div>
 
       <!-- iPhone steps -->
-      <div id="hs-steps-ios" style="display:none;flex-direction:column;gap:14px">
+      <div id="hs-steps-ios" class="space-y-4" style="display:none">
         <div style="display:flex;align-items:flex-start;gap:12px">
-          <div style="width:26px;height:26px;border-radius:50%;background:var(--amber);display:flex;align-items:center;justify-content:center;color:var(--ink);font-size:11px;font-weight:700;flex-shrink:0;margin-top:2px">1</div>
+          <div style="width:28px;height:28px;border-radius:50%;background:#6366f1;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:700;flex-shrink:0;margin-top:2px">1</div>
           <div>
-            <p data-i18n="hs_ios_1_title" style="color:var(--ink);font-size:14px;font-weight:600;margin-bottom:4px">Appuyez sur le bouton Partager</p>
-            <p data-i18n="hs_ios_1_sub" style="color:var(--muted);font-size:12px;line-height:1.5;margin-bottom:8px">Le carré avec une flèche vers le haut, en bas de Safari</p>
-            <div style="display:inline-flex;align-items:center;gap:8px;background:var(--bg-2);border:1px solid var(--line);border-radius:10px;padding:7px 11px">
-              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="var(--amber-2)" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
-              <span data-i18n="hs_ios_share_lbl" style="color:var(--muted);font-size:12px">Partager</span>
+            <p data-i18n="hs_ios_1_title" style="color:#f9fafb;font-size:14px;font-weight:600;margin-bottom:4px">Appuyez sur le bouton Partager</p>
+            <p data-i18n="hs_ios_1_sub" style="color:#6b7280;font-size:12px;line-height:1.5;margin-bottom:8px">Le carré avec une flèche vers le haut, en bas de Safari</p>
+            <div style="display:inline-flex;align-items:center;gap:8px;background:#1f2937;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:8px 12px">
+              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#818cf8" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
+              <span data-i18n="hs_ios_share_lbl" style="color:#9ca3af;font-size:12px">Partager</span>
             </div>
           </div>
         </div>
         <div style="display:flex;align-items:flex-start;gap:12px">
-          <div style="width:26px;height:26px;border-radius:50%;background:var(--amber);display:flex;align-items:center;justify-content:center;color:var(--ink);font-size:11px;font-weight:700;flex-shrink:0;margin-top:2px">2</div>
+          <div style="width:28px;height:28px;border-radius:50%;background:#6366f1;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:700;flex-shrink:0;margin-top:2px">2</div>
           <div>
-            <p data-i18n="hs_ios_2_title" style="color:var(--ink);font-size:14px;font-weight:600;margin-bottom:6px">Faites défiler et appuyez sur</p>
-            <div style="display:inline-flex;align-items:center;gap:8px;background:var(--bg-2);border:1px solid var(--line);border-radius:10px;padding:7px 11px">
-              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="var(--ink-2)" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-              <span data-i18n="hs_ios_2_btn" style="color:var(--ink);font-size:12px;font-weight:600">Sur l'écran d'accueil</span>
+            <p data-i18n="hs_ios_2_title" style="color:#f9fafb;font-size:14px;font-weight:600;margin-bottom:6px">Faites défiler et appuyez sur</p>
+            <div style="display:inline-flex;align-items:center;gap:8px;background:#1f2937;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:8px 12px">
+              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#d1d5db" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+              <span data-i18n="hs_ios_2_btn" style="color:white;font-size:12px;font-weight:600">Sur l'écran d'accueil</span>
             </div>
           </div>
         </div>
         <div style="display:flex;align-items:flex-start;gap:12px">
-          <div style="width:26px;height:26px;border-radius:50%;background:var(--amber);display:flex;align-items:center;justify-content:center;color:var(--ink);font-size:11px;font-weight:700;flex-shrink:0;margin-top:2px">3</div>
+          <div style="width:28px;height:28px;border-radius:50%;background:#6366f1;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:700;flex-shrink:0;margin-top:2px">3</div>
           <div>
-            <p data-i18n="hs_ios_3_title" style="color:var(--ink);font-size:14px;font-weight:600">Appuyez sur <span style="color:var(--amber-2)">"Ajouter"</span> en haut à droite</p>
+            <p data-i18n="hs_ios_3_title" style="color:#f9fafb;font-size:14px;font-weight:600">Appuyez sur <span style="color:#818cf8">"Ajouter"</span> en haut à droite</p>
           </div>
         </div>
         <div style="display:flex;align-items:flex-start;gap:12px">
-          <div style="width:26px;height:26px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">
-            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+          <div style="width:28px;height:28px;border-radius:50%;background:#10b981;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
           </div>
           <div>
-            <p data-i18n="hs_done_title" style="color:var(--ink);font-size:14px;font-weight:600">C'est fait !</p>
-            <p data-i18n="hs_ios_done_sub" style="color:var(--muted);font-size:12px;margin-top:2px">L'icône Fidelyzio apparaît sur votre écran d'accueil</p>
+            <p data-i18n="hs_done_title" style="color:#f9fafb;font-size:14px;font-weight:600">C'est fait !</p>
+            <p data-i18n="hs_ios_done_sub" style="color:#6b7280;font-size:12px;margin-top:2px">L'icône Fidelyzio apparaît sur votre écran d'accueil</p>
           </div>
         </div>
       </div>
 
       <!-- Android steps -->
-      <div id="hs-steps-android" style="display:none;flex-direction:column;gap:14px">
+      <div id="hs-steps-android" style="display:none" class="space-y-4">
         <div style="display:flex;align-items:flex-start;gap:12px">
-          <div style="width:26px;height:26px;border-radius:50%;background:var(--amber);display:flex;align-items:center;justify-content:center;color:var(--ink);font-size:11px;font-weight:700;flex-shrink:0;margin-top:2px">1</div>
+          <div style="width:28px;height:28px;border-radius:50%;background:#6366f1;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:700;flex-shrink:0;margin-top:2px">1</div>
           <div>
-            <p data-i18n="hs_and_1_title" style="color:var(--ink);font-size:14px;font-weight:600;margin-bottom:6px">Appuyez sur le menu Chrome</p>
-            <div style="display:inline-flex;align-items:center;gap:8px;background:var(--bg-2);border:1px solid var(--line);border-radius:10px;padding:7px 11px">
-              <svg width="14" height="14" fill="var(--muted)" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
-              <span data-i18n="hs_and_1_lbl" style="color:var(--muted);font-size:12px">3 points en haut à droite</span>
+            <p data-i18n="hs_and_1_title" style="color:#f9fafb;font-size:14px;font-weight:600;margin-bottom:6px">Appuyez sur le menu Chrome</p>
+            <div style="display:inline-flex;align-items:center;gap:8px;background:#1f2937;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:8px 12px">
+              <svg width="16" height="16" fill="#9ca3af" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+              <span data-i18n="hs_and_1_lbl" style="color:#9ca3af;font-size:12px">3 points en haut à droite</span>
             </div>
           </div>
         </div>
         <div style="display:flex;align-items:flex-start;gap:12px">
-          <div style="width:26px;height:26px;border-radius:50%;background:var(--amber);display:flex;align-items:center;justify-content:center;color:var(--ink);font-size:11px;font-weight:700;flex-shrink:0;margin-top:2px">2</div>
+          <div style="width:28px;height:28px;border-radius:50%;background:#6366f1;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:700;flex-shrink:0;margin-top:2px">2</div>
           <div>
-            <p data-i18n="hs_and_2_title" style="color:var(--ink);font-size:14px;font-weight:600;margin-bottom:6px">Appuyez sur</p>
-            <div style="display:inline-flex;align-items:center;gap:8px;background:var(--bg-2);border:1px solid var(--line);border-radius:10px;padding:7px 11px">
-              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="var(--ink-2)" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-              <span data-i18n="hs_and_2_btn" style="color:var(--ink);font-size:12px;font-weight:600">Ajouter à l'écran d'accueil</span>
+            <p data-i18n="hs_and_2_title" style="color:#f9fafb;font-size:14px;font-weight:600;margin-bottom:6px">Appuyez sur</p>
+            <div style="display:inline-flex;align-items:center;gap:8px;background:#1f2937;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:8px 12px">
+              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#d1d5db" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+              <span data-i18n="hs_and_2_btn" style="color:white;font-size:12px;font-weight:600">Ajouter à l'écran d'accueil</span>
             </div>
           </div>
         </div>
         <div style="display:flex;align-items:flex-start;gap:12px">
-          <div style="width:26px;height:26px;border-radius:50%;background:var(--amber);display:flex;align-items:center;justify-content:center;color:var(--ink);font-size:11px;font-weight:700;flex-shrink:0;margin-top:2px">3</div>
+          <div style="width:28px;height:28px;border-radius:50%;background:#6366f1;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:700;flex-shrink:0;margin-top:2px">3</div>
           <div>
-            <p data-i18n="hs_and_3_title" style="color:var(--ink);font-size:14px;font-weight:600">Appuyez sur <span style="color:var(--amber-2)">"Ajouter"</span> pour confirmer</p>
+            <p data-i18n="hs_and_3_title" style="color:#f9fafb;font-size:14px;font-weight:600">Appuyez sur <span style="color:#818cf8">"Ajouter"</span> pour confirmer</p>
           </div>
         </div>
         <div style="display:flex;align-items:flex-start;gap:12px">
-          <div style="width:26px;height:26px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">
-            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+          <div style="width:28px;height:28px;border-radius:50%;background:#10b981;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
           </div>
           <div>
-            <p data-i18n="hs_done_title" style="color:var(--ink);font-size:14px;font-weight:600">C'est fait !</p>
-            <p data-i18n="hs_and_done_sub" style="color:var(--muted);font-size:12px;margin-top:2px">L'icône Fidelyzio apparaît sur votre écran d'accueil</p>
+            <p data-i18n="hs_done_title" style="color:#f9fafb;font-size:14px;font-weight:600">C'est fait !</p>
+            <p data-i18n="hs_and_done_sub" style="color:#6b7280;font-size:12px;margin-top:2px">L'icône Fidelyzio apparaît sur votre écran d'accueil</p>
           </div>
         </div>
       </div>
 
-      <button data-i18n="hs_done" onclick="dismissHs()" style="display:block;width:100%;padding:14px;border-radius:14px;background:var(--ink);color:#FFF8EA;font-size:14px;font-weight:600;border:none;cursor:pointer;margin-top:20px;font-family:inherit">
+      <button data-i18n="hs_done" onclick="dismissHs()" style="display:block;width:100%;padding:14px;border-radius:14px;background:#6366f1;color:white;font-size:14px;font-weight:700;border:none;cursor:pointer;margin-top:20px">
         J'ai ajouté ma carte →
       </button>
     </div>
@@ -184,11 +185,11 @@
 
 <!-- Pull-to-refresh bar -->
 <div id="ptr-bar">
-  <svg id="ptr-spinner" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--amber-2)" stroke-width="2.5">
+  <svg id="ptr-spinner" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2.5">
     <circle cx="12" cy="12" r="10" stroke-opacity=".25"/>
     <path d="M4 12a8 8 0 018-8"/>
   </svg>
-  <span id="ptr-label" style="color:var(--ink-2);font-size:12px;font-weight:500">Tirez pour actualiser</span>
+  <span id="ptr-label" style="color:#818cf8;font-size:12px;font-weight:500">Tirez pour actualiser</span>
 </div>
 
 <!-- LOADING -->
@@ -207,12 +208,13 @@
 
     <!-- Header -->
     <div class="text-center py-6 animate-fade-up">
-      <div style="display:flex;align-items:center;justify-content:center;gap:9px;margin-bottom:6px">
-        <div class="brand-mark"></div>
-        <span style="font-size:17px;font-weight:600;letter-spacing:-0.02em;color:var(--ink)">Fidelyzio</span>
+      <div class="w-14 h-14 rounded-2xl bg-indigo-600/20 border border-indigo-500/25 flex items-center justify-center mx-auto mb-4">
+        <svg class="w-7 h-7 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z"/>
+        </svg>
       </div>
-      <h1 id="customer-name" style="font-size:24px;font-weight:700;color:var(--ink);margin:8px 0 4px"></h1>
-      <p style="color:var(--muted);font-size:14px;margin:0" data-i18n="subtitle">Carte de fidélité universelle</p>
+      <h1 id="customer-name" class="text-2xl font-bold text-white"></h1>
+      <p class="text-gray-500 text-sm mt-1" data-i18n="subtitle">Carte de fidélité universelle</p>
     </div>
 
     <!-- Notification opt-in -->
@@ -306,12 +308,12 @@
       hs_ios_1_sub:'Le carré avec une flèche vers le haut, en bas de Safari',
       hs_ios_share_lbl:'Partager', hs_ios_2_title:'Faites défiler et appuyez sur',
       hs_ios_2_btn:'Sur l\'écran d\'accueil',
-      hs_ios_3_title:'Appuyez sur <span style="color:var(--amber-2)">"Ajouter"</span> en haut à droite',
+      hs_ios_3_title:'Appuyez sur <span style="color:#818cf8">"Ajouter"</span> en haut à droite',
       hs_done_title:'C\'est fait !',
       hs_ios_done_sub:'L\'icône Fidelyzio apparaît sur votre écran d\'accueil',
       hs_and_1_title:'Appuyez sur le menu Chrome', hs_and_1_lbl:'3 points en haut à droite',
       hs_and_2_title:'Appuyez sur', hs_and_2_btn:'Ajouter à l\'écran d\'accueil',
-      hs_and_3_title:'Appuyez sur <span style="color:var(--amber-2)">"Ajouter"</span> pour confirmer',
+      hs_and_3_title:'Appuyez sur <span style="color:#818cf8">"Ajouter"</span> pour confirmer',
       hs_and_done_sub:'L\'icône Fidelyzio apparaît sur votre écran d\'accueil',
     },
     en: {
@@ -340,12 +342,12 @@
       hs_ios_1_sub:'The square with an arrow pointing up, at the bottom of Safari',
       hs_ios_share_lbl:'Share', hs_ios_2_title:'Scroll down and tap',
       hs_ios_2_btn:'Add to Home Screen',
-      hs_ios_3_title:'Tap <span style="color:var(--amber-2)">"Add"</span> in the top right',
+      hs_ios_3_title:'Tap <span style="color:#818cf8">"Add"</span> in the top right',
       hs_done_title:'Done!',
       hs_ios_done_sub:'The Fidelyzio icon appears on your home screen',
       hs_and_1_title:'Tap the Chrome menu', hs_and_1_lbl:'3 dots in the top right',
       hs_and_2_title:'Tap', hs_and_2_btn:'Add to Home Screen',
-      hs_and_3_title:'Tap <span style="color:var(--amber-2)">"Add"</span> to confirm',
+      hs_and_3_title:'Tap <span style="color:#818cf8">"Add"</span> to confirm',
       hs_and_done_sub:'The Fidelyzio icon appears on your home screen',
     },
   };
@@ -750,14 +752,12 @@
 
   function hsShowOs(os) {
     const ios = os === 'ios';
-    $('hs-steps-ios').style.display     = ios ? 'flex' : 'none';
-    $('hs-steps-ios').style.flexDirection = 'column';
-    $('hs-steps-android').style.display = ios ? 'none'  : 'flex';
-    $('hs-steps-android').style.flexDirection = 'column';
-    const on  = 'background:var(--card);color:var(--ink);box-shadow:0 1px 4px rgba(26,20,16,.08)';
-    const off = 'background:transparent;color:var(--muted)';
-    $('hs-tab-ios').style.cssText     = `flex:1;padding:8px;border-radius:9px;border:none;cursor:pointer;font-size:12px;font-weight:600;transition:all .15s;font-family:inherit;${ios ? on : off}`;
-    $('hs-tab-android').style.cssText = `flex:1;padding:8px;border-radius:9px;border:none;cursor:pointer;font-size:12px;font-weight:600;transition:all .15s;font-family:inherit;${ios ? off : on}`;
+    $('hs-steps-ios').style.display     = ios ? 'block' : 'none';
+    $('hs-steps-android').style.display = ios ? 'none'  : 'block';
+    const on  = 'background:#374151;color:#f9fafb';
+    const off = 'background:transparent;color:#6b7280';
+    $('hs-tab-ios').style.cssText     = `flex:1;padding:8px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:600;transition:all .15s;${ios ? on : off}`;
+    $('hs-tab-android').style.cssText = `flex:1;padding:8px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:600;transition:all .15s;${ios ? off : on}`;
   }
 
   // Tap outside modal panel to dismiss

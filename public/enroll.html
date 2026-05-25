@@ -4,127 +4,107 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="theme-color" content="#FAF6EE">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0f0f14">
   <title>Fidelyzio – Inscription</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="apple-touch-icon" href="/favicon.svg">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="/css/fidelyzio-design.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          keyframes: {
+            'fade-up':  { from: { opacity: '0', transform: 'translateY(16px)' }, to: { opacity: '1', transform: 'translateY(0)' } },
+            'scale-in': { from: { opacity: '0', transform: 'scale(0.92)' },      to: { opacity: '1', transform: 'scale(1)' }      },
+            'pop':      { '0%': { transform: 'scale(0.8)', opacity: '0' }, '70%': { transform: 'scale(1.05)' }, '100%': { transform: 'scale(1)', opacity: '1' } },
+          },
+          animation: {
+            'fade-up':  'fade-up 0.45s cubic-bezier(0.16, 1, 0.3, 1) both',
+            'scale-in': 'scale-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) both',
+            'pop':      'pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both',
+          },
+        },
+      },
+    };
+  </script>
   <style>
     *, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    html, body { height: 100%; overflow-x: hidden; overscroll-behavior: none; margin: 0; padding: 0; }
-    body { background: var(--bg); color: var(--ink);
-      font-family: "Geist", ui-sans-serif, system-ui, -apple-system, "Helvetica Neue", sans-serif;
-      -webkit-font-smoothing: antialiased; font-size: 16px; }
-    input, select, textarea { font-size: 16px !important; font-family: inherit; }
-    a { text-decoration: none; color: inherit; }
+    html, body { height: 100%; overflow-x: hidden; overscroll-behavior: none; }
+    body { background: #0f0f14; color: white; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    input, select, textarea { font-size: 16px !important; }
     .pb-safe { padding-bottom: env(safe-area-inset-bottom, 1.5rem); }
     .pt-safe { padding-top:    env(safe-area-inset-top,    1.5rem); }
     .ring-brand:focus { outline: none; box-shadow: 0 0 0 3px var(--brand-glow); }
     .delay-1 { animation-delay: 0.05s; } .delay-2 { animation-delay: 0.1s; }
     .delay-3 { animation-delay: 0.15s; } .delay-4 { animation-delay: 0.2s; }
     .delay-5 { animation-delay: 0.25s; }
-    @keyframes fade-up  { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
-    @keyframes scale-in { from { opacity:0; transform:scale(0.92); } to { opacity:1; transform:scale(1); } }
-    @keyframes pop      { 0% { transform:scale(0.8); opacity:0; } 70% { transform:scale(1.05); } 100% { transform:scale(1); opacity:1; } }
-    @keyframes spin     { to { transform: rotate(360deg); } }
-    .animate-fade-up  { animation: fade-up  0.45s cubic-bezier(0.16,1,0.3,1) both; }
-    .animate-scale-in { animation: scale-in 0.35s cubic-bezier(0.16,1,0.3,1) both; }
-    .animate-pop      { animation: pop      0.4s  cubic-bezier(0.34,1.56,0.64,1) both; }
-    .animate-spin     { animation: spin 1s linear infinite; }
-
-    /* Field inputs */
-    .fld { width: 100%; background: var(--bg); border: 1px solid var(--line);
-      border-radius: 16px; padding: 14px 16px; color: var(--ink); outline: none;
-      transition: border-color .2s, box-shadow .2s; }
-    .fld::placeholder { color: var(--muted); }
-    .fld:focus { border-color: var(--brand, var(--amber-2)); box-shadow: 0 0 0 3px var(--brand-glow, rgba(245,158,11,.15)); }
-
-    /* Card shine for loyalty widget */
     .card-shine::before {
       content: ''; position: absolute; inset: 0;
       background: radial-gradient(ellipse at 80% 15%, rgba(255,255,255,0.18) 0%, transparent 65%);
       border-radius: inherit; pointer-events: none;
     }
-
-    /* Sections */
-    #s-loading, #s-form, #s-success, #s-error { display: none; }
-
-    /* Homescreen tutorial steps */
-    .hs-step-num { width: 26px; height: 26px; border-radius: 50%; background: var(--amber);
-      display: flex; align-items: center; justify-content: center; color: var(--ink);
-      font-size: 12px; font-weight: 700; flex-shrink: 0; margin-top: 2px; }
-    .hs-step-num.done { background: var(--green); }
-    .hs-step-num.done svg path { stroke: white; }
-
-    /* Inline label for field */
-    .fld-label { display: block; font-size: 13px; font-weight: 500; color: var(--ink-2); margin-bottom: 7px; }
   </style>
 </head>
 <body>
 
 <!-- LOADING -->
-<div id="s-loading" style="min-height:100dvh;display:flex;align-items:center;justify-content:center">
-  <div style="display:flex;flex-direction:column;align-items:center;gap:14px">
-    <div style="width:44px;height:44px;border-radius:50%;border:2px solid var(--line);border-top-color:var(--ink);animation:spin 1s linear infinite"></div>
-    <p style="color:var(--muted);font-size:14px">Chargement…</p>
+<div id="s-loading" style="min-height:100dvh" class="flex items-center justify-center">
+  <div class="flex flex-col items-center gap-4">
+    <div class="w-12 h-12 rounded-full border-2 border-white/10 border-t-white/60 animate-spin"></div>
+    <p class="text-gray-500 text-sm">Chargement…</p>
   </div>
 </div>
 
 <!-- FORM -->
-<div id="s-form" style="min-height:100dvh;flex-direction:column">
-  <div style="display:flex;flex-direction:column;align-items:center;padding:max(1.5rem,env(safe-area-inset-top)) 24px 28px">
+<div id="s-form" style="min-height:100dvh;display:none" class="flex flex-col">
+  <div class="flex flex-col items-center px-6 pt-safe pt-10 pb-8">
     <div id="merchant-avatar"
-         style="width:80px;height:80px;border-radius:24px;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:700;color:white;margin-bottom:20px"
-         class="animate-pop"></div>
-    <h1 id="merchant-name" style="font-size:22px;font-weight:700;text-align:center;color:var(--ink);margin:0" class="animate-fade-up delay-1"></h1>
-    <p style="color:var(--muted);font-size:14px;text-align:center;margin-top:5px" class="animate-fade-up delay-2">
+         class="w-20 h-20 rounded-[1.5rem] flex items-center justify-center text-3xl font-bold text-white mb-5 shadow-2xl animate-pop">
+    </div>
+    <h1 id="merchant-name" class="text-2xl font-bold text-center animate-fade-up delay-1"></h1>
+    <p class="text-gray-400 text-sm text-center mt-1 animate-fade-up delay-2">
       Programme de fidélité — inscription gratuite
     </p>
   </div>
 
-  <div style="flex:1;background:var(--card);border-radius:28px 28px 0 0;padding:28px 24px env(safe-area-inset-bottom,1.5rem);border-top:1px solid var(--line)">
-    <form id="enroll-form" style="max-width:400px;margin:0 auto" novalidate>
-
-      <div style="margin-bottom:16px" class="animate-fade-up delay-2">
-        <label class="fld-label">Prénom</label>
-        <input id="inp-name" type="text" autocomplete="given-name" required placeholder="Marie" class="fld ring-brand">
+  <div class="flex-1 bg-gray-900/60 rounded-t-[2rem] px-6 pt-8 pb-safe backdrop-blur-sm border-t border-white/5">
+    <form id="enroll-form" class="max-w-sm mx-auto space-y-4" novalidate>
+      <div class="animate-fade-up delay-2">
+        <label class="block text-sm font-medium text-gray-300 mb-2">Prénom</label>
+        <input id="inp-name" type="text" autocomplete="given-name" required placeholder="Marie"
+               class="w-full bg-gray-800 border border-gray-700 rounded-2xl px-4 py-3.5 text-white placeholder-gray-500 transition-shadow ring-brand">
       </div>
-
-      <div style="margin-bottom:16px" class="animate-fade-up delay-3">
-        <label class="fld-label">Numéro de téléphone</label>
-        <input id="inp-phone" type="tel" autocomplete="tel" required placeholder="06 12 34 56 78" class="fld ring-brand">
+      <div class="animate-fade-up delay-3">
+        <label class="block text-sm font-medium text-gray-300 mb-2">Numéro de téléphone</label>
+        <input id="inp-phone" type="tel" autocomplete="tel" required placeholder="06 12 34 56 78"
+               class="w-full bg-gray-800 border border-gray-700 rounded-2xl px-4 py-3.5 text-white placeholder-gray-500 transition-shadow ring-brand">
       </div>
-
-      <div style="margin-bottom:16px" class="animate-fade-up delay-4">
-        <label class="fld-label" data-i18n="email_label">
-          E-mail <span style="color:var(--muted);font-weight:400">(optionnel, pour recevoir vos points)</span>
+      <div class="animate-fade-up delay-4">
+        <label class="block text-sm font-medium text-gray-300 mb-2" data-i18n="email_label">
+          E-mail <span class="text-gray-600 font-normal">(optionnel, pour recevoir vos points)</span>
         </label>
-        <input id="inp-email" type="email" autocomplete="email" placeholder="vous@email.com" class="fld ring-brand">
+        <input id="inp-email" type="email" autocomplete="email" placeholder="vous@email.com"
+               class="w-full bg-gray-800 border border-gray-700 rounded-2xl px-4 py-3.5 text-white placeholder-gray-500 transition-shadow ring-brand">
       </div>
-
       <!-- RGPD -->
-      <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:18px" class="animate-fade-up delay-4">
+      <div class="flex items-start gap-3 animate-fade-up delay-4">
         <input type="checkbox" id="inp-rgpd" required
-               style="margin-top:2px;width:15px;height:15px;accent-color:var(--amber);cursor:pointer;flex-shrink:0">
-        <label for="inp-rgpd" style="color:var(--muted);font-size:12px;line-height:1.65;cursor:pointer" data-i18n="rgpd">
-          J'accepte la <a href="/privacy" target="_blank" style="color:var(--amber-2);text-decoration:underline">politique de confidentialité</a>
-          et les <a href="/cgu" target="_blank" style="color:var(--amber-2);text-decoration:underline">CGU</a>.
+               class="mt-0.5 w-4 h-4 accent-indigo-500 cursor-pointer shrink-0">
+        <label for="inp-rgpd" class="text-gray-600 text-xs leading-relaxed cursor-pointer" data-i18n="rgpd">
+          J'accepte la <a href="/privacy" target="_blank" class="text-indigo-400 underline underline-offset-1">politique de confidentialité</a>
+          et les <a href="/cgu" target="_blank" class="text-indigo-400 underline underline-offset-1">CGU</a>.
         </label>
       </div>
-
-      <div id="form-error" style="display:none;margin-bottom:14px;border-radius:12px;padding:12px 14px;background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.2);color:#dc2626;font-size:13px" class="animate-fade-up"></div>
-
-      <div style="padding-top:4px" class="animate-fade-up delay-5">
+      <div id="form-error" class="hidden rounded-2xl px-4 py-3 bg-red-500/10 border border-red-500/30 text-red-400 text-sm animate-fade-up"></div>
+      <div class="animate-fade-up delay-5 pt-1">
         <button id="submit-btn" type="submit"
-                style="width:100%;padding:15px;border-radius:16px;font-weight:600;font-size:15px;color:white;border:none;cursor:pointer;transition:filter .2s,transform .15s,opacity .2s"
+                class="w-full py-4 rounded-2xl font-semibold text-white text-base active:scale-[0.98] disabled:opacity-60 transition-all shadow-xl"
                 data-i18n="cta">
           Obtenir ma carte gratuite →
         </button>
       </div>
-      <p style="text-align:center;color:var(--muted);font-size:12px;padding-bottom:8px;margin-top:14px" class="animate-fade-up delay-5" data-i18n="disclaimer">
+      <p class="text-center text-gray-600 text-xs pb-2 animate-fade-up delay-5" data-i18n="disclaimer">
         Gratuit · Sans application · Vos données restent privées
       </p>
     </form>
@@ -132,190 +112,204 @@
 </div>
 
 <!-- SUCCESS -->
-<div id="s-success" style="min-height:100dvh;flex-direction:column;align-items:center;padding:max(1.5rem,env(safe-area-inset-top)) 20px env(safe-area-inset-bottom,2.5rem);gap:18px">
+<div id="s-success" style="min-height:100dvh;display:none" class="flex flex-col items-center px-5 pt-safe pt-8 pb-safe pb-10 gap-5">
 
   <!-- Loyalty card widget -->
-  <div id="loyalty-card" style="width:100%;max-width:400px;border-radius:28px;padding:24px;position:relative;overflow:hidden" class="card-shine animate-scale-in">
-    <div style="position:relative;z-index:10">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px">
-        <span style="color:rgba(255,255,255,.5);font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase">Fidelyzio</span>
-        <span id="card-merchant-name" style="color:white;font-size:13px;font-weight:600;max-width:55%;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
+  <div id="loyalty-card" class="w-full max-w-sm rounded-3xl p-6 relative overflow-hidden card-shine shadow-2xl animate-scale-in">
+    <div class="relative z-10">
+      <div class="flex items-start justify-between mb-6">
+        <span class="text-white/50 text-[10px] font-semibold tracking-widest uppercase">Fidelyzio</span>
+        <span id="card-merchant-name" class="text-white text-sm font-semibold max-w-[55%] text-right truncate"></span>
       </div>
-      <div style="text-align:center;margin:8px 0">
-        <p id="card-points" style="font-size:56px;font-weight:900;color:white;line-height:1;margin:0">0</p>
-        <p style="color:rgba(255,255,255,.5);font-size:11px;letter-spacing:.18em;text-transform:uppercase;margin-top:6px">Points</p>
+      <div class="text-center my-2">
+        <p id="card-points" class="text-6xl font-black text-white leading-none">0</p>
+        <p class="text-white/50 text-xs tracking-[0.2em] uppercase mt-2">Points</p>
       </div>
-      <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-top:20px">
+      <div class="flex items-end justify-between mt-6">
         <div>
-          <p style="color:rgba(255,255,255,.4);font-size:9px;text-transform:uppercase;letter-spacing:.1em;margin:0 0 2px">Titulaire</p>
-          <p id="card-customer-name" style="color:white;font-weight:600;font-size:13px;margin:0"></p>
+          <p class="text-white/40 text-[9px] uppercase tracking-widest mb-0.5">Titulaire</p>
+          <p id="card-customer-name" class="text-white font-semibold text-sm"></p>
         </div>
-        <div id="qr-mini" style="border-radius:8px;overflow:hidden;background:white;padding:2px"></div>
+        <div id="qr-mini" class="rounded-lg overflow-hidden bg-white p-0.5"></div>
       </div>
     </div>
   </div>
 
   <!-- Welcome -->
-  <div style="text-align:center" class="animate-fade-up delay-1">
-    <h2 id="welcome-title" style="font-size:20px;font-weight:700;color:var(--ink);margin:0 0 4px"></h2>
-    <p style="color:var(--muted);font-size:14px;margin:0">Votre carte universelle est prête !</p>
-    <p style="color:var(--line-2);font-size:12px;margin-top:3px">Elle fonctionne dans tous les commerces partenaires</p>
+  <div class="text-center animate-fade-up delay-1">
+    <h2 id="welcome-title" class="text-xl font-bold"></h2>
+    <p class="text-gray-400 text-sm mt-1">Votre carte universelle est prête !</p>
+    <p class="text-gray-600 text-xs mt-1">Elle fonctionne dans tous les commerces partenaires</p>
   </div>
 
   <!-- Primary CTA -->
   <a id="my-card-btn" href="#"
-     style="width:100%;max-width:400px;padding:15px;border-radius:16px;font-weight:600;color:white;font-size:15px;text-align:center;display:block;transition:filter .15s,transform .12s"
-     class="animate-fade-up delay-2">
+     class="w-full max-w-sm py-4 rounded-2xl font-semibold text-white text-base text-center block active:scale-[0.98] transition-all shadow-2xl animate-fade-up delay-2">
     Accéder à ma carte →
   </a>
 
   <!-- Rewards at this merchant -->
-  <div id="rewards-section" style="width:100%;max-width:400px;display:none" class="animate-fade-up delay-3">
-    <div style="background:var(--card);border:1px solid var(--line);border-radius:20px;padding:20px">
-      <p style="color:var(--muted);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin:0 0 12px">Récompenses disponibles</p>
-      <div id="rewards-list" style="display:flex;flex-direction:column;gap:8px"></div>
+  <div id="rewards-section" class="w-full max-w-sm hidden animate-fade-up delay-3">
+    <div class="bg-gray-900 border border-white/5 rounded-3xl p-5">
+      <p class="text-gray-500 text-xs font-semibold uppercase tracking-widest mb-3">Récompenses disponibles</p>
+      <div id="rewards-list" class="space-y-2"></div>
     </div>
   </div>
 
-  <!-- Homescreen tutorial -->
-  <div id="homescreen-tutorial" style="width:100%;max-width:400px;display:none" class="animate-fade-up delay-4">
-    <div style="background:var(--card);border:1px solid var(--line);border-radius:20px;padding:20px">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
-        <div style="width:32px;height:32px;border-radius:10px;background:var(--amber-soft);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="var(--amber-2)" stroke-width="2">
+  <!-- (homescreen tutorial moved to /card page — shown after enrollment is fully complete) -->
+  <div id="homescreen-tutorial" class="w-full max-w-sm animate-fade-up delay-4" style="display:none">
+    <div class="bg-gray-900 border border-white/5 rounded-3xl p-5">
+      <div class="flex items-center gap-2.5 mb-1">
+        <div class="w-8 h-8 rounded-xl bg-indigo-500/15 flex items-center justify-center shrink-0">
+          <svg class="w-4 h-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/>
           </svg>
         </div>
-        <p style="color:var(--ink);font-weight:600;font-size:14px;margin:0">Accédez en 1 tap</p>
+        <p class="text-white font-semibold text-sm">Accédez en 1 tap</p>
       </div>
-      <p style="color:var(--muted);font-size:12px;margin:0 0 16px;line-height:1.6">Ajoutez votre carte à l'écran d'accueil pour l'avoir toujours sous la main, comme une vraie app.</p>
+      <p class="text-gray-500 text-xs mb-4 leading-relaxed">Ajoutez votre carte à l'écran d'accueil pour l'avoir toujours sous la main, comme une vraie app.</p>
 
       <!-- OS Tabs -->
-      <div style="display:flex;background:var(--bg-2);border-radius:12px;padding:3px;gap:3px;margin-bottom:18px">
+      <div class="flex bg-gray-800 rounded-xl p-1 gap-1 mb-5">
         <button id="tab-ios" onclick="showTutorialTab('ios')"
-                style="flex:1;padding:8px;border-radius:9px;border:none;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s">
+                class="flex-1 py-2 rounded-lg text-xs font-semibold transition-all">
           iPhone / Safari
         </button>
         <button id="tab-android" onclick="showTutorialTab('android')"
-                style="flex:1;padding:8px;border-radius:9px;border:none;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s">
+                class="flex-1 py-2 rounded-lg text-xs font-semibold transition-all">
           Android / Chrome
         </button>
       </div>
 
       <!-- iPhone steps -->
-      <div id="steps-ios" style="display:flex;flex-direction:column;gap:14px">
-        <div style="display:flex;align-items:flex-start;gap:10px">
-          <div class="hs-step-num">1</div>
-          <div style="flex:1">
-            <p style="color:var(--ink);font-size:13px;font-weight:600;margin:0 0 2px">Appuyez sur le bouton Partager</p>
-            <p style="color:var(--muted);font-size:12px;line-height:1.5;margin:0 0 6px">Le carré avec une flèche vers le haut en bas de Safari</p>
-            <div style="display:inline-flex;align-items:center;gap:7px;background:var(--bg-2);border:1px solid var(--line);border-radius:10px;padding:7px 11px">
-              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="var(--amber-2)" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
-              <span style="color:var(--ink-2);font-size:12px">Partager</span>
+      <div id="steps-ios" class="space-y-4">
+        <div class="flex items-start gap-3">
+          <div class="w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xs font-bold shrink-0 mt-0.5">1</div>
+          <div class="flex-1">
+            <p class="text-white text-sm font-medium">Appuyez sur le bouton Partager</p>
+            <p class="text-gray-500 text-xs mt-0.5 leading-relaxed">Le carré avec une flèche vers le haut en bas de Safari</p>
+            <div class="mt-2 inline-flex items-center gap-2 bg-gray-800 border border-white/5 rounded-xl px-3 py-2">
+              <svg class="w-4 h-4 text-indigo-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+              </svg>
+              <span class="text-gray-400 text-xs">Partager</span>
             </div>
           </div>
         </div>
-        <div style="display:flex;align-items:flex-start;gap:10px">
-          <div class="hs-step-num">2</div>
-          <div style="flex:1">
-            <p style="color:var(--ink);font-size:13px;font-weight:600;margin:0 0 5px">Faites défiler et appuyez sur</p>
-            <div style="display:inline-flex;align-items:center;gap:7px;background:var(--bg-2);border:1px solid var(--line);border-radius:10px;padding:7px 11px">
-              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="var(--ink-2)" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-              <span style="color:var(--ink);font-size:12px;font-weight:600">Sur l'écran d'accueil</span>
+        <div class="flex items-start gap-3">
+          <div class="w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xs font-bold shrink-0 mt-0.5">2</div>
+          <div class="flex-1">
+            <p class="text-white text-sm font-medium">Faites défiler et appuyez sur</p>
+            <div class="mt-1.5 inline-flex items-center gap-2 bg-gray-800 border border-white/5 rounded-xl px-3 py-2">
+              <svg class="w-4 h-4 text-gray-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+              </svg>
+              <span class="text-white text-xs font-medium">Sur l'écran d'accueil</span>
             </div>
           </div>
         </div>
-        <div style="display:flex;align-items:flex-start;gap:10px">
-          <div class="hs-step-num">3</div>
-          <div style="flex:1">
-            <p style="color:var(--ink);font-size:13px;font-weight:600;margin:0">Appuyez sur <span style="color:var(--amber-2)">"Ajouter"</span> en haut à droite</p>
+        <div class="flex items-start gap-3">
+          <div class="w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xs font-bold shrink-0 mt-0.5">3</div>
+          <div class="flex-1">
+            <p class="text-white text-sm font-medium">Appuyez sur <span class="text-indigo-400">"Ajouter"</span> en haut à droite</p>
+            <p class="text-gray-500 text-xs mt-0.5">Confirmez en haut à droite de l'écran</p>
           </div>
         </div>
-        <div style="display:flex;align-items:flex-start;gap:10px">
-          <div class="hs-step-num done" style="background:var(--green)">
-            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+        <div class="flex items-start gap-3">
+          <div class="w-7 h-7 rounded-full bg-emerald-600 flex items-center justify-center shrink-0 mt-0.5">
+            <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
+            </svg>
           </div>
-          <div style="flex:1">
-            <p style="color:var(--ink);font-size:13px;font-weight:600;margin:0">C'est fait !</p>
-            <p style="color:var(--muted);font-size:12px;margin-top:2px">L'icône Fidelyzio apparaît sur votre écran d'accueil</p>
+          <div class="flex-1">
+            <p class="text-white text-sm font-medium">C'est fait !</p>
+            <p class="text-gray-500 text-xs mt-0.5">L'icône Fidelyzio apparaît sur votre écran d'accueil</p>
           </div>
         </div>
       </div>
 
       <!-- Android steps -->
-      <div id="steps-android" style="display:none;flex-direction:column;gap:14px">
-        <div style="display:flex;align-items:flex-start;gap:10px">
-          <div class="hs-step-num">1</div>
-          <div style="flex:1">
-            <p style="color:var(--ink);font-size:13px;font-weight:600;margin:0 0 5px">Appuyez sur le menu Chrome</p>
-            <div style="display:inline-flex;align-items:center;gap:7px;background:var(--bg-2);border:1px solid var(--line);border-radius:10px;padding:7px 11px">
-              <svg width="14" height="14" fill="var(--muted)" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
-              <span style="color:var(--ink-2);font-size:12px">3 points en haut à droite</span>
+      <div id="steps-android" class="space-y-4" style="display:none">
+        <div class="flex items-start gap-3">
+          <div class="w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xs font-bold shrink-0 mt-0.5">1</div>
+          <div class="flex-1">
+            <p class="text-white text-sm font-medium">Appuyez sur le menu Chrome</p>
+            <div class="mt-2 inline-flex items-center gap-2 bg-gray-800 border border-white/5 rounded-xl px-3 py-2">
+              <svg class="w-4 h-4 text-gray-300 shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                <circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/>
+              </svg>
+              <span class="text-gray-400 text-xs">3 points en haut à droite</span>
             </div>
           </div>
         </div>
-        <div style="display:flex;align-items:flex-start;gap:10px">
-          <div class="hs-step-num">2</div>
-          <div style="flex:1">
-            <p style="color:var(--ink);font-size:13px;font-weight:600;margin:0 0 5px">Sélectionnez</p>
-            <div style="display:inline-flex;align-items:center;gap:7px;background:var(--bg-2);border:1px solid var(--line);border-radius:10px;padding:7px 11px">
-              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="var(--ink-2)" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-              <span style="color:var(--ink);font-size:12px;font-weight:600">Ajouter à l'écran d'accueil</span>
+        <div class="flex items-start gap-3">
+          <div class="w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xs font-bold shrink-0 mt-0.5">2</div>
+          <div class="flex-1">
+            <p class="text-white text-sm font-medium">Sélectionnez</p>
+            <div class="mt-1.5 inline-flex items-center gap-2 bg-gray-800 border border-white/5 rounded-xl px-3 py-2">
+              <svg class="w-4 h-4 text-gray-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+              </svg>
+              <span class="text-white text-xs font-medium">Ajouter à l'écran d'accueil</span>
             </div>
           </div>
         </div>
-        <div style="display:flex;align-items:flex-start;gap:10px">
-          <div class="hs-step-num">3</div>
-          <div style="flex:1">
-            <p style="color:var(--ink);font-size:13px;font-weight:600;margin:0">Appuyez sur <span style="color:var(--amber-2)">"Ajouter"</span></p>
+        <div class="flex items-start gap-3">
+          <div class="w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xs font-bold shrink-0 mt-0.5">3</div>
+          <div class="flex-1">
+            <p class="text-white text-sm font-medium">Appuyez sur <span class="text-indigo-400">"Ajouter"</span></p>
+            <p class="text-gray-500 text-xs mt-0.5">Confirmez dans la boîte de dialogue</p>
           </div>
         </div>
-        <div style="display:flex;align-items:flex-start;gap:10px">
-          <div class="hs-step-num done" style="background:var(--green)">
-            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+        <div class="flex items-start gap-3">
+          <div class="w-7 h-7 rounded-full bg-emerald-600 flex items-center justify-center shrink-0 mt-0.5">
+            <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
+            </svg>
           </div>
-          <div style="flex:1">
-            <p style="color:var(--ink);font-size:13px;font-weight:600;margin:0">C'est fait !</p>
-            <p style="color:var(--muted);font-size:12px;margin-top:2px">L'icône Fidelyzio apparaît sur votre écran d'accueil</p>
+          <div class="flex-1">
+            <p class="text-white text-sm font-medium">C'est fait !</p>
+            <p class="text-gray-500 text-xs mt-0.5">L'icône Fidelyzio apparaît sur votre écran d'accueil</p>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Google Wallet button -->
-  <a id="google-wallet-btn" href="#" style="display:none;width:100%;max-width:400px;align-items:center;justify-content:center;gap:12px;padding:15px;border-radius:16px;background:white;border:1px solid var(--line);transition:background .15s" class="animate-fade-up delay-3">
+  <!-- Google Wallet button (Android only, shown if configured) -->
+  <a id="google-wallet-btn" href="#" style="display:none"
+     class="w-full max-w-sm flex items-center justify-center gap-3 py-4 rounded-2xl bg-white hover:bg-gray-100 active:scale-[0.98] transition-all shadow-xl animate-fade-up delay-3">
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
       <path d="M22.5 12.5c0-.83-.07-1.63-.2-2.4H12v4.51h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.19z" fill="#4285F4"/>
       <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
       <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
       <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
     </svg>
-    <span style="color:var(--ink);font-weight:700;font-size:15px">Ajouter à Google Wallet</span>
+    <span style="color:#1f2937;font-weight:700;font-size:15px">Ajouter à Google Wallet</span>
   </a>
 
-  <!-- Big QR -->
-  <div style="width:100%;max-width:400px" class="animate-fade-up delay-4">
-    <div style="background:var(--card);border:1px solid var(--line);border-radius:20px;padding:24px;text-align:center">
-      <p style="color:var(--muted);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin:0 0 4px">Votre code fidélité</p>
-      <p style="color:var(--muted);font-size:12px;margin:0 0 18px">Présentez ce QR à la caisse pour cumuler vos points</p>
-      <div id="qr-big" style="display:flex;justify-content:center"></div>
+  <!-- Big QR (their universal card) -->
+  <div class="w-full max-w-sm animate-fade-up delay-4">
+    <div class="bg-gray-900 border border-white/5 rounded-3xl p-6 text-center">
+      <p class="text-gray-500 text-xs font-semibold uppercase tracking-widest mb-1">Votre code fidélité</p>
+      <p class="text-gray-600 text-xs mb-5">Présentez ce QR à la caisse pour cumuler vos points</p>
+      <div id="qr-big" class="flex justify-center"></div>
     </div>
   </div>
 
 </div>
 
 <!-- ERROR -->
-<div id="s-error" style="min-height:100dvh;display:none;align-items:center;justify-content:center;padding:32px">
-  <div style="text-align:center" class="animate-scale-in">
-    <div style="width:60px;height:60px;border-radius:50%;background:rgba(239,68,68,.1);display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
-      <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="#dc2626" stroke-width="2">
+<div id="s-error" style="min-height:100dvh;display:none" class="flex items-center justify-center px-8">
+  <div class="text-center animate-scale-in">
+    <div class="w-16 h-16 rounded-full bg-red-500/15 flex items-center justify-center mx-auto mb-4">
+      <svg class="w-8 h-8 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"/>
       </svg>
     </div>
-    <p id="error-msg" style="color:#dc2626;font-weight:600;margin:0 0 20px"></p>
+    <p id="error-msg" class="text-red-400 font-medium mb-6"></p>
     <button onclick="location.reload()"
-            style="padding:12px 24px;background:var(--card);border:1px solid var(--line);border-radius:12px;color:var(--ink);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .15s">
+            class="px-6 py-3 bg-gray-800 hover:bg-gray-700 rounded-2xl text-white text-sm font-medium transition active:scale-95">
       Réessayer
     </button>
   </div>
@@ -334,7 +328,7 @@
   }
 
   function show(id) {
-    STATES.forEach(s => { $(s).style.display = 'none'; });
+    STATES.forEach(s => $(s).style.display = 'none');
     const el = $(id);
     el.style.display = 'flex';
     if (id === 's-form')    el.style.flexDirection = 'column';
@@ -344,13 +338,13 @@
   const merchantId = window.location.pathname.split('/').filter(Boolean).pop();
 
   function hexToRgb(hex) {
-    const n = parseInt((hex || '#F59E0B').replace('#', ''), 16);
+    const n = parseInt((hex || '#6366f1').replace('#', ''), 16);
     return [(n >> 16) & 0xff, (n >> 8) & 0xff, n & 0xff];
   }
   function luminance([r, g, b]) { return 0.299 * r + 0.587 * g + 0.114 * b; }
 
   function applyBranding(merchant) {
-    const color = merchant.color || '#F59E0B';
+    const color = merchant.color || '#6366f1';
     const rgb   = hexToRgb(color);
     $('merchant-avatar').textContent       = merchant.name.charAt(0).toUpperCase();
     $('merchant-avatar').style.background  = color;
@@ -368,7 +362,6 @@
   }
 
   async function init() {
-    show('s-loading');
     try {
       const res = await fetchWithTimeout(`/api/merchants/${merchantId}/enroll`);
       if (!res.ok) throw new Error(await res.json().then(d => d.error).catch(() => 'Marchand introuvable'));
@@ -383,7 +376,7 @@
 
   $('enroll-form').addEventListener('submit', async e => {
     e.preventDefault();
-    $('form-error').style.display = 'none';
+    $('form-error').classList.add('hidden');
 
     const firstName = $('inp-name').value.trim();
     const phone     = $('inp-phone').value.trim();
@@ -392,10 +385,10 @@
 
     const btn = $('submit-btn');
     btn.disabled  = true;
-    btn.innerHTML = `<span style="display:flex;align-items:center;justify-content:center;gap:8px">
-      <svg style="width:16px;height:16px;animation:spin 1s linear infinite" fill="none" viewBox="0 0 24 24">
-        <circle style="opacity:.25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-        <path style="opacity:.75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+    btn.innerHTML = `<span class="flex items-center justify-center gap-2">
+      <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
       </svg>En cours…</span>`;
 
     try {
@@ -417,15 +410,17 @@
   function showFormError(msg) {
     const el = $('form-error');
     el.textContent = msg;
-    el.style.display = 'block';
+    el.classList.remove('hidden');
   }
 
   function renderSuccess({ customer, membership, merchant, rewards }, firstName) {
-    const color   = merchant.color || '#F59E0B';
+    const color   = merchant.color || '#6366f1';
     const cardUrl = `/card/${encodeURIComponent(customer.qr_code)}`;
 
+    // Persist card URL so /my-card can redirect directly next time
     try { localStorage.setItem('fidelyzio_card_url', cardUrl); } catch (_) {}
 
+    // Card widget
     $('loyalty-card').style.background = `linear-gradient(140deg, ${color} 0%, ${adjustBrightness(color, -30)} 100%)`;
     $('loyalty-card').style.boxShadow  = `0 30px 70px ${color}45`;
     $('card-merchant-name').textContent = merchant.name;
@@ -434,25 +429,29 @@
 
     $('welcome-title').textContent = `Bienvenue, ${firstName} !`;
 
+    // Primary CTA button
     const btn = $('my-card-btn');
     btn.href             = cardUrl;
     btn.style.background = color;
     btn.style.boxShadow  = `0 16px 40px ${color}40`;
 
+    // Rewards
     if (rewards && rewards.length > 0) {
-      $('rewards-section').style.display = 'block';
+      $('rewards-section').classList.remove('hidden');
       $('rewards-list').innerHTML = rewards.map(r => `
-        <div style="display:flex;align-items:center;justify-content:space-between;background:var(--bg-2);border-radius:14px;padding:12px 14px">
-          <span style="color:var(--ink);font-size:13px;display:flex;align-items:center;gap:6px"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="var(--amber-2)" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z"/></svg>${esc(r.description)}</span>
-          <span style="color:var(--muted);font-size:12px;font-weight:600">${r.points_required} pts</span>
+        <div class="flex items-center justify-between bg-gray-800 rounded-2xl px-4 py-3">
+          <span class="text-white text-sm flex items-center gap-1.5"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z"/></svg>${esc(r.description)}</span>
+          <span class="text-gray-400 text-xs font-semibold">${r.points_required} pts</span>
         </div>
       `).join('');
     }
 
+    // QR codes (server-side rendered)
     const qrUrl = `/api/qr/${encodeURIComponent(customer.qr_code)}`;
     $('qr-big').innerHTML  = `<img src="${qrUrl}?size=200" width="200" height="200" alt="QR code fidélité" style="display:block;border-radius:8px">`;
     $('qr-mini').innerHTML = `<img src="${qrUrl}?size=48"  width="48"  height="48"  alt="" style="display:block">`;
 
+    // Google Wallet (Android only)
     if (/android/i.test(navigator.userAgent)) {
       fetch(`/api/google-wallet/${encodeURIComponent(customer.qr_code)}`)
         .then(r => r.json())
@@ -473,31 +472,20 @@
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
-  // ── Tutorial tab ────────────────────────────────────────────────────────────
-  function showTutorialTab(os) {
-    const ios = os === 'ios';
-    $('steps-ios').style.display     = ios ? 'flex' : 'none';
-    $('steps-android').style.display = ios ? 'none' : 'flex';
-    $('tab-ios').style.background    = ios ? 'var(--card)' : 'transparent';
-    $('tab-ios').style.color         = ios ? 'var(--ink)' : 'var(--muted)';
-    $('tab-android').style.background = ios ? 'transparent' : 'var(--card)';
-    $('tab-android').style.color      = ios ? 'var(--muted)' : 'var(--ink)';
-  }
-
-  // ── i18n ─────────────────────────────────────────────────────────────────────
+  // ── i18n ─────────────────────────────────────────────────────────────────
   const T = {
     fr: {
       subtitle: 'Programme de fidélité — inscription gratuite',
-      email_label: 'E-mail <span style="color:var(--muted);font-weight:400">(optionnel, pour recevoir vos points)</span>',
-      rgpd: 'J\'accepte la <a href="/privacy" target="_blank" style="color:var(--amber-2);text-decoration:underline">politique de confidentialité</a> et les <a href="/cgu" target="_blank" style="color:var(--amber-2);text-decoration:underline">CGU</a>.',
+      email_label: 'E-mail <span style="color:#4b5563;font-weight:400">(optionnel, pour recevoir vos points)</span>',
+      rgpd: 'J\'accepte la <a href="/privacy" target="_blank" style="color:#818cf8;text-decoration:underline">politique de confidentialité</a> et les <a href="/cgu" target="_blank" style="color:#818cf8;text-decoration:underline">CGU</a>.',
       cta: 'Obtenir ma carte gratuite →',
       disclaimer: 'Gratuit · Sans application · Vos données restent privées',
       err_fields: 'Veuillez remplir tous les champs obligatoires.',
     },
     en: {
       subtitle: 'Loyalty programme — free registration',
-      email_label: 'Email <span style="color:var(--muted);font-weight:400">(optional, to receive points notifications)</span>',
-      rgpd: 'I accept the <a href="/privacy" target="_blank" style="color:var(--amber-2);text-decoration:underline">privacy policy</a> and the <a href="/cgu" target="_blank" style="color:var(--amber-2);text-decoration:underline">terms of service</a>.',
+      email_label: 'Email <span style="color:#4b5563;font-weight:400">(optional, to receive points notifications)</span>',
+      rgpd: 'I accept the <a href="/privacy" target="_blank" style="color:#818cf8;text-decoration:underline">privacy policy</a> and the <a href="/cgu" target="_blank" style="color:#818cf8;text-decoration:underline">terms of service</a>.',
       cta: 'Get my free card →',
       disclaimer: 'Free · No app needed · Your data stays private',
       err_fields: 'Please fill in all required fields.',
@@ -513,7 +501,7 @@
     });
     document.querySelectorAll('[data-lang-btn]').forEach(b => {
       b.style.fontWeight = b.dataset.langBtn === lang ? '700' : '400';
-      b.style.color = b.dataset.langBtn === lang ? 'var(--ink)' : 'var(--muted)';
+      b.style.color = b.dataset.langBtn === lang ? 'white' : '#6b7280';
     });
   }
 
@@ -523,18 +511,17 @@
     applyLang();
   }
 
+  // Inject lang toggle into header
   document.addEventListener('DOMContentLoaded', () => {
     const hdr = document.querySelector('#s-form > div:first-child');
     if (hdr) {
       const tog = document.createElement('div');
       tog.style.cssText = 'position:absolute;top:max(1.5rem,env(safe-area-inset-top));right:1.5rem;display:flex;gap:6px';
-      tog.innerHTML = `<button data-lang-btn="fr" onclick="setLang('fr')" style="background:none;border:none;font-size:12px;cursor:pointer;font-family:inherit">FR</button><span style="color:var(--line-2);font-size:12px">|</span><button data-lang-btn="en" onclick="setLang('en')" style="background:none;border:none;font-size:12px;cursor:pointer;font-family:inherit">EN</button>`;
+      tog.innerHTML = `<button data-lang-btn="fr" onclick="setLang('fr')" style="background:none;border:none;font-size:12px;cursor:pointer;color:#6b7280;font-weight:400">FR</button><span style="color:#374151;font-size:12px">|</span><button data-lang-btn="en" onclick="setLang('en')" style="background:none;border:none;font-size:12px;cursor:pointer;color:#6b7280">EN</button>`;
       hdr.style.position = 'relative';
       hdr.appendChild(tog);
     }
     applyLang();
-    // Init tutorial tab
-    showTutorialTab('ios');
   });
 
   init();

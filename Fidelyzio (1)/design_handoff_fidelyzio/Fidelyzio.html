@@ -1,0 +1,1555 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Fidelyzio — La fidélité, sans carte papier.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#FAF6EE;
+    --bg-2:#F1EADC;
+    --bg-3:#EBE2D0;
+    --ink:#1A1410;
+    --ink-2:#3B342C;
+    --muted:#6B6358;
+    --line:#E4DBC7;
+    --line-2:#D6CAB0;
+    --amber:#F59E0B;
+    --amber-2:#D97706;
+    --amber-soft:#FEF3C7;
+    --green:#1F7A4D;
+    --card:#FFFFFF;
+    --radius:14px;
+    --radius-lg:22px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:"Geist", ui-sans-serif, system-ui, -apple-system, "Helvetica Neue", sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+    font-size:16px;
+    line-height:1.55;
+  }
+  a{color:inherit;text-decoration:none}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+  .mono{font-family:"Geist Mono", ui-monospace, monospace; letter-spacing:-0.01em}
+  .wrap{max-width:1240px;margin:0 auto;padding:0 32px}
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;
+    font-size:12px;font-weight:500;letter-spacing:0.02em;
+    color:var(--ink-2);
+    background:rgba(255,255,255,0.7);
+    border:1px solid var(--line);
+    padding:6px 12px;border-radius:999px;
+  }
+  .eyebrow .dot{width:6px;height:6px;border-radius:99px;background:var(--amber);box-shadow:0 0 0 4px rgba(245,158,11,0.18)}
+  h1,h2,h3,h4{margin:0;font-weight:600;letter-spacing:-0.025em;color:var(--ink);text-wrap:balance}
+  h1{font-size:clamp(40px, 5.4vw, 76px);line-height:1.02;letter-spacing:-0.035em;font-weight:600}
+  h2{font-size:clamp(30px, 3.6vw, 50px);line-height:1.05;letter-spacing:-0.03em}
+  h3{font-size:22px;line-height:1.2}
+  p{margin:0;color:var(--ink-2)}
+  .lead{font-size:18px;line-height:1.55;color:var(--ink-2);text-wrap:pretty}
+
+  /* ───────── NAV ───────── */
+  .topbar{
+    position:sticky;top:0;z-index:50;
+    background:rgba(250,246,238,0.85);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid transparent;
+    transition:border-color .25s ease;
+  }
+  .topbar.scrolled{border-color:var(--line)}
+  .nav{
+    display:flex;align-items:center;justify-content:space-between;
+    height:72px;
+  }
+  .brand{display:flex;align-items:center;gap:10px;font-weight:600;letter-spacing:-0.02em;font-size:19px}
+  .brand-mark{
+    width:30px;height:30px;border-radius:9px;
+    background:var(--ink);position:relative;display:grid;place-items:center;
+  }
+  .brand-mark::before{
+    content:"";width:14px;height:14px;border-radius:4px;background:var(--amber);
+    transform:rotate(45deg);
+  }
+  .brand-mark::after{
+    content:"";position:absolute;width:6px;height:6px;border-radius:2px;background:var(--ink);
+    transform:rotate(45deg);
+  }
+  .nav-links{display:flex;gap:2px;align-items:center}
+  .nav-links a{
+    padding:8px 11px;border-radius:8px;font-size:14px;color:var(--ink-2);font-weight:450;
+    white-space:nowrap;
+    transition:background .15s, color .15s;
+  }
+  .nav-links a:hover{background:rgba(0,0,0,0.04);color:var(--ink)}
+  .nav-right{display:flex;align-items:center;gap:10px}
+  .lang{
+    display:flex;align-items:center;gap:6px;font-size:14px;color:var(--ink-2);
+    padding:8px 12px;border-radius:8px;
+  }
+  .lang:hover{background:rgba(0,0,0,0.04)}
+  .lang .flag{width:18px;height:13px;border-radius:2px;background:linear-gradient(to right,#0055A4 33%,#FFFFFF 33% 66%,#EF4135 66%);box-shadow:0 0 0 1px rgba(0,0,0,0.08)}
+  .signin{font-size:14.5px;color:var(--ink-2);padding:8px 14px;border-radius:8px}
+  .signin:hover{background:rgba(0,0,0,0.04);color:var(--ink)}
+  /* portal pill (espace client / commerçant) */
+  .nav-portals{
+    display:flex;align-items:center;gap:0;
+    background:#FFFCF6;border:1px solid var(--line);border-radius:10px;
+    padding:2px;
+  }
+  .portal{
+    display:inline-flex;align-items:center;gap:7px;
+    padding:7px 12px;border-radius:8px;
+    font-size:13.5px;color:var(--ink-2);font-weight:500;
+    transition:background .15s, color .15s;
+  }
+  .portal svg{color:var(--muted);transition:color .15s}
+  .portal:hover{background:var(--bg);color:var(--ink)}
+  .portal:hover svg{color:var(--amber-2)}
+  .portal-sep{width:1px;height:18px;background:var(--line);margin:0 1px}
+  .btn{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:11px 18px;border-radius:10px;
+    font-size:14.5px;font-weight:500;
+    transition:transform .12s ease, box-shadow .15s ease, background .15s;
+    white-space:nowrap;
+  }
+  .btn-primary{
+    background:var(--ink);color:#FFF8EA;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.1), 0 1px 2px rgba(0,0,0,0.1);
+  }
+  .btn-primary:hover{background:#2A211B;transform:translateY(-1px)}
+  .btn-amber{
+    background:var(--ink);color:#fff;
+    position:relative;overflow:hidden;
+  }
+  .btn-amber{
+    background:linear-gradient(180deg, #1A1410 0%, #2A211B 100%);
+    color:#FFF8EA;
+    box-shadow:0 1px 0 rgba(255,255,255,0.08) inset, 0 8px 22px -10px rgba(0,0,0,0.45);
+  }
+  .btn-amber:hover{transform:translateY(-1px); box-shadow:0 1px 0 rgba(255,255,255,0.08) inset, 0 12px 26px -10px rgba(0,0,0,0.55)}
+  .btn-ghost{
+    background:transparent;color:var(--ink);
+    border:1px solid var(--line-2);
+  }
+  .btn-ghost:hover{background:rgba(0,0,0,0.03)}
+  .btn-lg{padding:14px 22px;font-size:15.5px;border-radius:12px}
+  .btn .arrow{transition:transform .2s}
+  .btn:hover .arrow{transform:translateX(3px)}
+
+  /* ───────── HERO ───────── */
+  .hero{
+    padding:64px 0 96px;position:relative;overflow:hidden;
+  }
+  .hero-grid{
+    display:grid;grid-template-columns:1.05fr 1fr;gap:64px;align-items:center;
+  }
+  .hero h1 em{font-style:normal; position:relative;}
+  .hero h1 em .underline{
+    position:absolute;left:0;right:0;bottom:-2px;height:18px;
+    background:var(--amber); opacity:.22;border-radius:4px;z-index:-1;
+  }
+  .hero-sub{
+    margin-top:24px;font-size:19.5px;line-height:1.55;color:var(--ink-2);max-width:560px;
+    text-wrap:pretty;
+  }
+  .hero-cta{display:flex;gap:12px;margin-top:36px;flex-wrap:wrap}
+  .hero-trust{
+    margin-top:28px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;
+  }
+  .hero-trust .trust-chip{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:8px 14px;border-radius:999px;
+    font-size:13.5px;color:var(--ink-2);font-weight:500;
+    background:#FFFCF6;border:1px solid var(--line);
+  }
+  .hero-trust .trust-chip.lead-chip{
+    background:linear-gradient(180deg, #FFF4D9, #FEF3C7);
+    border-color:#FACC15;color:var(--ink);
+    box-shadow:0 4px 12px -6px rgba(245,158,11,0.4);
+  }
+  .hero-trust .trust-chip.lead-chip .check{
+    background:var(--amber);color:#1A1410;
+  }
+  .hero-trust .trust-chip .check{
+    width:18px;height:18px;border-radius:99px;background:var(--amber-soft);
+    color:var(--amber-2);
+    display:inline-grid;place-items:center;
+  }
+  .hero-trust .trust-chip .check svg{width:11px;height:11px}
+
+  /* phone visual */
+  .hero-visual{position:relative;justify-self:center;width:100%;display:flex;justify-content:center}
+  .visual-stage{
+    position:relative;
+    width:100%;max-width:520px;aspect-ratio:1/1;
+    display:grid;place-items:center;
+  }
+  .visual-stage::before{
+    content:"";position:absolute;inset:0;border-radius:50%;
+    background:radial-gradient(circle at 50% 45%, rgba(245,158,11,0.22), rgba(245,158,11,0) 60%);
+    z-index:0;
+  }
+  .grid-bg{
+    position:absolute;inset:8% 6% 6% 8%;border-radius:24px;
+    background-image:
+      linear-gradient(rgba(26,20,16,0.045) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(26,20,16,0.045) 1px, transparent 1px);
+    background-size:28px 28px;
+    mask-image:radial-gradient(circle at 50% 50%, black 30%, transparent 75%);
+    -webkit-mask-image:radial-gradient(circle at 50% 50%, black 30%, transparent 75%);
+  }
+  /* ───────── REALISTIC PHONE MOCKUP ───────── */
+  .phone-device{
+    position:relative;z-index:2;
+    width:300px;height:608px;
+    border-radius:52px;
+    background:
+      /* outer titanium-like edge */
+      linear-gradient(135deg,
+        #3a3a3e 0%,
+        #18181b 18%,
+        #2a2a2e 35%,
+        #0e0e10 55%,
+        #1e1e22 78%,
+        #0a0a0c 100%);
+    padding:4px;
+    box-shadow:
+      /* deep ambient shadow */
+      0 80px 120px -40px rgba(26,20,16,0.55),
+      0 40px 60px -25px rgba(26,20,16,0.35),
+      0 16px 28px -14px rgba(26,20,16,0.25),
+      /* metallic bezel rings */
+      inset 0 0 0 1px rgba(255,255,255,0.06),
+      inset 0 2px 1.5px rgba(255,255,255,0.12),
+      inset 0 -2px 2px rgba(0,0,0,0.6),
+      inset 1.5px 0 1px rgba(255,255,255,0.04),
+      inset -1.5px 0 1px rgba(0,0,0,0.4);
+    transform:rotate(-3deg);
+    transition:transform .35s ease;
+  }
+  .phone-device:hover{transform:rotate(-1deg) translateY(-4px)}
+  /* sharp metallic edge highlight (left side) */
+  .phone-device::before{
+    content:"";position:absolute;left:-1px;top:100px;bottom:140px;width:2px;
+    background:linear-gradient(180deg,
+      rgba(255,255,255,0) 0%,
+      rgba(255,255,255,0.28) 10%,
+      rgba(255,255,255,0.05) 30%,
+      rgba(255,255,255,0) 50%,
+      rgba(255,255,255,0.05) 70%,
+      rgba(255,255,255,0.28) 90%,
+      rgba(255,255,255,0) 100%);
+    border-radius:99px;pointer-events:none;
+  }
+  /* top edge highlight */
+  .phone-device::after{
+    content:"";position:absolute;left:80px;right:80px;top:-1px;height:2px;
+    background:linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+    border-radius:99px;pointer-events:none;
+  }
+  /* side buttons (volume + power) */
+  .side-btn{
+    position:absolute;background:#0a0a0c;border-radius:99px;z-index:0;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.1),
+      inset 0 -1px 0 rgba(0,0,0,0.5),
+      0 0 0 0.5px rgba(0,0,0,0.4);
+  }
+  .side-btn.power{right:-2.5px;top:150px;width:3px;height:80px}
+  .side-btn.vol-up{left:-2.5px;top:150px;width:3px;height:54px}
+  .side-btn.vol-dn{left:-2.5px;top:215px;width:3px;height:54px}
+  .side-btn.silent{left:-2.5px;top:108px;width:3px;height:30px}
+
+  .phone-inner{
+    width:100%;height:100%;border-radius:48px;
+    background:#000;
+    overflow:hidden;position:relative;
+  }
+  .phone-screen-bg{
+    position:absolute;inset:0;
+    background:
+      radial-gradient(ellipse at 80% -15%, rgba(245,158,11,0.22), transparent 55%),
+      radial-gradient(ellipse at -10% 110%, rgba(245,158,11,0.1), transparent 55%),
+      linear-gradient(180deg, #FFFCF6 0%, #FAF4E6 60%, #F5EDD6 100%);
+  }
+  /* very subtle noise/grain via gradient pattern */
+  .phone-screen-bg::after{
+    content:"";position:absolute;inset:0;
+    background-image:radial-gradient(circle at 1px 1px, rgba(26,20,16,0.015) 0.5px, transparent 0.5px);
+    background-size:3px 3px;
+    pointer-events:none;
+  }
+  /* dynamic island */
+  .dyn-island{
+    position:absolute;top:11px;left:50%;transform:translateX(-50%);
+    width:112px;height:33px;border-radius:99px;
+    background:#000;
+    z-index:5;
+    box-shadow:
+      inset 0 1px 1.5px rgba(255,255,255,0.06),
+      inset 0 -1px 1px rgba(0,0,0,0.8),
+      0 0 0 0.5px rgba(255,255,255,0.04);
+  }
+  /* tiny front camera dot inside the island */
+  .dyn-island::after{
+    content:"";position:absolute;right:14px;top:50%;transform:translateY(-50%);
+    width:8px;height:8px;border-radius:99px;
+    background:radial-gradient(circle at 35% 35%, #1a1a1f 0%, #050505 70%);
+    box-shadow:inset 0 0 0 0.5px rgba(255,255,255,0.1);
+  }
+  /* glossy screen reflection */
+  .phone-gloss{
+    position:absolute;inset:0;pointer-events:none;z-index:6;
+    background:linear-gradient(150deg,
+      rgba(255,255,255,0.22) 0%,
+      rgba(255,255,255,0.05) 15%,
+      rgba(255,255,255,0) 30%,
+      rgba(255,255,255,0) 70%,
+      rgba(255,255,255,0.04) 88%,
+      rgba(255,255,255,0.1) 100%);
+  }
+
+  /* status bar */
+  .status-bar{
+    position:relative;z-index:2;
+    height:50px;padding:18px 28px 0;
+    display:flex;justify-content:space-between;align-items:center;
+    color:#0F0B08;font-weight:600;font-size:15px;letter-spacing:-0.02em;
+    font-feature-settings:"tnum";
+  }
+  .status-icons{display:flex;gap:6px;align-items:center}
+  .status-icons .signal{display:flex;gap:1.5px;align-items:flex-end;height:11px}
+  .status-icons .signal i{width:3px;background:#0F0B08;border-radius:0.8px;display:block}
+  .status-icons .signal i:nth-child(1){height:3.5px}
+  .status-icons .signal i:nth-child(2){height:6px}
+  .status-icons .signal i:nth-child(3){height:8.5px}
+  .status-icons .signal i:nth-child(4){height:11px}
+  .status-icons .wifi{width:15px;height:11px;display:block}
+  .status-icons .battery{
+    width:25px;height:12px;border:1.2px solid #0F0B08;border-radius:3.5px;
+    position:relative;padding:1.2px;opacity:0.9;
+  }
+  .status-icons .battery::after{
+    content:"";position:absolute;right:-3px;top:3.5px;width:2px;height:5px;background:#0F0B08;border-radius:0 1.2px 1.2px 0;
+  }
+  .status-icons .battery i{display:block;height:100%;width:82%;background:#0F0B08;border-radius:1.8px}
+
+  /* app content */
+  .app-content{
+    position:relative;z-index:2;
+    padding:6px 20px 24px;
+    display:flex;flex-direction:column;gap:14px;
+  }
+  .app-header{
+    display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;padding-top:4px;
+  }
+  .app-header .greeting{font-size:11.5px;color:var(--muted);letter-spacing:0.01em;font-weight:500}
+  .app-header .username{font-size:18px;font-weight:600;color:var(--ink);letter-spacing:-0.025em;margin-top:2px}
+  .app-header .avatar{
+    width:36px;height:36px;border-radius:99px;
+    background:linear-gradient(135deg, #FCD34D, #F59E0B 55%, #B45309);
+    color:#fff;display:grid;place-items:center;font-size:13.5px;font-weight:600;letter-spacing:-0.01em;
+    box-shadow:
+      0 4px 12px -3px rgba(245,158,11,0.55),
+      inset 0 1px 0 rgba(255,255,255,0.25),
+      inset 0 -1px 0 rgba(0,0,0,0.1);
+    text-shadow:0 1px 1px rgba(0,0,0,0.15);
+  }
+  /* wallet-style loyalty pass */
+  .pass{
+    border-radius:20px;padding:20px;color:#FFF8EA;
+    background:
+      radial-gradient(circle at 88% 12%, rgba(245,158,11,0.42), transparent 48%),
+      radial-gradient(circle at 10% 95%, rgba(180,83,9,0.25), transparent 55%),
+      linear-gradient(160deg, #2f2620 0%, #1a1410 50%, #0a0705 100%);
+    position:relative;overflow:hidden;
+    box-shadow:
+      0 16px 32px -12px rgba(26,20,16,0.7),
+      0 4px 10px -4px rgba(26,20,16,0.4),
+      inset 0 1px 0 rgba(255,255,255,0.08),
+      inset 0 -1px 0 rgba(0,0,0,0.4);
+  }
+  .pass::before{
+    content:"";position:absolute;top:0;left:0;right:0;height:1px;
+    background:linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+  }
+  /* subtle holographic stripe across the pass */
+  .pass::after{
+    content:"";position:absolute;top:0;left:-50%;width:200%;height:100%;
+    background:linear-gradient(105deg,
+      transparent 40%,
+      rgba(255,255,255,0.04) 48%,
+      rgba(255,255,255,0.08) 50%,
+      rgba(255,255,255,0.04) 52%,
+      transparent 60%);
+    pointer-events:none;
+  }
+  .pass > *{position:relative;z-index:1}
+  .pass-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px}
+  .pass-brand{display:flex;align-items:center;gap:8px}
+  .pass-brand .mk{
+    width:24px;height:24px;border-radius:7px;background:rgba(255,248,234,0.08);
+    display:grid;place-items:center;
+    box-shadow:inset 0 0 0 1px rgba(255,248,234,0.08);
+  }
+  .pass-brand .mk::before{content:"";width:10px;height:10px;background:var(--amber);transform:rotate(45deg);border-radius:1.5px;box-shadow:0 0 8px rgba(245,158,11,0.6)}
+  .pass-brand .label{font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;font-weight:600;opacity:.9}
+  .pass-merch{font-size:10.5px;letter-spacing:0.08em;text-transform:uppercase;opacity:.65;text-align:right;line-height:1.4}
+  .pass-points{display:flex;align-items:baseline;gap:8px;margin-bottom:4px}
+  .pass-points .v{
+    font-family:"Geist Mono",monospace;font-size:46px;font-weight:500;
+    letter-spacing:-0.05em;line-height:1;color:#FFF8EA;
+    text-shadow:0 2px 8px rgba(245,158,11,0.2);
+  }
+  .pass-points .l{font-size:11.5px;opacity:.6;letter-spacing:0.05em;text-transform:uppercase;font-weight:500}
+  .pass-progress{
+    margin-top:16px;height:6px;border-radius:99px;
+    background:rgba(255,248,234,0.1);overflow:hidden;position:relative;
+    box-shadow:inset 0 1px 1px rgba(0,0,0,0.3);
+  }
+  .pass-progress i{
+    display:block;height:100%;width:70%;
+    background:linear-gradient(90deg, #B45309 0%, var(--amber) 40%, #FBBF24 100%);
+    border-radius:99px;
+    box-shadow:0 0 10px rgba(245,158,11,0.6), inset 0 1px 0 rgba(255,255,255,0.2);
+  }
+  .pass-foot{display:flex;justify-content:space-between;margin-top:10px;font-size:10.5px;opacity:.65;letter-spacing:0.03em;font-weight:500}
+  .pass-stamps{
+    display:grid;grid-template-columns:repeat(10,1fr);gap:5px;margin-top:16px;
+  }
+  .pass-stamps i{
+    aspect-ratio:1;border-radius:50%;
+    border:1px dashed rgba(255,248,234,0.25);display:grid;place-items:center;font-size:9px;
+    color:rgba(255,248,234,0.4);
+  }
+  .pass-stamps i.on{
+    background:radial-gradient(circle at 35% 30%, #FBBF24, var(--amber) 70%);
+    border:1px solid #B45309;color:#1A1410;font-weight:700;
+    box-shadow:0 1px 3px rgba(245,158,11,0.5);
+  }
+
+  /* qr block */
+  .app-qr-row{
+    background:#FFFCF6;border:1px solid var(--line);border-radius:14px;
+    padding:12px;display:flex;align-items:center;gap:12px;
+    box-shadow:
+      0 6px 16px -8px rgba(26,20,16,0.12),
+      inset 0 1px 0 rgba(255,255,255,0.6);
+  }
+  .app-qr-row .qrbox{
+    width:62px;height:62px;border-radius:9px;background:#fff;
+    border:1px solid var(--line);
+    padding:5px;flex-shrink:0;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,0.8);
+  }
+  .app-qr-row .qrbox svg{display:block;width:100%;height:100%}
+  .app-qr-row .qrbox .mod{fill:#0F0B08}
+  .app-qr-row .meta .t{font-size:13px;font-weight:600;color:var(--ink);letter-spacing:-0.015em}
+  .app-qr-row .meta .s{font-size:11px;color:var(--muted);margin-top:3px;letter-spacing:0.005em}
+  .app-qr-row .chev{margin-left:auto;color:var(--muted);opacity:.7}
+
+  /* home indicator */
+  .home-indicator{
+    position:absolute;bottom:8px;left:50%;transform:translateX(-50%);
+    width:128px;height:5px;border-radius:99px;background:rgba(15,11,8,0.42);z-index:5;
+  }
+
+  /* floating mini cards around phone */
+  .float-card{
+    position:absolute;z-index:3;background:#FFFCF6;
+    border:1px solid var(--line);border-radius:14px;padding:12px 14px;
+    box-shadow:0 18px 36px -16px rgba(26,20,16,0.35);
+    font-size:13px;
+    display:flex;align-items:center;gap:10px;
+    animation:float 5s ease-in-out infinite;
+  }
+  .float-card.fc-1{top:8%;left:0%;animation-delay:.2s}
+  .float-card.fc-2{bottom:14%;right:-4%;animation-delay:1.1s}
+  .float-card.fc-3{top:36%;right:-6%;animation-delay:2s}
+  @keyframes float{
+    0%,100%{transform:translateY(0)}
+    50%{transform:translateY(-8px)}
+  }
+  .fc-icon{
+    width:32px;height:32px;border-radius:9px;
+    background:var(--amber-soft);color:var(--amber-2);
+    display:grid;place-items:center;flex-shrink:0;
+  }
+  .fc-icon.green{background:#D8F0E4;color:var(--green)}
+  .fc-icon.ink{background:var(--ink);color:var(--amber)}
+  .fc-icon svg{width:16px;height:16px}
+  .fc-title{font-weight:500;color:var(--ink);font-size:13px;line-height:1.2}
+  .fc-sub{font-size:11.5px;color:var(--muted);margin-top:2px}
+
+  /* ───────── LOGO BAR ───────── */
+  .logobar{
+    border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+    padding:28px 0;
+  }
+  .logobar-inner{display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap}
+  .logobar-label{font-size:13px;color:var(--muted);letter-spacing:0.01em;max-width:240px}
+  .logos{display:flex;gap:36px;align-items:center;flex-wrap:wrap;flex:1;justify-content:flex-end}
+  .fakelogo{font-size:18px;color:var(--ink-2);opacity:.55;font-weight:600;letter-spacing:-0.02em;display:inline-flex;align-items:center;gap:7px}
+  .fakelogo .dot{width:7px;height:7px;background:var(--ink-2);border-radius:99px;opacity:.65}
+  .fakelogo.serif{font-family:"Geist", sans-serif;font-style:italic;font-weight:500;letter-spacing:0}
+  .fakelogo.alt{font-weight:400}
+
+  /* ─────────  KEY BENEFITS (sand, card-style like commerces) ───────── */
+  .stats{padding:96px 0; background:var(--bg-2); position:relative; overflow:hidden; border-top:1px solid var(--line); border-bottom:1px solid var(--line)}
+  .stats .wrap{position:relative; z-index:1}
+  .stats-head{display:flex;justify-content:space-between;align-items:end;gap:32px;margin-bottom:48px;flex-wrap:wrap}
+  .stats-head .left{max-width:560px}
+  .stats-head h2{margin-top:18px}
+  .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  .stat{
+    background:#FFFCF6;border:1px solid var(--line);border-radius:18px;
+    padding:24px;min-height:200px;
+    display:flex;flex-direction:column;justify-content:space-between;gap:14px;
+    transition:transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+    position:relative;overflow:hidden;
+  }
+  .stat:hover{transform:translateY(-3px);border-color:var(--amber);box-shadow:0 18px 30px -20px rgba(245,158,11,0.3)}
+  .stat-icon{
+    width:44px;height:44px;border-radius:12px;
+    background:var(--bg);border:1px solid var(--line);
+    display:grid;place-items:center;color:var(--ink);
+  }
+  .stat-icon svg{width:22px;height:22px;stroke-width:1.5}
+  .stat .num{font-size:18px;font-weight:500;letter-spacing:-0.015em;line-height:1.2;color:var(--ink)}
+  .stat .lbl{font-size:13.5px;color:var(--muted);line-height:1.45}
+
+  /* ───────── HOW IT WORKS ───────── */
+  .how{padding:96px 0;position:relative}
+  .how-head{text-align:center;max-width:680px;margin:0 auto 64px}
+  .how-head h2{margin-top:18px}
+  .how-head p{margin-top:16px;font-size:18px}
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;position:relative}
+  .step{
+    background:#FFFCF6;border:1px solid var(--line);border-radius:var(--radius-lg);
+    padding:28px;display:flex;flex-direction:column;gap:18px;
+    transition:transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+  }
+  .step:hover{transform:translateY(-4px);box-shadow:0 24px 40px -24px rgba(26,20,16,0.2);border-color:var(--line-2)}
+  .step-num{
+    display:inline-flex;align-items:center;gap:10px;
+    font-family:"Geist Mono",monospace;font-size:12px;color:var(--muted);
+  }
+  .step-num .n{
+    width:28px;height:28px;border-radius:8px;background:var(--ink);color:var(--amber);
+    display:grid;place-items:center;font-size:13px;font-weight:500;
+  }
+  .step h3{font-size:22px;letter-spacing:-0.02em;line-height:1.2}
+  .step p{font-size:15px;line-height:1.55}
+  .step-visual{
+    margin-top:6px;height:180px;border-radius:14px;background:var(--bg);
+    border:1px solid var(--line);position:relative;overflow:hidden;
+    display:grid;place-items:center;
+  }
+  /* step 1 visual: dashboard mini */
+  .sv-dash{padding:18px;width:100%;height:100%;display:flex;flex-direction:column;gap:8px}
+  .sv-dash .head-row{display:flex;justify-content:space-between;align-items:center}
+  .sv-dash .tag{font-size:10px;color:var(--muted);font-family:"Geist Mono",monospace}
+  .sv-dash .dot{width:6px;height:6px;border-radius:99px;background:var(--amber);box-shadow:0 0 0 3px rgba(245,158,11,0.2)}
+  .sv-dash .bars{display:flex;align-items:flex-end;gap:6px;flex:1}
+  .sv-dash .bars .b{flex:1;background:var(--ink);border-radius:4px 4px 2px 2px;opacity:.85}
+  .sv-dash .bars .b:nth-child(odd){background:var(--amber)}
+  /* step 2 visual: QR scan (real-looking) */
+  .sv-scan{position:relative;width:100%;height:100%;display:grid;place-items:center;background:#FFFCF6}
+  .sv-scan .qr-frame{
+    position:relative;width:120px;height:120px;
+    background:#fff;border-radius:10px;padding:8px;
+    box-shadow:0 4px 14px -6px rgba(26,20,16,0.18);
+    border:1px solid var(--line);
+    overflow:hidden;
+  }
+  .sv-scan .qr-frame svg{display:block;width:100%;height:100%}
+  .sv-scan .qr-frame .mod{fill:#0F0B08}
+  .sv-scan .qr-frame .scanline{
+    position:absolute;left:8px;right:8px;height:2px;
+    background:linear-gradient(90deg, transparent, var(--amber) 20%, var(--amber) 80%, transparent);
+    box-shadow:0 0 12px 2px rgba(245,158,11,0.55), 0 0 30px rgba(245,158,11,0.35);
+    top:8px;
+    animation:scanline 2.4s cubic-bezier(.45,0,.55,1) infinite;
+    z-index:2;
+  }
+  .sv-scan .qr-frame .scan-glow{
+    position:absolute;left:8px;right:8px;top:8px;height:0;
+    background:linear-gradient(180deg, rgba(245,158,11,0.18), rgba(245,158,11,0));
+    animation:scanglow 2.4s cubic-bezier(.45,0,.55,1) infinite;
+    z-index:1;pointer-events:none;
+  }
+  /* corner brackets around the QR (camera viewfinder feel) */
+  .sv-scan .qr-frame::before,
+  .sv-scan .qr-frame::after{
+    content:"";position:absolute;width:14px;height:14px;
+    border:2px solid var(--amber);
+    z-index:3;pointer-events:none;
+  }
+  .sv-scan .qr-frame::before{
+    top:-4px;left:-4px;border-right:none;border-bottom:none;border-top-left-radius:4px;
+  }
+  .sv-scan .qr-frame::after{
+    bottom:-4px;right:-4px;border-left:none;border-top:none;border-bottom-right-radius:4px;
+  }
+  .sv-scan .corner-tr,
+  .sv-scan .corner-bl{
+    position:absolute;width:14px;height:14px;border:2px solid var(--amber);z-index:3;pointer-events:none;
+  }
+  .sv-scan .corner-tr{top:-4px;right:-4px;border-left:none;border-bottom:none;border-top-right-radius:4px}
+  .sv-scan .corner-bl{bottom:-4px;left:-4px;border-right:none;border-top:none;border-bottom-left-radius:4px}
+  @keyframes scanline{
+    0%{top:8px}
+    50%{top:calc(100% - 10px)}
+    100%{top:8px}
+  }
+  @keyframes scanglow{
+    0%{top:8px;height:0}
+    45%{top:8px;height:calc(100% - 18px)}
+    50%{top:calc(100% - 10px);height:0}
+    95%{top:8px;height:calc(100% - 18px)}
+    100%{top:8px;height:0}
+  }
+  /* step 3 visual: stamps */
+  .sv-stamps{padding:0 24px;width:100%;display:flex;flex-direction:column;gap:10px;align-items:center}
+  .sv-stamps .row{display:flex;gap:6px}
+  .sv-stamps .s{width:26px;height:26px;border-radius:6px;border:1px dashed var(--line-2);background:#fff;display:grid;place-items:center;color:var(--line-2)}
+  .sv-stamps .s.on{background:var(--amber);border:1px solid var(--amber);color:var(--ink)}
+  .sv-stamps .reward{
+    font-family:"Geist Mono",monospace;font-size:11px;color:var(--ink);background:var(--amber-soft);
+    padding:6px 10px;border-radius:99px;border:1px solid #FACC15;
+  }
+
+  /* ───────── COMMERCES ───────── */
+  .commerces{padding:96px 0;background:var(--bg-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .commerces-head{display:flex;justify-content:space-between;align-items:end;gap:32px;flex-wrap:wrap;margin-bottom:48px}
+  .commerces-head .l{max-width:560px}
+  .commerces-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:14px}
+  .com-card{
+    grid-column:span 2;
+    background:#FFFCF6;border:1px solid var(--line);border-radius:18px;
+    padding:24px;min-height:170px;
+    display:flex;flex-direction:column;justify-content:space-between;gap:14px;
+    transition:transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+    position:relative;overflow:hidden;
+  }
+  .com-card:hover{transform:translateY(-3px);border-color:var(--amber);box-shadow:0 18px 30px -20px rgba(245,158,11,0.3)}
+  .com-card.feat{grid-column:span 3;background:linear-gradient(135deg, #FFFCF6 0%, #FFF4D9 100%);min-height:200px}
+  .com-card.large{grid-column:span 4;min-height:220px}
+  .com-icon{
+    width:44px;height:44px;border-radius:12px;background:var(--bg);border:1px solid var(--line);
+    display:grid;place-items:center;color:var(--ink);
+  }
+  .com-icon svg{width:22px;height:22px;stroke-width:1.5}
+  .com-card .title{font-size:18px;font-weight:500;letter-spacing:-0.015em;color:var(--ink)}
+  .com-card .desc{font-size:13.5px;color:var(--muted);line-height:1.45}
+  .com-card .pill{
+    position:absolute;top:18px;right:18px;
+    font-family:"Geist Mono",monospace;font-size:11px;color:var(--amber-2);
+    background:var(--amber-soft);padding:4px 9px;border-radius:99px;border:1px solid #FDE68A;
+  }
+
+  /* ───────── PRICING ───────── */
+  .pricing{padding:104px 0}
+  .pricing-head{text-align:center;max-width:680px;margin:0 auto 64px}
+  .pricing-head h2{margin-top:18px}
+  .pricing-head p{margin-top:16px;font-size:18px}
+  .price-grid{display:grid;grid-template-columns:1.05fr 1fr;gap:24px;align-items:stretch}
+  .price-card{
+    background:#FFFCF6;border:1px solid var(--line);border-radius:24px;
+    padding:40px;display:flex;flex-direction:column;
+    position:relative;
+  }
+  .price-card.main{
+    background:#1A1410;color:#FFF8EA;border-color:#1A1410;
+    box-shadow:0 30px 60px -30px rgba(26,20,16,0.45);
+    position:relative;overflow:hidden;
+  }
+  .price-card.main::after{
+    content:"";position:absolute;right:-80px;top:-80px;width:280px;height:280px;border-radius:99px;
+    background:radial-gradient(circle at center, rgba(245,158,11,0.25), transparent 65%);
+    pointer-events:none;
+  }
+  .price-card.main h3{color:#FFF8EA}
+  .price-card.main p{color:#C7BFB1}
+  .price-card .badge{
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:12px;font-weight:500;color:var(--ink);
+    background:var(--amber);padding:5px 11px;border-radius:99px;
+    align-self:flex-start;
+  }
+  .price-card .name{font-size:16px;color:var(--muted);margin-bottom:8px}
+  .price-card.main .name{color:#C7BFB1}
+  .price-card .amount{
+    display:flex;align-items:baseline;gap:8px;margin-top:14px;
+  }
+  .price-card .amount .v{font-size:68px;font-weight:500;letter-spacing:-0.045em;line-height:1}
+  .price-card.main .amount .v{color:#FFF8EA}
+  .price-card .amount .per{font-size:15px;color:var(--muted)}
+  .price-card.main .amount .per{color:#C7BFB1}
+  .price-desc{margin-top:20px;font-size:15.5px;line-height:1.55;max-width:380px}
+  .feature-list{margin-top:28px;display:flex;flex-direction:column;gap:14px;list-style:none;padding:0;flex:1}
+  .feature-list li{display:flex;gap:12px;align-items:flex-start;font-size:14.5px;line-height:1.45}
+  .feature-list li .ck{
+    width:20px;height:20px;flex-shrink:0;border-radius:99px;
+    background:var(--amber);color:#1A1410;display:grid;place-items:center;
+  }
+  .price-card.main .feature-list li .ck{background:var(--amber);color:#1A1410}
+  .price-card:not(.main) .feature-list li .ck{background:var(--amber-soft);color:var(--amber-2)}
+  .feature-list li .ck svg{width:11px;height:11px}
+  .price-card .cta{margin-top:32px;display:flex;flex-direction:column;gap:12px}
+  .price-card .fine{font-size:12.5px;color:var(--muted);text-align:center}
+  .price-card.main .fine{color:#9C9587}
+
+  .price-side{
+    display:flex;flex-direction:column;gap:24px;
+  }
+  .side-card{
+    background:#FFFCF6;border:1px solid var(--line);border-radius:20px;padding:28px;
+    flex:1;display:flex;flex-direction:column;justify-content:space-between;gap:18px;
+  }
+  .side-card h4{font-size:18px;letter-spacing:-0.015em;font-weight:500}
+  .side-card p{font-size:14px;line-height:1.5}
+  .side-card .icon{
+    width:42px;height:42px;border-radius:12px;background:var(--bg);border:1px solid var(--line);
+    display:grid;place-items:center;color:var(--ink);margin-bottom:4px;
+  }
+  .side-card .icon svg{width:20px;height:20px}
+
+  /* ───────── FAQ ───────── */
+  .faq{padding:96px 0;background:var(--bg-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .faq-grid{display:grid;grid-template-columns:1fr 1.4fr;gap:64px}
+  .faq-side h2{margin-top:14px}
+  .faq-side p{margin-top:18px;font-size:16px;max-width:340px}
+  .faq-side .btn{margin-top:24px}
+  .faq-list{display:flex;flex-direction:column;border-top:1px solid var(--line)}
+  .faq-item{border-bottom:1px solid var(--line);padding:24px 0}
+  .faq-q{
+    width:100%;display:flex;justify-content:space-between;align-items:center;gap:18px;
+    background:none;border:none;padding:0;text-align:left;
+    font-size:18px;font-weight:500;color:var(--ink);letter-spacing:-0.015em;cursor:pointer;
+  }
+  .faq-q .ic{
+    width:32px;height:32px;border-radius:99px;border:1px solid var(--line-2);
+    display:grid;place-items:center;color:var(--ink-2);flex-shrink:0;
+    transition:transform .25s ease, background .15s, color .15s;
+  }
+  .faq-q:hover .ic{background:var(--ink);color:var(--amber);border-color:var(--ink)}
+  .faq-item.open .faq-q .ic{transform:rotate(45deg);background:var(--ink);color:var(--amber);border-color:var(--ink)}
+  .faq-a{
+    max-height:0;overflow:hidden;transition:max-height .35s ease, opacity .25s ease;
+    opacity:0;
+  }
+  .faq-item.open .faq-a{max-height:240px;opacity:1}
+  .faq-a p{padding-top:14px;font-size:15px;line-height:1.6;color:var(--ink-2);max-width:600px}
+
+  /* ───────── FINAL CTA ───────── */
+  .cta-section{padding:96px 0}
+  .cta-box{
+    background:#1A1410;border-radius:32px;color:#FFF8EA;
+    padding:80px 64px;display:grid;grid-template-columns:1.4fr 1fr;gap:48px;align-items:center;
+    position:relative;overflow:hidden;
+  }
+  .cta-box::before{
+    content:"";position:absolute;right:-100px;top:-100px;width:420px;height:420px;border-radius:99px;
+    background:radial-gradient(circle at center, rgba(245,158,11,0.3), transparent 65%);
+  }
+  .cta-box h2{color:#FFF8EA;font-size:clamp(32px, 3.4vw, 48px);position:relative;z-index:1}
+  .cta-box p{color:#C7BFB1;margin-top:18px;font-size:17px;max-width:480px;position:relative;z-index:1}
+  .cta-box .cta-actions{display:flex;gap:12px;margin-top:32px;flex-wrap:wrap;position:relative;z-index:1}
+  .cta-box .btn-amber{background:var(--amber);color:#1A1410;}
+  .cta-box .btn-amber:hover{background:#FBBF24}
+  .cta-box .btn-ghost{border-color:rgba(255,248,234,0.2);color:#FFF8EA}
+  .cta-box .btn-ghost:hover{background:rgba(255,255,255,0.06)}
+  .cta-side{position:relative;z-index:1;display:flex;flex-direction:column;gap:16px}
+  .cta-meta{display:flex;align-items:center;gap:14px;padding:14px 18px;border:1px solid rgba(255,248,234,0.12);border-radius:14px;background:rgba(255,255,255,0.025)}
+  .cta-meta .ic{width:36px;height:36px;border-radius:10px;background:var(--amber);color:#1A1410;display:grid;place-items:center;flex-shrink:0}
+  .cta-meta .ic svg{width:18px;height:18px}
+  .cta-meta .t{font-size:14.5px;color:#FFF8EA;font-weight:500;line-height:1.2}
+  .cta-meta .s{font-size:12.5px;color:#9C9587;margin-top:3px}
+
+  /* ───────── FOOTER ───────── */
+  footer{padding:64px 0 40px;border-top:1px solid var(--line)}
+  .foot-grid{display:grid;grid-template-columns:1.5fr repeat(4,1fr);gap:48px;margin-bottom:64px}
+  .foot-brand{max-width:300px}
+  .foot-brand p{font-size:14px;color:var(--muted);margin-top:14px;line-height:1.55}
+  .foot-col h5{font-size:13px;color:var(--ink);font-weight:500;margin:0 0 16px;letter-spacing:0.01em}
+  .foot-col ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px}
+  .foot-col a{font-size:13.5px;color:var(--muted)}
+  .foot-col a:hover{color:var(--ink)}
+  .foot-bottom{border-top:1px solid var(--line);padding-top:24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+  .foot-bottom .l{font-size:13px;color:var(--muted)}
+  .foot-bottom .r{display:flex;gap:18px;font-size:13px;color:var(--muted)}
+  .foot-bottom .r a:hover{color:var(--ink)}
+  .legal-row{display:flex;gap:10px;align-items:center;font-size:12px;color:var(--muted);margin-top:14px;flex-wrap:wrap}
+  .legal-row .tag{display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border:1px solid var(--line);background:#FFFCF6;border-radius:99px}
+  .legal-row .tag .dt{width:5px;height:5px;border-radius:99px;background:var(--green)}
+
+  /* responsive */
+  @media (max-width: 1180px){
+    .nav-links a[href="#ressources"]{display:none}
+    .nav-portals{display:none}
+  }
+  @media (max-width: 980px){
+    .hero-grid{grid-template-columns:1fr;gap:48px}
+    .hero{padding:40px 0 64px}
+    .nav-portals{display:none}
+    .stats-grid{grid-template-columns:repeat(2,1fr);gap:12px}
+    .stat{padding:24px;min-height:auto}
+    .steps{grid-template-columns:1fr}
+    .commerces-grid{grid-template-columns:repeat(2,1fr)}
+    .com-card,.com-card.feat,.com-card.large{grid-column:span 1}
+    .price-grid{grid-template-columns:1fr}
+    .faq-grid{grid-template-columns:1fr;gap:32px}
+    .cta-box{grid-template-columns:1fr;padding:48px 32px}
+    .foot-grid{grid-template-columns:1fr 1fr;gap:32px}
+    .nav-links{display:none}
+    .visual-stage{max-width:380px}
+    .phone-device{width:260px;height:526px}
+  }
+  @media (max-width: 560px){
+    .wrap{padding:0 20px}
+    .stats-grid{grid-template-columns:1fr 1fr}
+    .commerces-grid{grid-template-columns:1fr}
+    .foot-grid{grid-template-columns:1fr}
+    .cta-box{padding:40px 24px}
+  }
+</style>
+</head>
+<body>
+
+<!-- ════════════ NAV ════════════ -->
+<header class="topbar" id="topbar">
+  <div class="wrap nav">
+    <a href="#" class="brand">
+      <div class="brand-mark"></div>
+      Fidelyzio
+    </a>
+    <nav class="nav-links">
+      <a href="#fonctionne">Comment ça marche</a>
+      <a href="#commerces">Commerces</a>
+      <a href="#tarifs">Tarifs</a>
+      <a href="#faq">FAQ</a>
+      <a href="#ressources">Ressources</a>
+    </nav>
+    <div class="nav-right">
+      <a href="#" class="lang"><span class="flag"></span>FR
+        <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M3 5l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <div class="nav-portals">
+        <a href="#" class="portal">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M20 21a8 8 0 10-16 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.7"/></svg>
+          Espace client
+        </a>
+        <span class="portal-sep"></span>
+        <a href="#" class="portal">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M3 21V9l9-6 9 6v12" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 21v-7h6v7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Espace commerçant
+        </a>
+      </div>
+      <a href="#tarifs" class="btn btn-amber">Commencer gratuitement <svg class="arrow" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    </div>
+  </div>
+</header>
+
+<!-- ════════════ HERO ════════════ -->
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div class="hero-left">
+      <span class="eyebrow"><span class="dot"></span>Programme de fidélité nouvelle génération</span>
+      <h1 style="margin-top:22px;">Vos clients méritent mieux qu'<em>une carte papier<span class="underline"></span></em>.</h1>
+      <p class="hero-sub">
+        Fidelyzio digitalise la fidélité de votre commerce.
+        Points, tampons et récompenses — accessibles via un simple QR code.
+        Sans appli mobile à télécharger.
+      </p>
+      <div class="hero-cta">
+        <a href="#tarifs" class="btn btn-amber btn-lg">Commencer gratuitement
+          <svg class="arrow" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <a href="#fonctionne" class="btn btn-ghost btn-lg">Voir une démo en 2 min</a>
+      </div>
+      <div class="hero-trust">
+        <span class="trust-chip lead-chip"><span class="check"><svg viewBox="0 0 12 12" fill="none"><path d="M2.5 6.5l2.5 2.5L10 4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>14 jours d'essai gratuit</span>
+        <span class="trust-chip"><span class="check"><svg viewBox="0 0 12 12" fill="none"><path d="M2.5 6.5l2.5 2.5L10 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Sans engagement</span>
+        <span class="trust-chip"><span class="check"><svg viewBox="0 0 12 12" fill="none"><path d="M2.5 6.5l2.5 2.5L10 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Sans appli mobile</span>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <div class="visual-stage">
+        <div class="grid-bg"></div>
+
+        <div class="float-card fc-1">
+          <div class="fc-icon">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 21 12 16.51 5.79 21l2.39-7.15L2 9.36h7.61z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+          </div>
+          <div>
+            <div class="fc-title">+50 points</div>
+            <div class="fc-sub">Café du Marché · à l'instant</div>
+          </div>
+        </div>
+
+        <div class="float-card fc-2">
+          <div class="fc-icon green">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M5 12l5 5L20 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div>
+            <div class="fc-title">Récompense débloquée</div>
+            <div class="fc-sub">10ème café offert</div>
+          </div>
+        </div>
+
+        <div class="float-card fc-3">
+          <div class="fc-icon ink">
+            <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.6"/><rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.6"/><rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.6"/><path d="M14 14h3v3h-3zM20 14v3M14 20h3M20 20v1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          </div>
+          <div>
+            <div class="fc-title">Scan QR</div>
+            <div class="fc-sub">Universel · multi-commerce</div>
+          </div>
+        </div>
+
+        <image-slot
+          id="hero-phone"
+          class="phone-slot"
+          shape="rounded"
+          radius="44"
+          placeholder="Dépose ici une photo de téléphone affichant l'app Fidelyzio (capture produit, mockup ou photo lifestyle)"
+          style="display:none"
+        ></image-slot>
+
+        <div class="phone-device" aria-hidden="true">
+          <span class="side-btn silent"></span>
+          <span class="side-btn vol-up"></span>
+          <span class="side-btn vol-dn"></span>
+          <span class="side-btn power"></span>
+          <div class="phone-inner">
+            <div class="phone-screen-bg"></div>
+            <div class="dyn-island"></div>
+            <div class="status-bar">
+              <span class="time">9:41</span>
+              <span class="status-icons">
+                <span class="signal"><i></i><i></i><i></i><i></i></span>
+                <svg class="wifi" viewBox="0 0 24 16" fill="none"><path d="M2 6c5.5-5 14.5-5 20 0" stroke="#0F0B08" stroke-width="2" stroke-linecap="round"/><path d="M6 10c3.5-3 8.5-3 12 0" stroke="#0F0B08" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="14" r="1.4" fill="#0F0B08"/></svg>
+                <span class="battery"><i></i></span>
+              </span>
+            </div>
+
+            <div class="app-content">
+              <div class="app-header">
+                <div>
+                  <div class="greeting">Bonjour</div>
+                  <div class="username">Marie L.</div>
+                </div>
+                <div class="avatar">ML</div>
+              </div>
+
+              <div class="pass">
+                <div class="pass-header">
+                  <div class="pass-brand">
+                    <span class="mk"></span>
+                    <span class="label">Fidelyzio</span>
+                  </div>
+                  <div class="pass-merch">Café du<br/>Marché</div>
+                </div>
+                <div class="pass-points">
+                  <span class="v">420</span>
+                  <span class="l">pts</span>
+                </div>
+                <div class="pass-progress"><i></i></div>
+                <div class="pass-foot"><span>10ème café offert</span><span>70%</span></div>
+                <div class="pass-stamps">
+                  <i class="on">✓</i><i class="on">✓</i><i class="on">✓</i><i class="on">✓</i><i class="on">✓</i>
+                  <i class="on">✓</i><i class="on">✓</i><i></i><i></i><i></i>
+                </div>
+              </div>
+
+              <div class="app-qr-row">
+                <div class="qrbox"><svg class="js-qr" viewBox="0 0 25 25" shape-rendering="crispEdges" aria-hidden="true"></svg></div>
+                <div class="meta">
+                  <div class="t">Carte universelle</div>
+                  <div class="s">Présentez ce QR à la caisse</div>
+                </div>
+                <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+            </div>
+
+            <div class="phone-gloss"></div>
+            <div class="home-indicator"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ KEY BENEFITS STRIP (dark contrast block) ════════════ -->
+<section class="stats">
+  <div class="wrap">
+    <div class="stats-head">
+      <div class="left">
+        <span class="eyebrow"><span class="dot"></span>Ce que vous obtenez</span>
+        <h2>Tout ce qu'il faut pour fidéliser. Rien de superflu.</h2>
+      </div>
+      <p class="lead" style="max-width:380px">
+        Un programme de fidélité moderne, pensé pour les commerces de proximité.
+      </p>
+    </div>
+    <div class="stats-grid">
+      <div class="stat">
+        <div class="stat-icon">
+          <svg viewBox="0 0 24 24" fill="none"><rect x="5" y="2" width="14" height="20" rx="3" stroke="currentColor"/><path d="M11 18h2" stroke="currentColor" stroke-linecap="round"/><path d="M9 7l2 2 4-4" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div>
+          <div class="num">Sans appli mobile</div>
+          <div class="lbl">Vos clients accèdent à leur carte via un simple QR code — rien à télécharger.</div>
+        </div>
+      </div>
+      <div class="stat">
+        <div class="stat-icon">
+          <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor"/><rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor"/><rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor"/><path d="M14 14h3v3h-3zM20 14v3M14 20h3M20 20v1" stroke="currentColor" stroke-linecap="round"/></svg>
+        </div>
+        <div>
+          <div class="num">Carte QR universelle</div>
+          <div class="lbl">Une seule carte pour tous les commerces partenaires Fidelyzio.</div>
+        </div>
+      </div>
+      <div class="stat">
+        <div class="stat-icon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 21 12 16.51 5.79 21l2.39-7.15L2 9.36h7.61z" stroke="currentColor" stroke-linejoin="round"/></svg>
+        </div>
+        <div>
+          <div class="num">Points &amp; tampons</div>
+          <div class="lbl">Deux formats de fidélité au choix — selon ce qui colle à votre métier.</div>
+        </div>
+      </div>
+      <div class="stat">
+        <div class="stat-icon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 2l7 4v6c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V6l7-4z" stroke="currentColor" stroke-linejoin="round"/><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div>
+          <div class="num">RGPD · Hébergé en France</div>
+          <div class="lbl">Vos données restent en France. Conformité RGPD native.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ HOW IT WORKS ════════════ -->
+<section class="how" id="fonctionne">
+  <div class="wrap">
+    <div class="how-head">
+      <span class="eyebrow"><span class="dot"></span>Comment ça marche</span>
+      <h2>Trois étapes. Aucun téléchargement. Zéro friction.</h2>
+      <p>De la création du programme à la première récompense distribuée — vos clients gardent leurs habitudes, vous gagnez leur fidélité.</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num"><span class="n">1</span>CONFIGURATION</div>
+        <h3>Créez votre programme</h3>
+        <p>Choisissez votre format (points ou tampons), définissez vos récompenses et personnalisez aux couleurs de votre enseigne.</p>
+        <div class="step-visual">
+          <div class="sv-dash">
+            <div class="head-row">
+              <span class="tag">PROGRAMME / NOUVEAU</span>
+              <span class="dot"></span>
+            </div>
+            <div class="bars">
+              <div class="b" style="height:30%"></div>
+              <div class="b" style="height:55%"></div>
+              <div class="b" style="height:40%"></div>
+              <div class="b" style="height:75%"></div>
+              <div class="b" style="height:60%"></div>
+              <div class="b" style="height:90%"></div>
+              <div class="b" style="height:70%"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);font-family:'Geist Mono',monospace">
+              <span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num"><span class="n">2</span>UTILISATION</div>
+        <h3>Vos clients scannent un QR code</h3>
+        <p>Une carte universelle accessible depuis n'importe quel téléphone — sans appli à installer. Le scan se fait directement en caisse.</p>
+        <div class="step-visual">
+          <div class="sv-scan">
+            <div class="qr-frame">
+              <span class="corner-tr"></span>
+              <span class="corner-bl"></span>
+              <svg class="js-qr" viewBox="0 0 25 25" shape-rendering="crispEdges" aria-hidden="true"></svg>
+              <div class="scan-glow"></div>
+              <div class="scanline"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num"><span class="n">3</span>FIDÉLISATION</div>
+        <h3>Récompensez et revoyez-les</h3>
+        <p>Points et tampons cumulés automatiquement. Vos clients reçoivent leurs récompenses, vous gardez le contact.</p>
+        <div class="step-visual">
+          <div class="sv-stamps">
+            <div class="row">
+              <div class="s on">✓</div><div class="s on">✓</div><div class="s on">✓</div><div class="s on">✓</div><div class="s on">✓</div>
+            </div>
+            <div class="row">
+              <div class="s on">✓</div><div class="s on">✓</div><div class="s on">✓</div><div class="s">·</div><div class="s">·</div>
+            </div>
+            <div class="reward">🎁  10ème café offert</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ COMMERCES ════════════ -->
+<section class="commerces" id="commerces">
+  <div class="wrap">
+    <div class="commerces-head">
+      <div class="l">
+        <span class="eyebrow"><span class="dot"></span>Pour tous les commerces</span>
+        <h2 style="margin-top:18px">Conçu pour les commerces de proximité, partout en France.</h2>
+      </div>
+      <p class="lead" style="max-width:380px">
+        Cafés, restaurants, salons, sport, bien-être — un programme qui s'adapte à votre métier sans rigidité.
+      </p>
+    </div>
+
+    <div class="commerces-grid">
+      <div class="com-card feat">
+        <div class="com-icon" style="background:#1A1410;color:var(--amber);border-color:#1A1410">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M3 11h14a3 3 0 010 6h-1M3 11v6a2 2 0 002 2h9a2 2 0 002-2v0M3 11V8a2 2 0 012-2h9a2 2 0 012 2v3M7 3v3M11 3v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </div>
+        <div>
+          <div class="title">Cafés &amp; Restaurants</div>
+          <div class="desc">Programmes au tampon ou au point. Idéal pour bistrots, brasseries, salons de thé, boulangeries et restaurants de proximité.</div>
+        </div>
+      </div>
+
+      <div class="com-card">
+        <div class="com-icon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M6 4v9a2 2 0 002 2h8a2 2 0 002-2V4M6 4h12M9 19h6M12 15v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </div>
+        <div>
+          <div class="title">Salons &amp; Beauté</div>
+          <div class="desc">Coiffure, esthétique, barbiers — fidélisez vos clients réguliers avec des récompenses personnalisées.</div>
+        </div>
+      </div>
+
+      <div class="com-card">
+        <div class="com-icon">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M3 12h18M12 3a13.5 13.5 0 010 18M12 3a13.5 13.5 0 000 18" stroke="currentColor" stroke-width="1.6"/></svg>
+        </div>
+        <div>
+          <div class="title">Sport &amp; Bien-être</div>
+          <div class="desc">Clubs, studios yoga, salles de fitness, kinés — récompensez la régularité de vos abonnés.</div>
+        </div>
+      </div>
+
+      <div class="com-card large">
+        <div class="com-icon" style="background:var(--amber-soft);color:var(--amber-2);border-color:#FDE68A">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M3 7l9-4 9 4M3 7v10l9 4 9-4V7M3 7l9 4 9-4M12 11v10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div>
+          <div class="title">Commerces de détail</div>
+          <div class="desc">Librairies, fleuristes, épiceries, primeurs, cavistes, concept stores — n'importe quel commerce avec une caisse et un client régulier.</div>
+        </div>
+      </div>
+
+      <div class="com-card">
+        <div class="com-icon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M3 21V11l9-7 9 7v10h-6v-7h-6v7H3z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div>
+          <div class="title">Pressing, services</div>
+          <div class="desc">Tous les commerces de service où la régularité fait la différence.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ PRICING ════════════ -->
+<section class="pricing" id="tarifs">
+  <div class="wrap">
+    <div class="pricing-head">
+      <span class="eyebrow"><span class="dot"></span>Tarification</span>
+      <h2>Un seul tarif. Aucun frais caché. Pas d'engagement.</h2>
+      <p>Tout ce qu'il vous faut pour fidéliser vos clients — pour le prix d'un déjeuner par mois.</p>
+    </div>
+
+    <div class="price-grid">
+      <div class="price-card main">
+        <div class="name" style="margin-top:0">Fidelyzio</div>
+        <h3 style="font-size:28px;letter-spacing:-0.02em;margin-top:4px">Tout inclus, un seul tarif</h3>
+        <div class="amount">
+          <span class="v">29€</span>
+          <span class="per">/ mois</span>
+        </div>
+        <p class="price-desc">14 jours gratuits. Résiliable à tout moment, sans engagement.</p>
+        <ul class="feature-list">
+          <li><span class="ck"><svg viewBox="0 0 12 12" fill="none"><path d="M2.5 6.5l2.5 2.5L10 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Programme points <strong>et</strong> tampons</li>
+          <li><span class="ck"><svg viewBox="0 0 12 12" fill="none"><path d="M2.5 6.5l2.5 2.5L10 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Carte QR universelle — fonctionne sans appli mobile</li>
+          <li><span class="ck"><svg viewBox="0 0 12 12" fill="none"><path d="M2.5 6.5l2.5 2.5L10 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Données hébergées en France — RGPD</li>
+          <li><span class="ck"><svg viewBox="0 0 12 12" fill="none"><path d="M2.5 6.5l2.5 2.5L10 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>14 jours d'essai gratuit</li>
+          <li><span class="ck"><svg viewBox="0 0 12 12" fill="none"><path d="M2.5 6.5l2.5 2.5L10 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Sans engagement</li>
+        </ul>
+        <div class="cta">
+          <a href="#" class="btn btn-lg" style="background:var(--amber);color:#1A1410;justify-content:center">
+            Démarrer mon essai gratuit
+            <svg class="arrow" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+          <div class="fine">Sans engagement · annulable en 1 clic</div>
+        </div>
+      </div>
+
+      <div class="price-side">
+        <div class="side-card">
+          <div>
+            <div class="icon">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M12 2l7 4v6c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V6l7-4z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <h4>Vos données restent en France 🇫🇷</h4>
+            <p>Hébergement en France, RGPD natif. Vous conservez la propriété pleine et entière de votre base client.</p>
+          </div>
+        </div>
+        <div class="side-card">
+          <div>
+            <div class="icon">
+              <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            </div>
+            <h4>Sans engagement, sans surprise</h4>
+            <p>29€/mois, c'est tout. Résiliable à tout moment, aucun matériel à acheter.</p>
+          </div>
+        </div>
+        <div class="side-card" style="background:linear-gradient(180deg, var(--amber-soft), #FFFCF6)">
+          <div>
+            <div class="icon" style="background:var(--amber);color:#1A1410;border-color:var(--amber-2)">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M3 12h18M3 6h18M3 18h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            </div>
+            <h4>Vous gérez plusieurs commerces ?</h4>
+            <p>Parlons-en — nous étudions chaque situation au cas par cas.</p>
+          </div>
+          <a href="#" class="btn btn-ghost" style="align-self:flex-start;background:#FFFCF6">
+            Nous contacter →
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ FAQ ════════════ -->
+<section class="faq" id="faq">
+  <div class="wrap faq-grid">
+    <div class="faq-side">
+      <span class="eyebrow"><span class="dot"></span>Questions fréquentes</span>
+      <h2>On a sûrement déjà la réponse.</h2>
+      <p>Si vous ne trouvez pas votre question ici, contactez-nous directement.</p>
+      <a href="#" class="btn btn-ghost">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="1.6"/><path d="M8 12l3 3 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Nous contacter
+      </a>
+    </div>
+    <div class="faq-list">
+      <div class="faq-item open">
+        <button class="faq-q">Mes clients ont-ils besoin d'installer une appli ?
+          <span class="ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+        </button>
+        <div class="faq-a">
+          <p>Non — c'est tout l'intérêt de Fidelyzio. Vos clients accèdent à leur carte de fidélité via un simple QR code, depuis n'importe quel téléphone. Aucune installation, aucune création de compte interminable. La carte universelle fonctionne ensuite chez tous les commerces partenaires.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">Quel matériel dois-je acheter pour démarrer ?
+          <span class="ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+        </button>
+        <div class="faq-a">
+          <p>Zéro. Un smartphone, une tablette ou un ordinateur en caisse suffit pour scanner les QR codes de vos clients. Vous pouvez aussi imprimer le QR code de votre commerce et le placer en évidence — c'est tout.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">Est-ce vraiment résiliable à tout moment ?
+          <span class="ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+        </button>
+        <div class="faq-a">
+          <p>Oui, sans condition. L'abonnement est mensuel, sans engagement, résiliable en un clic depuis votre tableau de bord. Vous gardez l'accès jusqu'à la fin du mois facturé, et pouvez exporter toutes vos données client à tout moment.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">Que deviennent les données de mes clients ?
+          <span class="ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+        </button>
+        <div class="faq-a">
+          <p>Elles vous appartiennent — toujours. Les données sont hébergées en France, chiffrées au repos et en transit. Fidelyzio est entièrement conforme RGPD et ne revend jamais aucune information à des tiers.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">Comment fonctionne l'essai gratuit ?
+          <span class="ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+        </button>
+        <div class="faq-a">
+          <p>Vous accédez à toutes les fonctionnalités pendant 14 jours. À la fin de l'essai, vous choisissez de continuer (29€/mois) ou d'arrêter — sans engagement.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">Puis-je utiliser Fidelyzio avec ma caisse existante ?
+          <span class="ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+        </button>
+        <div class="faq-a">
+          <p>Oui — Fidelyzio fonctionne en navigateur sur tablette, smartphone ou ordinateur, en parallèle de votre caisse actuelle. Aucune intégration technique n'est requise pour démarrer.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ FINAL CTA ════════════ -->
+<section class="cta-section">
+  <div class="wrap">
+    <div class="cta-box">
+      <div>
+        <span class="eyebrow" style="background:rgba(255,255,255,0.05);border-color:rgba(255,248,234,0.15);color:#FFF8EA"><span class="dot"></span>Prêt à fidéliser autrement</span>
+        <h2 style="margin-top:22px">Donnez à vos clients une raison<br/>de revenir.</h2>
+        <p>14 jours gratuits. Sans engagement.</p>
+        <div class="cta-actions">
+          <a href="#" class="btn btn-amber btn-lg">Commencer 14 jours gratuits
+            <svg class="arrow" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+          <a href="#" class="btn btn-ghost btn-lg">Nous contacter</a>
+        </div>
+      </div>
+      <div class="cta-side">
+        <div class="cta-meta">
+          <div class="ic">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div>
+            <div class="t">Sans engagement</div>
+            <div class="s">14 jours d'essai gratuit</div>
+          </div>
+        </div>
+        <div class="cta-meta">
+          <div class="ic">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 2l7 4v6c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V6l7-4z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+          </div>
+          <div>
+            <div class="t">Hébergé en France · RGPD</div>
+            <div class="s">Données chiffrées, jamais revendues</div>
+          </div>
+        </div>
+        <div class="cta-meta">
+          <div class="ic">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M21 15a4 4 0 01-4 4H7l-4 3V6a4 4 0 014-4h10a4 4 0 014 4v9z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+          </div>
+          <div>
+            <div class="t">Sans appli mobile</div>
+            <div class="s">Une simple carte QR universelle</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ FOOTER ════════════ -->
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <a href="#" class="brand">
+          <div class="brand-mark"></div>
+          Fidelyzio
+        </a>
+        <p>La fidélité client réinventée pour les commerces de proximité français. Sans appli, sans complication.</p>
+        <div class="legal-row">
+          <span class="tag">🇫🇷 Hébergé en France</span>
+          <span class="tag">RGPD</span>
+        </div>
+      </div>
+      <div class="foot-col">
+        <h5>Produit</h5>
+        <ul>
+          <li><a href="#fonctionne">Comment ça marche</a></li>
+          <li><a href="#tarifs">Tarifs</a></li>
+          <li><a href="#">Fonctionnalités</a></li>
+          <li><a href="#">Carte universelle</a></li>
+          <li><a href="#">Intégrations</a></li>
+          <li><a href="#">Nouveautés</a></li>
+        </ul>
+      </div>
+      <div class="foot-col">
+        <h5>Commerces</h5>
+        <ul>
+          <li><a href="#">Cafés &amp; restaurants</a></li>
+          <li><a href="#">Salons &amp; beauté</a></li>
+          <li><a href="#">Sport &amp; bien-être</a></li>
+          <li><a href="#">Retail</a></li>
+          <li><a href="#">Réseau d'enseignes</a></li>
+        </ul>
+      </div>
+      <div class="foot-col">
+        <h5>Ressources</h5>
+        <ul>
+          <li><a href="#">Centre d'aide</a></li>
+          <li><a href="#">Études de cas</a></li>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">Guide RGPD</a></li>
+          <li><a href="#">API &amp; développeurs</a></li>
+        </ul>
+      </div>
+      <div class="foot-col">
+        <h5>Entreprise</h5>
+        <ul>
+          <li><a href="#">À propos</a></li>
+          <li><a href="#">Carrières</a></li>
+          <li><a href="#">Presse</a></li>
+          <li><a href="#">Contact</a></li>
+          <li><a href="#">Devenir partenaire</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <div class="l">© 2026 Fidelyzio</div>
+      <div class="r">
+        <a href="#">Mentions légales</a>
+        <a href="#">CGV</a>
+        <a href="#">Confidentialité</a>
+        <a href="#">Cookies</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="image-slot.js"></script>
+<script>
+  const topbar = document.getElementById('topbar');
+  window.addEventListener('scroll', () => {
+    topbar.classList.toggle('scrolled', window.scrollY > 8);
+  }, {passive:true});
+
+  // FAQ accordion
+  document.querySelectorAll('.faq-item').forEach(item => {
+    const q = item.querySelector('.faq-q');
+    q.addEventListener('click', () => {
+      const wasOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+      if (!wasOpen) item.classList.add('open');
+    });
+  });
+
+  // Smooth scroll for anchor links (without scrollIntoView)
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', (e) => {
+      const id = a.getAttribute('href');
+      if (id.length > 1) {
+        const el = document.querySelector(id);
+        if (el) {
+          e.preventDefault();
+          const y = el.getBoundingClientRect().top + window.scrollY - 72;
+          window.scrollTo({top:y, behavior:'smooth'});
+        }
+      }
+    });
+  });
+</script>
+<script>
+  // Build a realistic QR-style graphic (not a decodable QR, just looks like one).
+  (function buildQRs(){
+    const targets = document.querySelectorAll('svg.js-qr');
+    if (!targets.length) return;
+    const N = 25;
+    const NS = 'http://www.w3.org/2000/svg';
+
+    function buildOne(svg, seed){
+      const grid = Array.from({length:N}, () => Array(N).fill(0));
+
+      function placeFinder(r, c){
+        for (let i=0;i<7;i++){
+          for (let j=0;j<7;j++){
+            const onBorder = i===0||i===6||j===0||j===6;
+            const inCenter = i>=2&&i<=4&&j>=2&&j<=4;
+            grid[r+i][c+j] = (onBorder || inCenter) ? 1 : 0;
+          }
+        }
+      }
+      placeFinder(0, 0);
+      placeFinder(0, N-7);
+      placeFinder(N-7, 0);
+
+      function placeAlign(r, c){
+        for (let i=0;i<5;i++){
+          for (let j=0;j<5;j++){
+            const onBorder = i===0||i===4||j===0||j===4;
+            const inCenter = i===2&&j===2;
+            grid[r+i][c+j] = (onBorder || inCenter) ? 1 : 0;
+          }
+        }
+      }
+      placeAlign(N-9, N-9);
+
+      for (let i=8;i<N-8;i++){
+        grid[6][i] = (i%2===0) ? 1 : 0;
+        grid[i][6] = (i%2===0) ? 1 : 0;
+      }
+
+      function isReserved(r,c){
+        if (r<8 && c<8) return true;
+        if (r<8 && c>=N-8) return true;
+        if (r>=N-8 && c<8) return true;
+        if (r>=N-9 && r<N-4 && c>=N-9 && c<N-4) return true;
+        if (r===6 || c===6) return true;
+        return false;
+      }
+
+      function hash(r,c,s){
+        let h = (r*73856093) ^ (c*19349663) ^ (s*83492791) ^ 0x9E3779B1;
+        h = (h ^ (h>>>13)) >>> 0;
+        h = Math.imul(h, 0x85EBCA6B) >>> 0;
+        return h;
+      }
+      for (let r=0;r<N;r++){
+        for (let c=0;c<N;c++){
+          if (isReserved(r,c)) continue;
+          grid[r][c] = (hash(r,c,seed) % 100 < 48) ? 1 : 0;
+        }
+      }
+
+      const frag = document.createDocumentFragment();
+      for (let r=0;r<N;r++){
+        for (let c=0;c<N;c++){
+          if (grid[r][c]){
+            const rect = document.createElementNS(NS,'rect');
+            rect.setAttribute('class','mod');
+            rect.setAttribute('x', c);
+            rect.setAttribute('y', r);
+            rect.setAttribute('width', 1);
+            rect.setAttribute('height', 1);
+            frag.appendChild(rect);
+          }
+        }
+      }
+      svg.appendChild(frag);
+    }
+
+    targets.forEach((svg, i) => buildOne(svg, i+1));
+  })();
+</script>
+
+</body>
+</html>

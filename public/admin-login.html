@@ -4,47 +4,63 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin — Fidelyzio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      background: #080810; color: #e5e7eb;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0E0D0A; color: #e5e7eb;
+      font-family: "Geist", ui-sans-serif, system-ui, -apple-system, "Helvetica Neue", sans-serif;
+      -webkit-font-smoothing: antialiased;
       display: flex; align-items: center; justify-content: center; min-height: 100vh;
     }
     .card {
-      background: #111827; border: 1px solid rgba(255,255,255,.07);
-      border-radius: 20px; padding: 36px 32px; width: 100%; max-width: 360px;
+      background: #181610; border: 1px solid rgba(245,158,11,.12);
+      border-radius: 22px; padding: 36px 32px; width: 100%; max-width: 360px;
+      box-shadow: 0 8px 40px rgba(0,0,0,.4);
     }
-    .logo {
-      display: flex; align-items: center; gap: 8px;
-      margin-bottom: 24px;
+    .logo { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; }
+    .logo-mark {
+      width: 38px; height: 38px; border-radius: 11px;
+      background: #F59E0B; position: relative; display: grid; place-items: center; flex-shrink: 0;
     }
-    .logo-dot {
-      width: 36px; height: 36px; border-radius: 10px; background: #6366f1;
-      display: flex; align-items: center; justify-content: center;
+    .logo-mark::before {
+      content: ""; width: 16px; height: 16px; border-radius: 4px;
+      background: #0E0D0A; transform: rotate(45deg);
     }
-    .logo-name { font-size: 18px; font-weight: 900; letter-spacing: -0.3px; color: #f9fafb; }
-    .logo-tag  { font-size: 11px; color: #6b7280; margin-top: 1px; }
-    h1 { font-size: 20px; font-weight: 800; color: #f9fafb; margin-bottom: 6px; }
-    .sub { color: #6b7280; font-size: 13px; margin-bottom: 28px; }
+    .logo-mark::after {
+      content: ""; position: absolute; width: 7px; height: 7px;
+      border-radius: 2px; background: #F59E0B; transform: rotate(45deg);
+    }
+    .logo-text { }
+    .logo-name { font-size: 18px; font-weight: 700; letter-spacing: -0.02em; color: #f9fafb; }
+    .logo-tag  { font-size: 11px; color: rgba(245,158,11,.6); margin-top: 2px; font-weight: 500; }
+    h1 { font-size: 20px; font-weight: 700; color: #f9fafb; margin-bottom: 5px; letter-spacing: -0.02em; }
+    .sub { color: rgba(255,255,255,.35); font-size: 13px; margin-bottom: 28px; }
     label {
-      display: block; color: rgba(255,255,255,.4); font-size: 11px;
-      font-weight: 700; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px;
+      display: block; color: rgba(255,255,255,.35); font-size: 11px;
+      font-weight: 600; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px;
     }
     input[type=password] {
-      width: 100%; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
-      border-radius: 11px; padding: 13px 14px; font-size: 15px; color: #fff; outline: none;
-      transition: border-color .15s; margin-bottom: 20px;
+      width: 100%; background: rgba(255,255,255,.05); border: 1px solid rgba(245,158,11,.18);
+      border-radius: 12px; padding: 13px 14px; font-size: 15px; color: #fff; outline: none;
+      transition: border-color .15s, box-shadow .15s; margin-bottom: 20px; font-family: inherit;
     }
-    input[type=password]:focus { border-color: rgba(99,102,241,.6); }
+    input[type=password]:focus {
+      border-color: rgba(245,158,11,.5);
+      box-shadow: 0 0 0 3px rgba(245,158,11,.1);
+    }
     button {
-      width: 100%; padding: 14px; background: #6366f1; color: #fff; border: none;
-      border-radius: 11px; font-size: 15px; font-weight: 700; cursor: pointer;
-      transition: background .15s;
+      width: 100%; padding: 14px; background: #F59E0B; color: #1A1410; border: none;
+      border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer;
+      transition: background .15s, transform .12s; font-family: inherit;
+      box-shadow: 0 8px 24px rgba(245,158,11,.25);
     }
-    button:hover { background: #4f46e5; }
+    button:hover { background: #D97706; transform: translateY(-1px); }
+    button:active { transform: scale(.98); }
     .err {
-      background: rgba(239,68,68,.1); border: 1px solid rgba(239,68,68,.25);
+      background: rgba(239,68,68,.1); border: 1px solid rgba(239,68,68,.2);
       border-radius: 10px; padding: 10px 14px; color: #f87171;
       font-size: 13px; margin-bottom: 18px;
     }
@@ -53,15 +69,8 @@
 <body>
   <div class="card">
     <div class="logo">
-      <div class="logo-dot">
-        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round"
-            d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5Z
-               M3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5Z
-               M13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5Z"/>
-        </svg>
-      </div>
-      <div>
+      <div class="logo-mark"></div>
+      <div class="logo-text">
         <div class="logo-name">Fidelyzio</div>
         <div class="logo-tag">Espace administrateur</div>
       </div>

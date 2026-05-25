@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="theme-color" content="#0d1420">
+  <meta name="theme-color" content="#FAF6EE">
   <title>Ma carte de fidélité — Fidelyzio</title>
   <meta name="description" content="Accédez à votre carte de fidélité universelle Fidelyzio. Vos points et tampons dans tous vos commerces préférés, sans application.">
   <link rel="canonical" href="https://fidelyzio.com/join">
@@ -15,14 +15,17 @@
       if (url) window.location.replace(url);
     } catch (_) {}
   </script>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="/css/fidelyzio-design.css">
   <style>
     *, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    html, body { min-height: 100%; background: #0d1420; color: #e2d9c8;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
-    .pt-safe { padding-top: max(1.5rem, env(safe-area-inset-top)); }
-    .pb-safe { padding-bottom: max(1.5rem, env(safe-area-inset-bottom)); }
-    input { font-size: 16px !important; }
+    html, body { min-height: 100%; overflow-x: hidden; overscroll-behavior: none;
+      background: var(--bg); color: var(--ink);
+      font-family: "Geist", ui-sans-serif, system-ui, -apple-system, "Helvetica Neue", sans-serif;
+      -webkit-font-smoothing: antialiased; font-size: 16px; margin: 0; padding: 0; }
+    input, button { font-family: inherit; font-size: 16px; }
+    a { color: inherit; text-decoration: none; }
 
     @keyframes fade-up { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
     @keyframes spin    { to { transform: rotate(360deg); } }
@@ -31,234 +34,238 @@
     .d2  { animation-delay:.12s; }
     .d3  { animation-delay:.18s; }
 
-    .field {
-      width: 100%; background: #1a2640; border: 1px solid rgba(240,180,41,.15);
-      border-radius: 14px; padding: 14px 16px; color: white; outline: none;
-      transition: border-color .2s, box-shadow .2s;
-    }
-    .field::placeholder { color: rgba(138,154,176,.5); }
-    .field:focus { border-color: #f0b429; box-shadow: 0 0 0 3px rgba(240,180,41,.12); }
+    .page { min-height: 100dvh; display: flex; flex-direction: column; align-items: center;
+      justify-content: center;
+      padding: max(1.5rem, env(safe-area-inset-top)) 20px max(1.5rem, env(safe-area-inset-bottom)); }
 
-    .btn-gold {
-      display: flex; align-items: center; justify-content: center; gap: 8px;
-      width: 100%; background: linear-gradient(135deg, #f0b429, #d4920e);
-      color: #0d1420; font-weight: 800; border-radius: 14px;
-      padding: 16px; font-size: 15px; border: none; cursor: pointer;
+    /* Brand */
+    .page-brand { display: flex; align-items: center; justify-content: center; gap: 10px;
+      font-weight: 600; letter-spacing: -0.02em; font-size: 19px; color: var(--ink); margin-bottom: 4px; }
+
+    /* Card container */
+    .card-box { width: 100%; max-width: 390px; background: var(--card);
+      border: 1px solid var(--line); border-radius: var(--radius-lg);
+      padding: 26px 24px; box-shadow: 0 2px 24px rgba(26,20,16,.06); margin-top: 16px; }
+
+    /* Field */
+    .field { width: 100%; background: var(--bg); border: 1px solid var(--line);
+      border-radius: var(--radius); padding: 13px 15px; color: var(--ink); outline: none;
+      transition: border-color .2s, box-shadow .2s; }
+    .field::placeholder { color: var(--muted); }
+    .field:focus { border-color: var(--amber-2); box-shadow: 0 0 0 3px rgba(245,158,11,.12); }
+    .field-label { display: block; font-size: 13px; font-weight: 500; color: var(--ink-2); margin-bottom: 7px; }
+
+    /* Choice cards */
+    .choice-card { display: flex; flex-direction: column; align-items: flex-start;
+      padding: 18px 20px; border-radius: 16px; cursor: pointer; text-align: left;
+      border: 1.5px solid transparent; transition: border-color .2s, transform .1s, box-shadow .15s;
+      width: 100%; background: none; gap: 8px; }
+    .choice-card:hover { transform: translateY(-2px); box-shadow: 0 12px 36px rgba(26,20,16,.1); }
+    .choice-amber { background: var(--amber-soft); border-color: rgba(245,158,11,.4); }
+    .choice-amber:hover { border-color: var(--amber); }
+    .choice-plain { background: var(--bg-2); border-color: var(--line); }
+    .choice-plain:hover { border-color: var(--line-2); }
+
+    /* Buttons */
+    .btn-amber { display: flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%; background: linear-gradient(135deg, var(--amber), var(--amber-2));
+      color: var(--ink); font-weight: 700; border-radius: var(--radius);
+      padding: 14px; font-size: 15px; border: none; cursor: pointer;
       transition: opacity .15s, transform .1s;
-      box-shadow: 0 10px 30px rgba(240,180,41,.25);
-    }
-    .btn-gold:hover:not(:disabled) { opacity: .9; transform: translateY(-1px); }
-    .btn-gold:disabled { opacity: .5; cursor: not-allowed; }
+      box-shadow: 0 8px 24px rgba(245,158,11,.25); }
+    .btn-amber:hover:not(:disabled) { opacity: .9; transform: translateY(-1px); }
+    .btn-amber:disabled { opacity: .5; cursor: not-allowed; }
 
-    .btn-navy {
-      display: flex; align-items: center; justify-content: center; gap: 8px;
-      width: 100%; background: #1a2640; border: 1px solid rgba(138,154,176,.2);
-      color: white; font-weight: 700; border-radius: 14px;
-      padding: 16px; font-size: 15px; cursor: pointer;
-      transition: background .15s, border-color .15s;
-    }
-    .btn-navy:hover { background: #1e2e4a; border-color: rgba(138,154,176,.35); }
+    .btn-outline { display: flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%; background: transparent; border: 1px solid var(--line-2);
+      color: var(--ink-2); font-weight: 600; border-radius: var(--radius);
+      padding: 13px; font-size: 14px; cursor: pointer;
+      transition: background .15s, border-color .15s; }
+    .btn-outline:hover { background: var(--bg-2); border-color: var(--line-2); }
 
-    .choice-card {
-      display: flex; flex-direction: column; align-items: flex-start;
-      padding: 22px; border-radius: 20px; cursor: pointer; text-align: left;
-      border: 1.5px solid transparent; transition: border-color .2s, transform .1s, box-shadow .2s;
-      text-decoration: none; gap: 10px;
-    }
-    .choice-card:hover { transform: translateY(-2px); box-shadow: 0 16px 48px rgba(0,0,0,.3); }
-    .choice-card-gold {
-      background: linear-gradient(135deg, rgba(240,180,41,.12), rgba(212,146,14,.08));
-      border-color: rgba(240,180,41,.3);
-    }
-    .choice-card-gold:hover { border-color: rgba(240,180,41,.6); }
-    .choice-card-navy {
-      background: rgba(255,255,255,.04);
-      border-color: rgba(138,154,176,.15);
-    }
-    .choice-card-navy:hover { border-color: rgba(138,154,176,.35); }
+    /* Back button */
+    .back-btn { display: flex; align-items: center; gap: 6px; background: none; border: none;
+      color: var(--muted); font-size: 13px; cursor: pointer; padding: 0; margin-bottom: 18px;
+      font-family: inherit; }
+    .back-btn:hover { color: var(--ink); }
 
+    /* Error box */
+    .err-box { display: none; background: rgba(239,68,68,.07); border: 1px solid rgba(239,68,68,.2);
+      border-radius: 12px; padding: 12px 14px; color: #dc2626; font-size: 13px; margin-bottom: 14px; }
+    .err-box.show { display: block; }
+
+    /* Step visibility */
     .step { display: none; }
     .step.active { display: block; }
   </style>
 </head>
 <body>
 
-<div class="min-h-dvh flex flex-col items-center justify-center px-5 pt-safe pb-safe">
+<div class="page">
 
   <!-- Brand -->
-  <div class="mb-8 text-center au">
-    <a href="/home" style="text-decoration:none;display:inline-flex;flex-direction:column;align-items:center;gap:12px">
-      <div style="width:68px;height:68px;border-radius:22px;background:linear-gradient(135deg,#f0b429,#d4920e);display:flex;align-items:center;justify-content:center;box-shadow:0 16px 40px rgba(240,180,41,.3)">
-        <svg style="width:34px;height:34px;color:#0d1420" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z"/>
-        </svg>
-      </div>
-      <div>
-        <p style="color:white;font-weight:900;font-size:20px;letter-spacing:-.03em">Fidelyzio</p>
-        <p style="color:rgba(138,154,176,.6);font-size:13px;margin-top:2px">Carte de fidélité digitale</p>
-      </div>
+  <div style="text-align:center;margin-bottom:4px" class="au">
+    <a href="/home" class="page-brand">
+      <div class="brand-mark"></div>
+      Fidelyzio
     </a>
+    <p style="font-size:13px;color:var(--muted);margin-top:2px">Carte de fidélité digitale</p>
   </div>
 
   <!-- Card container -->
-  <div class="w-full max-w-sm au d1">
-    <div style="background:#141f30;border:1px solid rgba(255,255,255,.07);border-radius:24px;padding:28px">
+  <div style="width:100%;max-width:390px" class="au d1">
+    <div class="card-box">
 
-      <!-- ── STEP 0: Choice ──────────────────────────────────────────────────── -->
+      <!-- ── STEP 0: Choice ── -->
       <div id="step-choice" class="step active">
-        <h1 style="color:white;font-weight:800;font-size:18px;margin-bottom:6px">Vous avez déjà une carte ?</h1>
-        <p style="color:rgba(138,154,176,.7);font-size:13px;line-height:1.6;margin-bottom:24px">
+        <h1 style="font-weight:700;font-size:18px;margin:0 0 6px;color:var(--ink)">Vous avez déjà une carte ?</h1>
+        <p style="font-size:13px;color:var(--muted);line-height:1.6;margin:0 0 22px">
           Choisissez une option pour retrouver ou créer votre carte de fidélité.
         </p>
 
-        <div style="display:flex;flex-direction:column;gap:12px">
-          <!-- Has a card -->
-          <button class="choice-card choice-card-gold" onclick="showStep('recover')">
-            <div style="width:40px;height:40px;border-radius:12px;background:rgba(240,180,41,.15);display:flex;align-items:center;justify-content:center">
-              <svg style="width:20px;height:20px" fill="none" viewBox="0 0 24 24" stroke="#f0b429" stroke-width="2">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <button class="choice-card choice-amber" onclick="showStep('recover')">
+            <div style="width:38px;height:38px;border-radius:11px;background:rgba(245,158,11,.15);display:flex;align-items:center;justify-content:center">
+              <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--amber-2)" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z"/>
               </svg>
             </div>
-            <div>
-              <p style="color:white;font-weight:700;font-size:15px;margin-bottom:3px">J'ai déjà une carte</p>
-              <p style="color:rgba(138,154,176,.65);font-size:13px">Recevoir le lien de ma carte par e-mail</p>
+            <div style="flex:1;text-align:left">
+              <p style="color:var(--ink);font-weight:700;font-size:15px;margin:0 0 3px">J'ai déjà une carte</p>
+              <p style="color:var(--muted);font-size:13px;margin:0">Recevoir le lien de ma carte par e-mail</p>
             </div>
-            <svg style="width:16px;height:16px;color:rgba(240,180,41,.6);margin-left:auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="var(--amber-2)" stroke-width="2.5">
               <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/>
             </svg>
           </button>
 
-          <!-- No card yet -->
-          <button class="choice-card choice-card-navy" onclick="showStep('create')">
-            <div style="width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center">
-              <svg style="width:20px;height:20px" fill="none" viewBox="0 0 24 24" stroke="rgba(138,154,176,.8)" stroke-width="2">
+          <button class="choice-card choice-plain" onclick="showStep('create')">
+            <div style="width:38px;height:38px;border-radius:11px;background:var(--bg-3);display:flex;align-items:center;justify-content:center">
+              <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--ink-2)" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
               </svg>
             </div>
-            <div>
-              <p style="color:white;font-weight:700;font-size:15px;margin-bottom:3px">Je n'ai pas encore de carte</p>
-              <p style="color:rgba(138,154,176,.65);font-size:13px">Créer ma carte gratuitement</p>
+            <div style="flex:1;text-align:left">
+              <p style="color:var(--ink);font-weight:700;font-size:15px;margin:0 0 3px">Je n'ai pas encore de carte</p>
+              <p style="color:var(--muted);font-size:13px;margin:0">Créer ma carte gratuitement</p>
             </div>
-            <svg style="width:16px;height:16px;color:rgba(138,154,176,.4);margin-left:auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="var(--muted)" stroke-width="2.5">
               <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/>
             </svg>
           </button>
         </div>
       </div>
 
-      <!-- ── STEP recover: Enter email ─────────────────────────────────────── -->
+      <!-- ── STEP recover: Enter email ── -->
       <div id="step-recover" class="step">
-        <button onclick="showStep('choice')" style="display:flex;align-items:center;gap:6px;background:none;border:none;color:rgba(138,154,176,.6);font-size:13px;cursor:pointer;padding:0;margin-bottom:18px">
-          <svg style="width:14px;height:14px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <button class="back-btn" onclick="showStep('choice')">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/>
           </svg>
           Retour
         </button>
-        <h1 style="color:white;font-weight:800;font-size:18px;margin-bottom:6px">Retrouver ma carte</h1>
-        <p style="color:rgba(138,154,176,.7);font-size:13px;line-height:1.6;margin-bottom:22px">
+        <h1 style="font-weight:700;font-size:18px;margin:0 0 6px;color:var(--ink)">Retrouver ma carte</h1>
+        <p style="font-size:13px;color:var(--muted);line-height:1.6;margin:0 0 20px">
           Entrez votre adresse e-mail. Nous vous enverrons un lien pour accéder à votre carte.
         </p>
 
-        <label style="display:block;color:rgba(138,154,176,.8);font-size:13px;font-weight:600;margin-bottom:8px">Adresse e-mail</label>
+        <label class="field-label" for="inp-recover-email">Adresse e-mail</label>
         <input id="inp-recover-email" type="email" autocomplete="email" inputmode="email"
-               placeholder="votre@email.com" class="field" style="margin-bottom:16px"
+               placeholder="votre@email.com" class="field" style="margin-bottom:14px"
                onkeydown="if(event.key==='Enter')sendRecovery()">
 
-        <div id="recover-error" style="display:none;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:12px;padding:12px 14px;color:rgb(248,113,113);font-size:13px;margin-bottom:14px"></div>
+        <div id="recover-error" class="err-box"></div>
 
-        <button id="btn-recover" class="btn-gold" onclick="sendRecovery()">
+        <button id="btn-recover" class="btn-amber" onclick="sendRecovery()">
           Envoyer le lien →
         </button>
       </div>
 
-      <!-- ── STEP sent: Email sent confirmation ──────────────────────────────── -->
-      <div id="step-sent" class="step" style="text-align:center;padding:24px 0">
-        <div style="width:60px;height:60px;border-radius:50%;background:rgba(240,180,41,.12);border:2px solid rgba(240,180,41,.3);display:flex;align-items:center;justify-content:center;margin:0 auto 18px">
-          <svg style="width:28px;height:28px;color:#f0b429" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+      <!-- ── STEP sent ── -->
+      <div id="step-sent" class="step" style="text-align:center;padding:20px 0">
+        <div style="width:56px;height:56px;border-radius:50%;background:var(--amber-soft);border:2px solid rgba(245,158,11,.35);display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
+          <svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="var(--amber-2)" stroke-width="2.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"/>
           </svg>
         </div>
-        <h2 style="color:white;font-weight:800;font-size:18px;margin-bottom:8px">E-mail envoyé !</h2>
-        <p style="color:rgba(138,154,176,.7);font-size:14px;line-height:1.6;margin-bottom:24px">
+        <h2 style="color:var(--ink);font-weight:700;font-size:18px;margin:0 0 8px">E-mail envoyé !</h2>
+        <p style="color:var(--muted);font-size:14px;line-height:1.6;margin:0 0 22px">
           Vérifiez votre boîte de réception. Le lien vers votre carte est en route.
         </p>
-        <button onclick="showStep('choice')" class="btn-navy" style="font-size:14px;padding:12px">
+        <button onclick="showStep('choice')" class="btn-outline" style="font-size:14px;padding:12px">
           Retour à l'accueil
         </button>
       </div>
 
-      <!-- ── STEP create: Signup form ────────────────────────────────────────── -->
+      <!-- ── STEP create: Signup form ── -->
       <div id="step-create" class="step">
-        <button onclick="showStep('choice')" style="display:flex;align-items:center;gap:6px;background:none;border:none;color:rgba(138,154,176,.6);font-size:13px;cursor:pointer;padding:0;margin-bottom:18px">
-          <svg style="width:14px;height:14px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <button class="back-btn" onclick="showStep('choice')">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/>
           </svg>
           Retour
         </button>
-        <h1 style="color:white;font-weight:800;font-size:18px;margin-bottom:6px">Créer ma carte</h1>
-        <p style="color:rgba(138,154,176,.7);font-size:13px;line-height:1.6;margin-bottom:22px">
+        <h1 style="font-weight:700;font-size:18px;margin:0 0 6px;color:var(--ink)">Créer ma carte</h1>
+        <p style="font-size:13px;color:var(--muted);line-height:1.6;margin:0 0 20px">
           Votre carte de fidélité universelle, gratuite, sans application.
         </p>
 
-        <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:16px">
+        <div style="display:flex;flex-direction:column;gap:13px;margin-bottom:14px">
           <div>
-            <label style="display:block;color:rgba(138,154,176,.8);font-size:13px;font-weight:600;margin-bottom:8px">Votre prénom <span style="color:#f0b429">*</span></label>
-            <input id="inp-name" type="text" autocomplete="given-name"
-                   placeholder="ex : Marie" class="field">
+            <label class="field-label">Votre prénom <span style="color:var(--amber)">*</span></label>
+            <input id="inp-name" type="text" autocomplete="given-name" placeholder="ex : Marie" class="field">
           </div>
           <div>
-            <label style="display:block;color:rgba(138,154,176,.8);font-size:13px;font-weight:600;margin-bottom:8px">Numéro de téléphone <span style="color:#f0b429">*</span></label>
-            <input id="inp-phone" type="tel" autocomplete="tel" inputmode="tel"
-                   placeholder="06 12 34 56 78" class="field">
+            <label class="field-label">Numéro de téléphone <span style="color:var(--amber)">*</span></label>
+            <input id="inp-phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="06 12 34 56 78" class="field">
           </div>
           <div>
-            <label style="display:block;color:rgba(138,154,176,.8);font-size:13px;font-weight:600;margin-bottom:8px">
-              E-mail <span style="color:#f0b429">*</span>
-            </label>
+            <label class="field-label">E-mail <span style="color:var(--amber)">*</span></label>
             <input id="inp-email" type="email" autocomplete="email" inputmode="email"
                    placeholder="votre@email.com" class="field" required
                    onkeydown="if(event.key==='Enter')createCard()">
           </div>
         </div>
 
-        <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:16px;margin-top:4px">
-          <input type="checkbox" id="inp-cgu" style="margin-top:3px;width:16px;height:16px;accent-color:#f0b429;cursor:pointer;flex-shrink:0">
-          <label for="inp-cgu" style="color:rgba(138,154,176,.7);font-size:12px;line-height:1.6;cursor:pointer">
-            J'ai lu et j'accepte les <a href="/cgu" target="_blank" style="color:#f0b429;text-decoration:underline">Conditions Générales d'Utilisation</a> et la <a href="/privacy" target="_blank" style="color:#f0b429;text-decoration:underline">Politique de Confidentialité</a>
+        <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:14px">
+          <input type="checkbox" id="inp-cgu" style="margin-top:3px;width:15px;height:15px;accent-color:var(--amber);cursor:pointer;flex-shrink:0">
+          <label for="inp-cgu" style="font-size:12px;line-height:1.65;color:var(--muted);cursor:pointer">
+            J'ai lu et j'accepte les <a href="/cgu" target="_blank" style="color:var(--amber-2);text-decoration:underline">Conditions Générales d'Utilisation</a>
+            et la <a href="/privacy" target="_blank" style="color:var(--amber-2);text-decoration:underline">Politique de Confidentialité</a>
           </label>
         </div>
 
-        <div id="create-error" style="display:none;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:12px;padding:12px 14px;color:rgb(248,113,113);font-size:13px;margin-bottom:14px"></div>
+        <div id="create-error" class="err-box"></div>
 
-        <button id="btn-create" class="btn-gold" onclick="createCard()">
+        <button id="btn-create" class="btn-amber" onclick="createCard()">
           Créer ma carte gratuite →
         </button>
       </div>
 
-      <!-- ── STEP loading ─────────────────────────────────────────────────────── -->
+      <!-- ── STEP loading ── -->
       <div id="step-loading" class="step" style="text-align:center;padding:32px 0">
-        <div style="width:48px;height:48px;border:3px solid rgba(240,180,41,.2);border-top-color:#f0b429;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px"></div>
-        <p id="loading-msg" style="color:rgba(138,154,176,.7);font-size:14px">Chargement…</p>
+        <div style="width:44px;height:44px;border:3px solid var(--line);border-top-color:var(--amber);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 14px"></div>
+        <p id="loading-msg" style="color:var(--muted);font-size:14px">Chargement…</p>
       </div>
 
-      <!-- ── STEP success ─────────────────────────────────────────────────────── -->
+      <!-- ── STEP success ── -->
       <div id="step-success" class="step" style="text-align:center;padding:24px 0">
-        <div style="width:60px;height:60px;border-radius:50%;background:rgba(240,180,41,.12);border:2px solid rgba(240,180,41,.3);display:flex;align-items:center;justify-content:center;margin:0 auto 18px">
-          <svg style="width:28px;height:28px;color:#f0b429" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <div style="width:56px;height:56px;border-radius:50%;background:var(--amber-soft);border:2px solid rgba(245,158,11,.35);display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
+          <svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="var(--amber-2)" stroke-width="2.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
           </svg>
         </div>
-        <h2 id="success-title" style="color:white;font-weight:800;font-size:18px;margin-bottom:8px">Carte créée !</h2>
-        <p id="success-msg" style="color:rgba(138,154,176,.7);font-size:14px;line-height:1.6;margin-bottom:12px"></p>
-        <p style="color:rgba(138,154,176,.4);font-size:12px">Redirection automatique…</p>
+        <h2 id="success-title" style="color:var(--ink);font-weight:700;font-size:18px;margin:0 0 8px">Carte créée !</h2>
+        <p id="success-msg" style="color:var(--muted);font-size:14px;line-height:1.6;margin:0 0 10px"></p>
+        <p style="color:var(--line-2);font-size:12px">Redirection automatique…</p>
       </div>
 
     </div>
   </div>
 
   <!-- Footer link -->
-  <p class="au d2" style="margin-top:24px;color:rgba(138,154,176,.4);font-size:13px">
-    Commerçant ? <a href="/register" style="color:rgba(240,180,41,.7);text-decoration:none">Créer un programme →</a>
+  <p class="au d2" style="margin-top:20px;font-size:13px;color:var(--muted)">
+    Commerçant ? <a href="/register" style="color:var(--amber-2)">Créer un programme →</a>
   </p>
 
 </div>
@@ -271,15 +278,15 @@
 
   function showRecoverError(msg) {
     const el = document.getElementById('recover-error');
-    el.textContent = msg; el.style.display = 'block';
+    el.textContent = msg; el.classList.add('show');
   }
-  function hideRecoverError() { document.getElementById('recover-error').style.display = 'none'; }
+  function hideRecoverError() { document.getElementById('recover-error').classList.remove('show'); }
 
   function showCreateError(msg) {
     const el = document.getElementById('create-error');
-    el.textContent = msg; el.style.display = 'block';
+    el.textContent = msg; el.classList.add('show');
   }
-  function hideCreateError() { document.getElementById('create-error').style.display = 'none'; }
+  function hideCreateError() { document.getElementById('create-error').classList.remove('show'); }
 
   async function sendRecovery() {
     hideRecoverError();

@@ -1,8 +1,28 @@
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Geist+Mono:wght@400;500&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --bg:         #FAF6EE;
+    --bg-2:       #F1EADC;
+    --bg-3:       #EBE2D0;
+    --ink:        #1A1410;
+    --ink-2:      #3B342C;
+    --muted:      #6B6358;
+    --line:       #E4DBC7;
+    --line-2:     #D6CAB0;
+    --amber:      #F59E0B;
+    --amber-2:    #D97706;
+    --amber-soft: #FEF3C7;
+    --green:      #1F7A4D;
+    --card:       #FFFFFF;
+    --radius:     14px;
+    --radius-lg:  22px;
+  }
+
   * {
     -webkit-tap-highlight-color: transparent;
     box-sizing: border-box;
@@ -16,8 +36,9 @@
   body {
     background-color: #0f0f14;
     color: white;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family: "Geist", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     overscroll-behavior: none;
+    -webkit-font-smoothing: antialiased;
   }
 }
 

@@ -4,204 +4,223 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="theme-color" content="#0a0a0f">
+  <meta name="theme-color" content="#FAF6EE">
   <title>Créer mon programme de fidélité — Fidelyzio</title>
   <meta name="description" content="Créez votre programme de fidélité digital en 2 minutes. 14 jours d'essai — aucun prélèvement pendant 14 jours.">
   <link rel="canonical" href="https://fidelyzio.com/register">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="apple-touch-icon" href="/favicon.svg">
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="/css/fidelyzio-design.css">
   <style>
     *, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    html, body { min-height: 100%; background: #0a0a0f; color: #e5e7eb; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; overscroll-behavior: none; }
-    input { font-size: 16px !important; }
-    .pt-safe { padding-top: max(1.5rem, env(safe-area-inset-top)); }
-    .pb-safe { padding-bottom: max(1.5rem, env(safe-area-inset-bottom)); }
+    html, body { min-height: 100%; overflow-x: hidden; overscroll-behavior: none;
+      background: var(--bg); color: var(--ink);
+      font-family: "Geist", ui-sans-serif, system-ui, -apple-system, "Helvetica Neue", sans-serif;
+      -webkit-font-smoothing: antialiased; font-size: 16px; }
+    body { margin: 0; padding: 0; }
+    input, button { font-family: inherit; font-size: 16px; }
+    a { color: inherit; text-decoration: none; }
 
     @keyframes fade-up  { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
     @keyframes scale-in { from { opacity:0; transform:scale(0.94); }      to { opacity:1; transform:scale(1); }      }
     @keyframes pop      { 0% { transform:scale(0.7); opacity:0; } 70% { transform:scale(1.06); } 100% { transform:scale(1); opacity:1; } }
-    .animate-fade-up  { animation: fade-up  .4s cubic-bezier(.16,1,.3,1) both; }
-    .animate-scale-in { animation: scale-in .35s cubic-bezier(.16,1,.3,1) both; }
-    .animate-pop      { animation: pop      .45s cubic-bezier(.34,1.56,.64,1) both; }
-    .delay-1 { animation-delay:.06s; } .delay-2 { animation-delay:.12s; }
-    .delay-3 { animation-delay:.18s; } .delay-4 { animation-delay:.24s; }
-    .delay-5 { animation-delay:.30s; } .delay-6 { animation-delay:.36s; }
+    @keyframes spin     { to { transform: rotate(360deg); } }
+    .au  { animation: fade-up  .4s cubic-bezier(.16,1,.3,1) both; }
+    .asi { animation: scale-in .35s cubic-bezier(.16,1,.3,1) both; }
+    .ap  { animation: pop      .45s cubic-bezier(.34,1.56,.64,1) both; }
+    .d1 { animation-delay:.06s; } .d2 { animation-delay:.12s; }
+    .d3 { animation-delay:.18s; } .d4 { animation-delay:.24s; }
+    .d5 { animation-delay:.30s; } .d6 { animation-delay:.36s; }
 
-    .field-input {
-      width:100%; background:#1a1a24; border:1px solid rgba(255,255,255,.1);
-      border-radius:14px; padding:14px 16px; color:white;
-      transition: border-color .2s, box-shadow .2s; outline:none;
-    }
-    .field-input::placeholder { color:#4b5563; }
-    .field-input:focus { border-color: var(--brand, #6366f1); box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand,#6366f1) 20%, transparent); }
+    /* Layout */
+    .page { min-height: 100dvh; display: flex; flex-direction: column; align-items: center;
+      justify-content: center;
+      padding: max(1.5rem, env(safe-area-inset-top)) 20px max(1.5rem, env(safe-area-inset-bottom)); }
+    .inner { width: 100%; max-width: 390px; }
 
-    .swatch {
-      width:36px; height:36px; border-radius:10px; cursor:pointer; position:relative;
-      transition: transform .15s, box-shadow .15s; border:2px solid transparent;
-      flex-shrink:0;
-    }
-    .swatch:hover { transform:scale(1.1); }
-    .swatch.selected { border-color:white; box-shadow:0 0 0 3px rgba(255,255,255,.25); transform:scale(1.08); }
-    .swatch-custom {
-      background: conic-gradient(#f43f5e,#f97316,#eab308,#22c55e,#06b6d4,#6366f1,#ec4899,#f43f5e);
-    }
+    /* Brand */
+    .page-brand { display: flex; align-items: center; justify-content: center; gap: 10px;
+      font-weight: 600; letter-spacing: -0.02em; font-size: 19px; color: var(--ink); margin-bottom: 6px; }
 
-    .btn-primary {
-      width:100%; padding:15px; border-radius:14px; font-weight:600; font-size:15px;
-      color:white; border:none; cursor:pointer;
-      transition: filter .2s, transform .15s, opacity .2s;
-      background: var(--brand, #6366f1);
-      box-shadow: 0 10px 30px color-mix(in srgb, var(--brand,#6366f1) 35%, transparent);
-    }
-    .btn-primary:hover { filter:brightness(1.1); }
-    .btn-primary:active { transform:scale(.98); }
-    .btn-primary:disabled { opacity:.55; cursor:not-allowed; }
+    /* Form card */
+    .form-card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-lg);
+      padding: 30px 26px; box-shadow: 0 2px 24px rgba(26,20,16,.06); margin-top: 20px; }
 
-    /* ── Color preview bar ── */
-    .color-bar { height:4px; border-radius:2px; transition:background .25s; margin-bottom:16px; }
+    /* Fields */
+    .field-wrap { margin-bottom: 16px; }
+    .field-label { display: block; font-size: 13px; font-weight: 500; color: var(--ink-2); margin-bottom: 7px; }
+    .field-input { width: 100%; background: var(--bg); border: 1px solid var(--line);
+      border-radius: var(--radius); padding: 13px 15px; color: var(--ink); outline: none;
+      transition: border-color .2s, box-shadow .2s; }
+    .field-input::placeholder { color: var(--muted); }
+    .field-input:focus { border-color: var(--amber-2); box-shadow: 0 0 0 3px rgba(245,158,11,.12); }
+    .pwd-wrap { position: relative; }
+    .pwd-toggle { position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; color: var(--muted); cursor: pointer; padding: 4px;
+      display: flex; align-items: center; }
+    .pwd-toggle:hover { color: var(--ink); }
 
-    /* ── Copy button feedback ── */
-    .copy-btn { transition: color .2s; }
+    /* Error */
+    .error-box { display: none; margin-bottom: 16px; border-radius: 12px; padding: 12px 14px;
+      background: rgba(239,68,68,.07); border: 1px solid rgba(239,68,68,.2);
+      color: #dc2626; font-size: 13px; align-items: flex-start; gap: 8px; }
+    .error-box.visible { display: flex; }
 
-    /* ── Print styles ── */
+    /* CGU */
+    .cgu-wrap { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 20px; }
+    .cgu-wrap input[type="checkbox"] { margin-top: 2px; width: 15px; height: 15px;
+      accent-color: var(--amber); flex-shrink: 0; cursor: pointer; }
+    .cgu-label { font-size: 12px; line-height: 1.65; color: var(--muted); cursor: pointer; }
+    .cgu-label a { color: var(--amber-2); text-decoration: underline; text-underline-offset: 2px; }
+
+    /* Primary button */
+    .btn-primary { width: 100%; padding: 14px; border-radius: var(--radius);
+      font-size: 15px; font-weight: 600; border: none; cursor: pointer;
+      background: var(--ink); color: #FFF8EA;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 4px 16px rgba(26,20,16,.18);
+      transition: background .15s, transform .12s; }
+    .btn-primary:hover { background: #2A211B; transform: translateY(-1px); }
+    .btn-primary:active { transform: scale(.98); }
+    .btn-primary:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+
+    /* Footer links */
+    .footer-links { margin-top: 18px; display: flex; flex-direction: column; }
+    .footer-links a { display: block; text-align: center; padding: 10px; font-size: 14px; color: var(--muted); }
+    .footer-links a strong { color: var(--ink); font-weight: 600; }
+
+    /* ── Success ── */
+    .succ-avatar { width: 64px; height: 64px; border-radius: 18px; font-size: 26px; font-weight: 900;
+      color: white; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
+    .qr-card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-lg);
+      padding: 24px; text-align: center; }
+    .qr-eyebrow { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em;
+      color: var(--muted); margin-bottom: 4px; }
+    .qr-sub { font-size: 12px; color: var(--muted); margin-bottom: 20px; }
+    .url-box { background: var(--bg-2); border-radius: 12px; padding: 12px 14px; text-align: left; margin-top: 16px; }
+    .url-box-lbl { font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+    .url-row { display: flex; align-items: center; gap: 8px; }
+    .url-text { font-family: "Geist Mono", ui-monospace, monospace; font-size: 11px;
+      color: var(--ink-2); word-break: break-all; flex: 1; }
+    .copy-btn { flex-shrink: 0; color: var(--muted); cursor: pointer; border: none; background: none;
+      padding: 4px; border-radius: 6px; display: flex; align-items: center;
+      transition: background .15s, color .15s; }
+    .copy-btn:hover { background: var(--bg-3); color: var(--ink); }
+    .action-btns { display: flex; gap: 10px; margin-top: 12px; }
+    .btn-outline { flex: 1; padding: 13px; border-radius: var(--radius);
+      font-size: 14px; font-weight: 600; cursor: pointer; background: transparent;
+      color: var(--ink-2); border: 1px solid var(--line-2);
+      display: flex; align-items: center; justify-content: center; gap: 7px;
+      transition: background .15s; }
+    .btn-outline:hover { background: var(--bg-2); }
+    .btn-scanner { flex: 2; padding: 13px; border-radius: var(--radius);
+      font-size: 14px; font-weight: 600; cursor: pointer; background: var(--ink); color: #FFF8EA;
+      border: none; display: flex; align-items: center; justify-content: center; gap: 7px;
+      box-shadow: 0 4px 16px rgba(26,20,16,.2); transition: background .15s, transform .12s; }
+    .btn-scanner:hover { background: #2A211B; transform: translateY(-1px); }
+
     @media print {
-      body { background:white !important; color:#111 !important; }
-      .no-print { display:none !important; }
-      #s-form { display:none !important; }
-      #s-success { display:block !important; min-height:auto !important; }
-      .print-card {
-        background:white !important; border:1px solid #e5e7eb !important;
-        box-shadow:none !important; color:#111 !important; break-inside:avoid;
-      }
-      .print-card * { color:#111 !important; }
-      .print-only { display:block !important; }
+      body { background: white !important; color: #111 !important; }
+      .no-print { display: none !important; }
+      #s-form { display: none !important; }
+      #s-success { display: block !important; min-height: auto !important; }
     }
-    .print-only { display:none; }
+    .print-only { display: none; }
   </style>
 </head>
 <body>
 
-<!-- ── FORM ───────────────────────────────────────────────────────────────────── -->
-<div id="s-form" style="min-height:100dvh" class="flex flex-col px-5 pt-safe pb-safe">
+<!-- ── FORM ── -->
+<div id="s-form" class="page">
+  <div class="inner">
 
-  <!-- Header -->
-  <div class="flex flex-col items-center pt-8 pb-7 animate-fade-up">
-    <div class="w-14 h-14 rounded-2xl bg-indigo-600/20 border border-indigo-500/25 flex items-center justify-center mb-4">
-      <svg class="w-7 h-7 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z"/>
-      </svg>
-    </div>
-    <h1 class="text-white text-2xl font-bold">Créer votre programme</h1>
-    <p class="text-gray-500 text-sm mt-1">14 jours d'essai · Aucun prélèvement avant J+14</p>
-  </div>
+    <a href="/home" class="page-brand au">
+      <div class="brand-mark"></div>
+      Fidelyzio
+    </a>
+    <p style="text-align:center;font-size:14px;color:var(--muted)" class="au d1">14 jours d'essai · Aucun prélèvement avant J+14</p>
 
-  <!-- Form card -->
-  <div class="flex-1 max-w-sm w-full mx-auto">
-    <form id="reg-form" novalidate>
+    <div class="form-card au d2">
+      <form id="reg-form" novalidate>
 
-      <!-- Business name -->
-      <div class="mb-4 animate-fade-up delay-1">
-        <label class="block text-sm font-medium text-gray-400 mb-2">Nom de l'établissement</label>
-        <input id="inp-name" type="text" autocomplete="organization" placeholder="Café de la Paix"
-               class="field-input">
-      </div>
-
-      <!-- Email -->
-      <div class="mb-4 animate-fade-up delay-2">
-        <label class="block text-sm font-medium text-gray-400 mb-2">Adresse e-mail</label>
-        <input id="inp-email" type="email" autocomplete="email" placeholder="contact@moncommerce.fr"
-               class="field-input">
-      </div>
-
-      <!-- Password -->
-      <div class="mb-5 animate-fade-up delay-3">
-        <label class="block text-sm font-medium text-gray-400 mb-2">Mot de passe</label>
-        <div class="relative">
-          <input id="inp-password" type="password" autocomplete="new-password" placeholder="Minimum 8 caractères"
-                 class="field-input" style="padding-right:48px">
-          <button type="button" onclick="togglePwd()" tabindex="-1"
-                  class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition p-1">
-            <svg id="eye-icon" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.641 0-8.573-3.007-9.964-7.178Z"/>
-              <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
-            </svg>
-          </button>
+        <div class="field-wrap">
+          <label class="field-label" for="inp-name">Nom de l'établissement</label>
+          <input id="inp-name" type="text" autocomplete="organization" placeholder="Café de la Paix" class="field-input">
         </div>
-      </div>
 
-      <!-- Error -->
-      <div id="form-error" class="hidden mb-4 rounded-xl px-4 py-3 bg-red-500/10 border border-red-500/25 text-red-400 text-sm flex items-start gap-2">
-        <svg class="w-4 h-4 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"/>
-        </svg>
-        <span id="form-error-msg"></span>
-      </div>
+        <div class="field-wrap">
+          <label class="field-label" for="inp-email">Adresse e-mail</label>
+          <input id="inp-email" type="email" autocomplete="email" placeholder="contact@moncommerce.fr" class="field-input">
+        </div>
 
-      <!-- CGU -->
-      <div class="flex items-start gap-3 animate-fade-up delay-5 mb-5">
-        <input type="checkbox" id="inp-rgpd"
-               class="mt-0.5 w-4 h-4 accent-indigo-500 cursor-pointer shrink-0">
-        <label for="inp-rgpd" class="text-gray-500 text-xs leading-relaxed cursor-pointer">
-          J'ai lu et j'accepte les <a href="/cgu" target="_blank" class="text-indigo-400 underline underline-offset-1">Conditions Générales d'Utilisation</a> et la <a href="/privacy" target="_blank" class="text-indigo-400 underline underline-offset-1">Politique de Confidentialité</a>
-        </label>
-      </div>
+        <div class="field-wrap">
+          <label class="field-label" for="inp-password">Mot de passe</label>
+          <div class="pwd-wrap">
+            <input id="inp-password" type="password" autocomplete="new-password" placeholder="Minimum 8 caractères"
+                   class="field-input" style="padding-right:44px">
+            <button type="button" onclick="togglePwd()" tabindex="-1" class="pwd-toggle">
+              <svg id="eye-icon" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.641 0-8.573-3.007-9.964-7.178Z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
 
-      <!-- Submit -->
-      <div class="animate-fade-up delay-5">
-        <button id="submit-btn" type="submit" class="btn-primary">
-          Créer mon programme →
-        </button>
-      </div>
+        <div id="form-error" class="error-box" role="alert">
+          <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0;margin-top:1px">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"/>
+          </svg>
+          <span id="form-error-msg"></span>
+        </div>
 
-      <div class="mt-5 flex flex-col animate-fade-up delay-6">
-        <a href="/login" style="display:block;text-align:center;padding:12px 0;font-size:1rem;color:#9ca3af;text-decoration:none;-webkit-tap-highlight-color:transparent">
-          Déjà inscrit ? <span style="color:#e5e7eb;font-weight:600">Se connecter →</span>
-        </a>
-        <a href="/forgot-password" style="display:block;text-align:center;padding:12px 0;font-size:1rem;color:#6b7280;text-decoration:none;-webkit-tap-highlight-color:transparent">
-          Mot de passe oublié
-        </a>
-      </div>
+        <div class="cgu-wrap">
+          <input type="checkbox" id="inp-rgpd">
+          <label class="cgu-label" for="inp-rgpd">
+            J'ai lu et j'accepte les <a href="/cgu" target="_blank">Conditions Générales d'Utilisation</a>
+            et la <a href="/privacy" target="_blank">Politique de Confidentialité</a>
+          </label>
+        </div>
 
-    </form>
+        <button id="submit-btn" type="submit" class="btn-primary">Créer mon programme →</button>
+      </form>
+    </div>
+
+    <div class="footer-links au d4">
+      <a href="/login">Déjà inscrit ? <strong>Se connecter →</strong></a>
+      <a href="/forgot-password" style="font-size:13px">Mot de passe oublié</a>
+    </div>
+
   </div>
 </div>
 
-<!-- ── SUCCESS ─────────────────────────────────────────────────────────────────── -->
-<div id="s-success" style="min-height:100dvh;display:none" class="flex flex-col px-5 pt-safe pb-safe">
+<!-- ── SUCCESS ── -->
+<div id="s-success" style="min-height:100dvh;display:none;flex-direction:column;align-items:center;justify-content:center;padding:max(1.5rem,env(safe-area-inset-top)) 20px max(1.5rem,env(safe-area-inset-bottom))">
+  <div style="width:100%;max-width:390px;display:flex;flex-direction:column;gap:14px">
 
-  <div class="max-w-sm w-full mx-auto flex flex-col gap-5 py-8">
-
-    <!-- Welcome header -->
-    <div class="text-center animate-fade-up">
-      <div id="succ-avatar"
-           class="w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-black text-white mx-auto mb-4 animate-pop shadow-2xl">
-      </div>
-      <h1 class="text-white text-xl font-bold">C'est parti, <span id="succ-name"></span> !</h1>
-      <p class="text-gray-500 text-sm mt-1">Votre programme de fidélité est actif</p>
+    <div style="text-align:center" class="au">
+      <div id="succ-avatar" class="succ-avatar ap"></div>
+      <h1 style="font-size:22px;font-weight:700;color:var(--ink);margin:0 0 4px">C'est parti, <span id="succ-name"></span> !</h1>
+      <p style="font-size:14px;color:var(--muted);margin:0">Votre programme de fidélité est actif</p>
     </div>
 
-    <!-- QR print card -->
-    <div id="print-card" class="print-card bg-gray-900/60 border border-white/6 rounded-3xl p-6 text-center animate-fade-up delay-1">
-      <p class="text-gray-500 text-xs font-semibold uppercase tracking-widest mb-1">QR d'inscription client</p>
-      <p class="text-gray-600 text-xs mb-5">Affichez ce code en caisse — vos clients s'inscrivent eux-mêmes</p>
-      <div class="flex justify-center mb-5">
-        <div class="bg-white p-3 rounded-2xl shadow-xl inline-block">
-          <img id="succ-qr" src="" alt="QR code d'inscription" class="w-48 h-48 rounded-lg block"
+    <div id="print-card" class="qr-card au d1">
+      <p class="qr-eyebrow">QR d'inscription client</p>
+      <p class="qr-sub">Affichez ce code en caisse — vos clients s'inscrivent eux-mêmes</p>
+      <div style="display:flex;justify-content:center;margin-bottom:16px">
+        <div style="background:white;padding:10px;border-radius:16px;border:1px solid var(--line)">
+          <img id="succ-qr" src="" alt="QR code d'inscription" style="width:192px;height:192px;display:block;border-radius:8px"
                onerror="this.alt='Erreur chargement QR'">
         </div>
       </div>
-      <!-- Print-only label -->
-      <p class="print-only text-sm font-medium mt-2" id="print-store-name"></p>
-
-      <!-- Enrollment URL -->
-      <div class="bg-gray-800/80 rounded-2xl px-4 py-3 mt-1">
-        <p class="text-gray-500 text-xs mb-1.5">Lien d'inscription</p>
-        <div class="flex items-center gap-2">
-          <p id="succ-url" class="text-gray-300 text-xs font-mono break-all flex-1 text-left"></p>
-          <button id="copy-btn" type="button" onclick="copyUrl()" title="Copier"
-                  class="copy-btn shrink-0 text-gray-500 hover:text-white transition p-1 rounded-lg hover:bg-white/10">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <p class="print-only" id="print-store-name" style="font-size:13px;font-weight:600;color:var(--ink);margin-top:8px"></p>
+      <div class="url-box">
+        <p class="url-box-lbl">Lien d'inscription</p>
+        <div class="url-row">
+          <p id="succ-url" class="url-text"></p>
+          <button id="copy-btn" type="button" onclick="copyUrl()" title="Copier" class="copy-btn">
+            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75"/>
             </svg>
           </button>
@@ -209,18 +228,15 @@
       </div>
     </div>
 
-    <!-- Action buttons -->
-    <div class="flex gap-3 no-print animate-fade-up delay-2">
-      <button type="button" onclick="window.print()"
-              class="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-gray-800 hover:bg-gray-700 active:scale-95 text-gray-300 text-sm font-semibold transition-all">
-        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+    <div class="action-btns no-print au d2">
+      <button type="button" onclick="window.print()" class="btn-outline">
+        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0 0 21 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 0 0-1.913-.247M6.34 18H5.25A2.25 2.25 0 0 1 3 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.056 48.056 0 0 1 1.913-.247m10.5 0a48.536 48.536 0 0 0-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5Zm-3 0h.008v.008H15V10.5Z"/>
         </svg>
         Imprimer
       </button>
-      <button type="button" id="scanner-btn" onclick="goToScanner()"
-              class="flex-[2] flex items-center justify-center gap-2 py-3.5 rounded-2xl text-white text-sm font-semibold transition-all active:scale-95 shadow-lg btn-primary">
-        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+      <button type="button" id="scanner-btn" onclick="goToScanner()" class="btn-scanner">
+        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
           <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5Z"/>
           <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75ZM6.75 16.5h.75v.75h-.75V16.5ZM16.5 6.75h.75v.75h-.75v-.75ZM13.5 13.5h.75v.75h-.75v-.75ZM13.5 19.5h.75v.75h-.75v-.75ZM19.5 13.5h.75v.75h-.75v-.75ZM19.5 19.5h.75v.75h-.75v-.75ZM16.5 16.5h.75v.75h-.75v-.75Z"/>
         </svg>
@@ -228,9 +244,9 @@
       </button>
     </div>
 
-    <p class="text-gray-700 text-xs text-center no-print animate-fade-up delay-3">
+    <p style="font-size:12px;color:var(--line-2);text-align:center" class="no-print au d3">
       Revenez sur cette page depuis
-      <a href="/register" class="underline hover:text-gray-500 transition">fidelyzio.com/register</a>
+      <a href="/register" style="color:var(--muted);text-decoration:underline">fidelyzio.com/register</a>
       pour créer un autre compte
     </p>
 
@@ -241,7 +257,6 @@
   let registeredMerchant = null;
   let registeredToken    = null;
 
-  // ── Password toggle ───────────────────────────────────────────────────────
   function togglePwd() {
     const inp  = document.getElementById('inp-password');
     const icon = document.getElementById('eye-icon');
@@ -252,18 +267,15 @@
       : `<path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.641 0-8.573-3.007-9.964-7.178Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>`;
   }
 
-  // ── Form error ────────────────────────────────────────────────────────────
   function showError(msg) {
     const el = document.getElementById('form-error');
     document.getElementById('form-error-msg').textContent = msg;
-    el.classList.remove('hidden');
-    el.style.display = 'flex';
+    el.classList.add('visible');
   }
   function hideError() {
-    document.getElementById('form-error').classList.add('hidden');
+    document.getElementById('form-error').classList.remove('visible');
   }
 
-  // ── Form submit ───────────────────────────────────────────────────────────
   document.getElementById('reg-form').addEventListener('submit', async e => {
     e.preventDefault();
     hideError();
@@ -294,7 +306,6 @@
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Erreur lors de la création du compte');
 
-      // Store auth so the scanner auto-logs in after the Stripe redirect
       try {
         localStorage.setItem('fidelyzio_auth', JSON.stringify({
           merchant: data.merchant, token: data.token,
@@ -315,45 +326,34 @@
     }
   });
 
-  // ── Render success state ──────────────────────────────────────────────────
   function renderSuccess(merchant, token) {
-    const color   = merchant.color || '#6366f1';
+    const color   = merchant.color || '#F59E0B';
     const initial = merchant.name.charAt(0).toUpperCase();
     const url     = `${window.location.origin}/enroll/${merchant.id}`;
 
-    // Avatar
     const avatar = document.getElementById('succ-avatar');
-    avatar.textContent         = initial;
-    avatar.style.background    = color;
-    avatar.style.boxShadow     = `0 20px 50px ${color}50`;
+    avatar.textContent      = initial;
+    avatar.style.background = color;
+    avatar.style.boxShadow  = `0 20px 50px ${color}50`;
 
-    // Name
-    document.getElementById('succ-name').textContent = merchant.name;
+    document.getElementById('succ-name').textContent            = merchant.name;
+    document.getElementById('succ-qr').src                     = `/api/merchants/${merchant.id}/enroll-qr`;
+    document.getElementById('succ-url').textContent            = url;
+    document.getElementById('print-store-name').textContent    = merchant.name;
 
-    // QR code (served server-side)
-    document.getElementById('succ-qr').src = `/api/merchants/${merchant.id}/enroll-qr`;
+    const scannerBtn = document.getElementById('scanner-btn');
+    scannerBtn.style.background = color;
+    scannerBtn.style.boxShadow  = `0 10px 30px ${color}35`;
 
-    // URL
-    document.getElementById('succ-url').textContent       = url;
-    document.getElementById('print-store-name').textContent = merchant.name;
-
-    // Brand the scanner button
-    document.getElementById('scanner-btn').style.background  = color;
-    document.getElementById('scanner-btn').style.boxShadow   = `0 10px 30px ${color}35`;
-
-    // Show success
     document.getElementById('s-form').style.display    = 'none';
     document.getElementById('s-success').style.display = 'flex';
-    document.getElementById('s-success').style.flexDirection = 'column';
     window.scrollTo(0, 0);
 
-    // Store auth so scanner auto-logs in
     try {
       localStorage.setItem('fidelyzio_auth', JSON.stringify({ merchant, token, expires: Date.now() + 90 * 24 * 60 * 60 * 1000 }));
     } catch {}
   }
 
-  // ── Copy URL ──────────────────────────────────────────────────────────────
   async function copyUrl() {
     const url = document.getElementById('succ-url').textContent;
     try {
@@ -365,21 +365,15 @@
       document.execCommand('copy'); document.body.removeChild(ta);
     }
     const btn = document.getElementById('copy-btn');
-    btn.innerHTML = `<svg class="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>`;
+    btn.innerHTML = `<svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="#16a34a" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>`;
     setTimeout(() => {
-      btn.innerHTML = `<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75"/></svg>`;
+      btn.innerHTML = `<svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75"/></svg>`;
     }, 2000);
   }
 
-  // ── Go to scanner (auth already stored in localStorage) ───────────────────
   function goToScanner() {
     window.location.href = '/scanner';
   }
-
-  // ── Spin keyframe for loading btn ─────────────────────────────────────────
-  const style = document.createElement('style');
-  style.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
-  document.head.appendChild(style);
 </script>
 <script src="/js/cookie-consent.js"></script>
 </body>
